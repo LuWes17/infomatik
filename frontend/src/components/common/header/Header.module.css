@@ -3,26 +3,20 @@
   box-shadow: var(--shadow-sm);
   position: sticky;
   top: 0;
-  max-width: 1200px; /* control background length */
-  margin: 0 auto;
-  border-radius: 0 0 12px 12px; /* optional for nicer look */
 }
 
 .nav {
   display: flex;
-  align-items: center;
   justify-content: space-between;
   padding: var(--spacing-md) 0;
   max-width: 1200px; /* control the length */
   margin: 0 auto;    /* centers it */
-  width: 100%;
 }
 
 .logoImg {
   height: 4rem;
   width: auto;
   max-width: 13.75rem;
-  object-fit: contain; 
 }
 
 .navList {
