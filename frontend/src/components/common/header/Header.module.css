@@ -7,11 +7,12 @@
 
 .nav {
   display: flex;
-  justify-content: space-between;
-  padding: var(--spacing-md) 0;
-  max-width: 1200px; /* control the length */
-  margin: 0 auto;    /* centers it */
 }
+
+.logoContainer{
+  margin-right: 12rem;
+  margin-left: 2rem;
+  }
 
 .logoImg {
   height: 4rem;
@@ -41,6 +42,8 @@
   display: flex;
   gap: var(--spacing-md);
   align-items: center;
+  flex-shrink: 0;
+  margin-left: 3rem;
 }
 
 @media (max-width: 768px) {
