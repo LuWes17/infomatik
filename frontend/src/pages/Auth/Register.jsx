@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import styles from './Auth.module.css';
 import infomatiklogo from '../../assets/infomatik-logo.png'
 
 const Register = () => {
   const [activeTab, setActiveTab] = useState('signup');
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -25,6 +26,13 @@ const Register = () => {
 
   const [phoneNumberFocused, setPhoneNumberFocused] = useState(false);
   const [displayPhoneNumber, setDisplayPhoneNumber] = useState('');
+
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+    if (tab === 'login') {
+      navigate('/login');
+    }
+  };
 
   const barangays = [
     'Agnas', 'Bacolod', 'Bangkilingan', 'Bantayan', 'Baranghawon', 'Basagan', 
@@ -194,13 +202,13 @@ const Register = () => {
             <div className={styles.tabContainer}>
               <button 
                 className={`${styles.tab} ${activeTab === 'login' ? styles.activeTab : ''}`}
-                onClick={() => setActiveTab('login')}
+                onClick={() => handleTabChange('login')}
               >
                 Login
               </button>
               <button 
                 className={`${styles.tab} ${activeTab === 'signup' ? styles.activeTab : ''}`}
-                onClick={() => setActiveTab('signup')}
+                onClick={() => handleTabChange('signup')}
               >
                 Sign up
               </button>

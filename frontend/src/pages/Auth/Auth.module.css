@@ -292,3 +292,32 @@
     border-radius: 60% 40% 70% 30% / 40% 70% 30% 60%;
   }
 }
+
+.tabContainerLogin {
+  display: flex;
+  margin-bottom: 4rem;
+  border-bottom: 2px solid #e0e0e0;
+  width: 100%;
+  max-width: 300px;
+}
+
+/* Auth link styling */
+.authLink {
+  color: #1c62bb;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.authLink:hover {
+  color: #1557a6;
+  text-decoration: underline;
+}
+
+/* Container for the "Don't have an account?" text */
+.authPrompt {
+  text-align: center;
+  margin-top: 1rem;
+  color: gray;
+  font-size: 0.9rem;
+}
