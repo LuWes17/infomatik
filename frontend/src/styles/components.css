@@ -32,13 +32,13 @@
 
 .btn-outline {
   background-color: transparent;
-  border-color: var(--primary-color);
-  color: var(--primary-color);
+  border-color: var(--white);
+  color: var(--white);
 }
 
 .btn-outline:hover {
-  background-color: var(--primary-color);
-  color: var(--white);
+  background-color: var(--white);
+  color: var(--primary-color);
 }
 
 .btn-sm {
@@ -59,10 +59,6 @@
   overflow: hidden;
 }
 
-.card-header {
-  padding: var(--spacing-lg);
-  border-bottom: 1px solid var(--gray-200);
-}
 
 .card-body {
   padding: var(--spacing-lg);
@@ -72,13 +68,6 @@
   padding: var(--spacing-lg);
   border-top: 1px solid var(--gray-200);
   background-color: var(--gray-50);
-}
-
-/* Container and layout */
-.container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 var(--spacing-lg);
 }
 
 .flex {

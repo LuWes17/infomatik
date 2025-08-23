@@ -1,4 +1,3 @@
-import React from 'react';
 import { Link } from 'react-router-dom';
 import styles from './Header.module.css';
 import infomatiklogo from '../../../assets/infomatik-logo.png'
@@ -8,13 +7,15 @@ const Header = () => {
     <header className={styles.header}>
       <div className="container">
         <nav className={styles.nav}>
-          <Link to="/" className={styles.logo}>
-            <img 
-              src={infomatiklogo} 
-              alt="infomatik" 
-              className={styles.logoImg}
-            />
-          </Link>
+          <div className={styles.logoContainer}>
+            <Link to="/">
+              <img 
+                src={infomatiklogo} 
+                alt="infomatik" 
+                className={styles.logoImg}
+              />
+            </Link>
+          </div>
           
           <ul className={styles.navList}>
             <li><Link to="/" className={styles.navLink}>Home</Link></li>
