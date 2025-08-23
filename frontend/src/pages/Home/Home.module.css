@@ -1,0 +1,30 @@
+.home {
+  min-height: 80vh;
+}
+
+.hero {
+  text-align: center;
+  padding: var(--spacing-2xl) 0;
+}
+
+.hero h1 {
+  font-size: var(--font-size-4xl);
+  color: var(--gray-800);
+  margin-bottom: var(--spacing-lg);
+}
+
+.hero p {
+  font-size: var(--font-size-lg);
+  color: var(--gray-600);
+  margin-bottom: var(--spacing-2xl);
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.quickActions {
+  display: flex;
+  gap: var(--spacing-lg);
+  justify-content: center;
+  flex-wrap: wrap;
+}

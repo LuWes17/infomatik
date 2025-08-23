@@ -1,0 +1,73 @@
+.citizenGuide {
+  padding: var(--spacing-2xl) 0;
+  min-height: 80vh;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: var(--spacing-2xl);
+}
+
+.header h1 {
+  font-size: var(--font-size-3xl);
+  color: var(--gray-800);
+  margin-bottom: var(--spacing-md);
+}
+
+.header p {
+  font-size: var(--font-size-lg);
+  color: var(--gray-600);
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.guidesContainer {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+  gap: var(--spacing-2xl);
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.guideCard {
+  height: fit-content;
+}
+
+.guideHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.guideIcon {
+  font-size: 2rem;
+}
+
+.guideHeader h3 {
+  color: var(--gray-800);
+  font-size: var(--font-size-xl);
+  margin: 0;
+}
+
+.stepsList {
+  margin: 0;
+  padding-left: var(--spacing-lg);
+}
+
+.step {
+  color: var(--gray-700);
+  line-height: 1.6;
+  margin-bottom: var(--spacing-md);
+  padding-left: var(--spacing-sm);
+}
+
+.step:last-child {
+  margin-bottom: 0;
+}
+
+@media (max-width: 768px) {
+  .guidesContainer {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-xl);
+  }
+}

@@ -1,0 +1,72 @@
+.announcements {
+  padding: var(--spacing-2xl) 0;
+  min-height: 80vh;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: var(--spacing-2xl);
+}
+
+.header h1 {
+  font-size: var(--font-size-3xl);
+  color: var(--gray-800);
+  margin-bottom: var(--spacing-md);
+}
+
+.header p {
+  font-size: var(--font-size-lg);
+  color: var(--gray-600);
+}
+
+.announcementGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: var(--spacing-xl);
+}
+
+.announcementCard {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.announcementCard:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--spacing-sm);
+}
+
+.cardHeader h3 {
+  color: var(--gray-800);
+  font-size: var(--font-size-lg);
+  margin: 0;
+}
+
+.category {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--border-radius-sm);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.category.update {
+  background-color: var(--info-color);
+  color: white;
+}
+
+.category.event {
+  background-color: var(--accent-color);
+  color: white;
+}
+
+.date {
+  color: var(--gray-500);
+  font-size: var(--font-size-sm);
+  margin: 0;
+}

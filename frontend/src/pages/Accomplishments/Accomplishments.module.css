@@ -1,0 +1,93 @@
+.accomplishments {
+  padding: var(--spacing-2xl) 0;
+  min-height: 80vh;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: var(--spacing-2xl);
+}
+
+.header h1 {
+  font-size: var(--font-size-3xl);
+  color: var(--gray-800);
+  margin-bottom: var(--spacing-md);
+}
+
+.header p {
+  font-size: var(--font-size-lg);
+  color: var(--gray-600);
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.timelineContainer {
+  max-width: 800px;
+  margin: 0 auto;
+  position: relative;
+}
+
+.timelineContainer::before {
+  content: '';
+  position: absolute;
+  left: 30px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--primary-color);
+}
+
+.timelineItem {
+  display: flex;
+  margin-bottom: var(--spacing-2xl);
+  position: relative;
+}
+
+.timelineMarker {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: var(--primary-color);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: var(--font-size-lg);
+  margin-right: var(--spacing-xl);
+  flex-shrink: 0;
+  z-index: 1;
+}
+
+.accomplishmentCard {
+  flex: 1;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.accomplishmentCard:hover {
+  transform: translateX(10px);
+  box-shadow: var(--shadow-lg);
+}
+
+.accomplishmentIcon {
+  font-size: 2rem;
+  margin-bottom: var(--spacing-md);
+}
+
+.accomplishmentCard h3 {
+  color: var(--gray-800);
+  font-size: var(--font-size-xl);
+  margin-bottom: var(--spacing-md);
+}
+
+.description {
+  color: var(--gray-600);
+  line-height: 1.6;
+  margin-bottom: var(--spacing-lg);
+}
+
+.completionDate {
+  color: var(--primary-color);
+  font-weight: 600;
+  font-size: var(--font-size-sm);
+}

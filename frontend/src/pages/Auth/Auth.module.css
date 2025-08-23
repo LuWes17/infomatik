@@ -1,0 +1,99 @@
+.authContainer {
+  min-height: 80vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-xl) var(--spacing-lg);
+}
+
+.authCard {
+  width: 100%;
+  max-width: 500px;
+}
+
+.authCard .card-header {
+  text-align: center;
+}
+
+.authCard .card-header h2 {
+  color: var(--gray-800);
+  font-size: var(--font-size-2xl);
+  margin-bottom: var(--spacing-sm);
+}
+
+.authCard .card-header p {
+  color: var(--gray-600);
+  margin: 0;
+}
+
+.authForm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.formRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-md);
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+}
+
+.formGroup label {
+  color: var(--gray-700);
+  font-weight: 500;
+  margin-bottom: var(--spacing-sm);
+  font-size: var(--font-size-sm);
+}
+
+.formInput {
+  padding: var(--spacing-md);
+  border: 1px solid var(--gray-300);
+  border-radius: var(--border-radius-md);
+  font-size: var(--font-size-base);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.formInput:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.formInput::placeholder {
+  color: var(--gray-400);
+}
+
+.authCard .card-footer {
+  text-align: center;
+}
+
+.authCard .card-footer p {
+  color: var(--gray-600);
+  margin: 0;
+}
+
+.authLink {
+  color: var(--primary-color);
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.authLink:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+  .formRow {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-md);
+  }
+  
+  .authCard {
+    margin: var(--spacing-lg);
+  }
+}
