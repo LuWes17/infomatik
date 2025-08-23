@@ -176,6 +176,7 @@ const Register = () => {
     <div className={styles.authContainer}>
       <div className={styles.cardContainer}>
         <div className={styles.welcomeContainer}>
+          <div className={styles.blobShape}></div> 
           <div className={styles.imageContainer}>
             <img 
               src={infomatiklogo} 

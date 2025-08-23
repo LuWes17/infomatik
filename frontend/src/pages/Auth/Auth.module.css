@@ -20,6 +20,8 @@
   display: flex;
   flex-direction: column;
   background-color: #1c62bb;
+  position: relative;
+  overflow: hidden; /* Add this to contain the blobs */
 }
 
 .imageContainer {
@@ -194,4 +196,99 @@
 
 .phoneInputFocused {
   padding-left: 2.8rem !important;
+}
+
+/* Blob shapes */
+.welcomeContainer::before {
+  content: '';
+  position: absolute;
+  width: 200px;
+  height: 200px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+  bottom: -50px;
+  right: -50px;
+  animation: blob1 8s ease-in-out infinite;
+}
+
+.welcomeContainer::after {
+  content: '';
+  position: absolute;
+  width: 150px;
+  height: 150px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 40% 60% 70% 30% / 40% 70% 30% 60%;
+  bottom: 50px;
+  left: -30px;
+  animation: blob2 10s ease-in-out infinite reverse;
+}
+
+/* Add a third blob with a new div */
+.blobShape {
+  position: absolute;
+  width: 120px;
+  height: 120px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 70% 30% 50% 50% / 30% 60% 40% 70%;
+  top: 100px;
+  right: -20px;
+  animation: blob3 12s ease-in-out infinite;
+}
+
+/* Blob animations */
+@keyframes blob1 {
+  0%, 100% {
+    transform: translate(0, 0) rotate(0deg) scale(1);
+    border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+  }
+  25% {
+    transform: translate(-10px, -15px) rotate(90deg) scale(1.1);
+    border-radius: 50% 50% 40% 60% / 50% 40% 60% 50%;
+  }
+  50% {
+    transform: translate(10px, -10px) rotate(180deg) scale(0.9);
+    border-radius: 40% 60% 50% 50% / 40% 50% 60% 50%;
+  }
+  75% {
+    transform: translate(5px, 10px) rotate(270deg) scale(1.05);
+    border-radius: 70% 30% 60% 40% / 30% 70% 40% 60%;
+  }
+}
+
+@keyframes blob2 {
+  0%, 100% {
+    transform: translate(0, 0) rotate(0deg) scale(1);
+    border-radius: 40% 60% 70% 30% / 40% 70% 30% 60%;
+  }
+  33% {
+    transform: translate(15px, -5px) rotate(120deg) scale(0.8);
+    border-radius: 60% 40% 50% 50% / 60% 50% 40% 50%;
+  }
+  66% {
+    transform: translate(-5px, 15px) rotate(240deg) scale(1.2);
+    border-radius: 50% 50% 30% 70% / 50% 30% 70% 50%;
+  }
+}
+
+@keyframes blob3 {
+  0%, 100% {
+    transform: translate(0, 0) rotate(0deg) scale(1);
+    border-radius: 70% 30% 50% 50% / 30% 60% 40% 70%;
+  }
+  20% {
+    transform: translate(-8px, 12px) rotate(72deg) scale(1.1);
+    border-radius: 60% 40% 40% 60% / 40% 60% 60% 40%;
+  }
+  40% {
+    transform: translate(12px, 8px) rotate(144deg) scale(0.9);
+    border-radius: 50% 50% 60% 40% / 50% 40% 50% 60%;
+  }
+  60% {
+    transform: translate(8px, -12px) rotate(216deg) scale(1.05);
+    border-radius: 40% 60% 50% 50% / 60% 50% 50% 40%;
+  }
+  80% {
+    transform: translate(-12px, -8px) rotate(288deg) scale(0.95);
+    border-radius: 60% 40% 70% 30% / 40% 70% 30% 60%;
+  }
 }
