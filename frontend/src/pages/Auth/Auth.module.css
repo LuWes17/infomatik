@@ -1,99 +1,323 @@
 .authContainer {
-  min-height: 80vh;
+  display: flex;
+  justify-content: center;
+  margin-top: 5rem;
+}
+
+.cardContainer {
+  width: 55rem;
+  height: 35rem;
+  border-radius: 2rem;
+  display: flex;
+  box-shadow: 0 16px 40px #9AAACF;
+}
+
+.welcomeContainer {
+  height: 35rem;
+  width: 25rem;
+  border-top-left-radius: 2rem;
+  border-bottom-left-radius: 2rem;
+  display: flex;
+  flex-direction: column;
+  background-color: #1c62bb;
+  position: relative;
+  overflow: hidden; /* Add this to contain the blobs */
+}
+
+.imageContainer {
+  margin-top: 6em;
+  display: flex;
+  justify-content: center;
+}
+
+.logoImg {
+  height: 5rem;
+}
+
+.textWelcomeContainer {
+  margin-top: 3rem;
+  height: 10rem;
+  width: 20rem;
+  display: flex;
+  text-align: left;
+  align-items: center;
+  color: white;
+  font-weight: bold;
+  padding-left: 5rem;
+  font-size: 1.25rem;
+}
+
+.formContainer {
+  height: 35rem;
+  width: 30rem;
+  border-top-right-radius: 2rem;
+  border-bottom-right-radius: 2rem;
+  display: flex;
+}
+
+.formContent {
+  width: 100%;
+  padding: 1rem;
+  padding-top: 3rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.tabContainer {
+  display: flex;
+  margin-bottom: 1rem;
+  border-bottom: 2px solid #e0e0e0;
+  width: 100%;
+  max-width: 300px;
+}
+
+.tab {
+  flex: 1;
+  padding: 0.2rem;
+  border: none;
+  background: none;
+  font-size: 1.1rem;
+  font-weight: 500;
+  cursor: pointer;
+  color: #666;
+  border-bottom: 2px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.tab:hover {
+  color: #1c62bb;
+}
+
+.activeTab {
+  color: #1c62bb !important;
+  border-bottom-color: #1c62bb !important;
+}
+
+.form {
+  width: 18rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.input {
+  padding: 0.8rem 1rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 1rem;
+  font-size: 0.9rem;
+  outline: none;
+  transition: border-color 0.3s ease;
+  background-color: white;
+}
+
+
+.input::placeholder {
+  color: #999;
+}
+
+.nameRow .input {
+  flex: 1;
+}
+
+.submitButton {
+  padding: 0.8rem 2rem;
+  background-color: #1c62bb;
+  color: white;
+  border: none;
+  border-radius: 25px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  margin-top: 1rem;
+  transition: background-color 0.3s ease;
+}
+
+.submitButton:hover {
+  background-color: #1557a6;
+}
+
+/* Validation styles */
+.inputValid {
+  border-color: #28a745 !important;
+}
+
+.inputInvalid {
+  border-color: #dc3545 !important;
+}
+
+.inputValid:focus {
+  border-color: #28a745;
+}
+
+.inputInvalid:focus {
+  border-color: #dc3545;
+}
+
+
+/* Style for select placeholder option */
+.input option[value=""] {
+  color: #999;
+}
+
+.input option:not([value=""]) {
+  color: #000;
+}
+
+/* For the select element itself when no option is selected */
+.input:invalid {
+  color: #999;
+}
+
+.selectPlaceholder {
+  color: #999 !important;
+}
+
+/* Phone input wrapper styles */
+.phoneInputWrapper {
+  position: relative;
   display: flex;
   align-items: center;
-  justify-content: center;
-  padding: var(--spacing-xl) var(--spacing-lg);
-}
-
-.authCard {
   width: 100%;
-  max-width: 500px;
 }
 
-.authCard .card-header {
-  text-align: center;
+.phoneInputWrapper .input {
+  width: 100%; /* Add this */
 }
 
-.authCard .card-header h2 {
-  color: var(--gray-800);
-  font-size: var(--font-size-2xl);
-  margin-bottom: var(--spacing-sm);
+.phonePrefix {
+  position: absolute;
+  left: 1rem;
+  color: #333;
+  z-index: 1;
+  pointer-events: none;
+  font-size: 0.9rem;
 }
 
-.authCard .card-header p {
-  color: var(--gray-600);
-  margin: 0;
+.phoneInputFocused {
+  padding-left: 2.8rem !important;
 }
 
-.authForm {
+/* Blob shapes */
+.welcomeContainer::before {
+  content: '';
+  position: absolute;
+  width: 200px;
+  height: 200px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+  bottom: -50px;
+  right: -50px;
+  animation: blob1 8s ease-in-out infinite;
+}
+
+.welcomeContainer::after {
+  content: '';
+  position: absolute;
+  width: 150px;
+  height: 150px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 40% 60% 70% 30% / 40% 70% 30% 60%;
+  bottom: 50px;
+  left: -30px;
+  animation: blob2 10s ease-in-out infinite reverse;
+}
+
+/* Add a third blob with a new div */
+.blobShape {
+  position: absolute;
+  width: 120px;
+  height: 120px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 70% 30% 50% 50% / 30% 60% 40% 70%;
+  top: 100px;
+  right: -20px;
+  animation: blob3 12s ease-in-out infinite;
+}
+
+/* Blob animations */
+@keyframes blob1 {
+  0%, 100% {
+    transform: translate(0, 0) rotate(0deg) scale(1);
+    border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+  }
+  25% {
+    transform: translate(-10px, -15px) rotate(90deg) scale(1.1);
+    border-radius: 50% 50% 40% 60% / 50% 40% 60% 50%;
+  }
+  50% {
+    transform: translate(10px, -10px) rotate(180deg) scale(0.9);
+    border-radius: 40% 60% 50% 50% / 40% 50% 60% 50%;
+  }
+  75% {
+    transform: translate(5px, 10px) rotate(270deg) scale(1.05);
+    border-radius: 70% 30% 60% 40% / 30% 70% 40% 60%;
+  }
+}
+
+@keyframes blob2 {
+  0%, 100% {
+    transform: translate(0, 0) rotate(0deg) scale(1);
+    border-radius: 40% 60% 70% 30% / 40% 70% 30% 60%;
+  }
+  33% {
+    transform: translate(15px, -5px) rotate(120deg) scale(0.8);
+    border-radius: 60% 40% 50% 50% / 60% 50% 40% 50%;
+  }
+  66% {
+    transform: translate(-5px, 15px) rotate(240deg) scale(1.2);
+    border-radius: 50% 50% 30% 70% / 50% 30% 70% 50%;
+  }
+}
+
+@keyframes blob3 {
+  0%, 100% {
+    transform: translate(0, 0) rotate(0deg) scale(1);
+    border-radius: 70% 30% 50% 50% / 30% 60% 40% 70%;
+  }
+  20% {
+    transform: translate(-8px, 12px) rotate(72deg) scale(1.1);
+    border-radius: 60% 40% 40% 60% / 40% 60% 60% 40%;
+  }
+  40% {
+    transform: translate(12px, 8px) rotate(144deg) scale(0.9);
+    border-radius: 50% 50% 60% 40% / 50% 40% 50% 60%;
+  }
+  60% {
+    transform: translate(8px, -12px) rotate(216deg) scale(1.05);
+    border-radius: 40% 60% 50% 50% / 60% 50% 50% 40%;
+  }
+  80% {
+    transform: translate(-12px, -8px) rotate(288deg) scale(0.95);
+    border-radius: 60% 40% 70% 30% / 40% 70% 30% 60%;
+  }
+}
+
+.tabContainerLogin {
   display: flex;
-  flex-direction: column;
-  gap: var(--spacing-lg);
+  margin-bottom: 4rem;
+  border-bottom: 2px solid #e0e0e0;
+  width: 100%;
+  max-width: 300px;
 }
 
-.formRow {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--spacing-md);
-}
-
-.formGroup {
-  display: flex;
-  flex-direction: column;
-}
-
-.formGroup label {
-  color: var(--gray-700);
-  font-weight: 500;
-  margin-bottom: var(--spacing-sm);
-  font-size: var(--font-size-sm);
-}
-
-.formInput {
-  padding: var(--spacing-md);
-  border: 1px solid var(--gray-300);
-  border-radius: var(--border-radius-md);
-  font-size: var(--font-size-base);
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
-}
-
-.formInput:focus {
-  outline: none;
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-}
-
-.formInput::placeholder {
-  color: var(--gray-400);
-}
-
-.authCard .card-footer {
-  text-align: center;
-}
-
-.authCard .card-footer p {
-  color: var(--gray-600);
-  margin: 0;
-}
-
+/* Auth link styling */
 .authLink {
-  color: var(--primary-color);
-  font-weight: 500;
+  color: #1c62bb;
   text-decoration: none;
+  font-weight: 500;
+  transition: color 0.3s ease;
 }
 
 .authLink:hover {
+  color: #1557a6;
   text-decoration: underline;
 }
 
-@media (max-width: 768px) {
-  .formRow {
-    grid-template-columns: 1fr;
-    gap: var(--spacing-md);
-  }
-  
-  .authCard {
-    margin: var(--spacing-lg);
-  }
+/* Container for the "Don't have an account?" text */
+.authPrompt {
+  text-align: center;
+  margin-top: 1rem;
+  color: gray;
+  font-size: 0.9rem;
 }
