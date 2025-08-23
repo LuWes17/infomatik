@@ -1,0 +1,66 @@
+/* Footer.module.css */
+
+.footer {
+    background:  var(--primary-color);
+    color: var(--white);
+    padding: 1.5rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    margin-top: auto;
+}
+
+.emergencySection {
+    display: flex;
+    flex-direction: column;
+}
+
+.emergencyHeader {
+    display: flex;
+    align-items: center;
+    font-size: 24px;
+    font-weight: 600;
+}
+
+.contactIcon {
+  height: 4rem;
+  margin-right: .5rem;
+}
+
+.hotlinesGrid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+}
+
+.hotlineItem {
+    padding: 12px 16px;
+    border-radius: 15px;
+    transition: all 0.3s ease;
+    text-align: center;
+}
+
+.hotlineContent {
+    font-size: 16px;
+    font-weight: 500;
+}
+
+.divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    margin: 25px 0;
+}
+
+.footerBottom {
+    text-align: center;
+}
+
+.copyright {
+    font-size: 16px;
+    font-weight: 500;
+    margin-bottom: 6px;
+    opacity: 0.95;
+}
+
+.poweredBy {
+    font-size: 14px;
+    opacity: 0.8;
+}
