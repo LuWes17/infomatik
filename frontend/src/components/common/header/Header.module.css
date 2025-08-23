@@ -1,9 +1,11 @@
 .header {
-  background: var(--white);
+  background: var(--primary-color);
   box-shadow: var(--shadow-sm);
   position: sticky;
   top: 0;
-  z-index: 100;
+  max-width: 1200px; /* control background length */
+  margin: 0 auto;
+  border-radius: 0 0 12px 12px; /* optional for nicer look */
 }
 
 .nav {
@@ -11,12 +13,16 @@
   align-items: center;
   justify-content: space-between;
   padding: var(--spacing-md) 0;
+  max-width: 1200px; /* control the length */
+  margin: 0 auto;    /* centers it */
+  width: 100%;
 }
 
-.logo h1 {
-  color: var(--primary-color);
-  font-size: var(--font-size-xl);
-  font-weight: 700;
+.logoImg {
+  height: 4rem;
+  width: auto;
+  max-width: 13.75rem;
+  object-fit: contain; 
 }
 
 .navList {
@@ -27,14 +33,14 @@
 }
 
 .navLink {
-  color: var(--gray-600);
+  color: var(--white);
   font-weight: 500;
   transition: color 0.2s ease;
   padding: var(--spacing-sm) 0;
 }
 
 .navLink:hover {
-  color: var(--primary-color);
+  color: var(--gray-50);
 }
 
 .authButtons {

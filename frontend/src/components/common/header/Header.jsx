@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import styles from './Header.module.css';
+import infomatiklogo from '../../../assets/infomatik-logo.png'
 
 const Header = () => {
   return (
@@ -8,7 +9,11 @@ const Header = () => {
       <div className="container">
         <nav className={styles.nav}>
           <Link to="/" className={styles.logo}>
-            <h1>{import.meta.env.VITE_APP_NAME}</h1>
+            <img 
+              src={infomatiklogo} 
+              alt="infomatik" 
+              className={styles.logoImg}
+            />
           </Link>
           
           <ul className={styles.navList}>
@@ -23,7 +28,6 @@ const Header = () => {
           
           <div className={styles.authButtons}>
             <Link to="/login" className="btn btn-outline">Login</Link>
-            <Link to="/register" className="btn btn-primary">Register</Link>
           </div>
         </nav>
       </div>

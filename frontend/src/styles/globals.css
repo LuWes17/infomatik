@@ -1,7 +1,9 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
 /* Global styles and CSS custom properties */
 :root {
   /* Color palette */
-  --primary-color: #2563eb;
+  --primary-color: #1c62bb;
   --primary-light: #3b82f6;
   --primary-dark: #1d4ed8;
   --secondary-color: #64748b;
@@ -9,7 +11,7 @@
   
   /* Neutral colors */
   --white: #ffffff;
-  --gray-50: #f8fafc;
+  --gray-50: #f8fafc9e;
   --gray-100: #f1f5f9;
   --gray-200: #e2e8f0;
   --gray-300: #cbd5e1;
@@ -27,7 +29,7 @@
   --info-color: #3b82f6;
   
   /* Typography */
-  --font-family-primary: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-family-primary: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --font-size-xs: 0.75rem;
   --font-size-sm: 0.875rem;
   --font-size-base: 1rem;
@@ -69,7 +71,7 @@ body {
   font-size: var(--font-size-base);
   line-height: 1.6;
   color: var(--gray-800);
-  background-color: var(--gray-50);
+  background-color: var(--white);
 }
 
 a {
