@@ -3,9 +3,27 @@
 .footer {
     background:  var(--primary-color);
     color: var(--white);
-    padding: 1.5rem;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-    margin-top: auto;
+    padding: 1rem;
+}
+
+.inputIcon {
+    height: 1rem;
+}
+
+.contactSection {
+    margin-bottom: 25px;
+}
+
+.contactHeader {
+    display: flex;
+    align-items: center;
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.contactItem {
+    display: flex;
 }
 
 .emergencySection {
@@ -16,37 +34,67 @@
 .emergencyHeader {
     display: flex;
     align-items: center;
-    font-size: 24px;
+    font-size: 18px;
     font-weight: 600;
+    margin-bottom: 5px;
 }
 
+
 .contactIcon {
-  height: 4rem;
-  margin-right: .5rem;
+    height: 2rem;
+}
+
+.contactusContainer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 1rem;
 }
 
 .hotlinesGrid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1rem;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* 3 columns */
+  gap: 0.5rem;
+  text-align: left; /* better readability */
+  margin-left: 3rem;
 }
 
-.hotlineItem {
-    padding: 12px 16px;
-    border-radius: 15px;
-    transition: all 0.3s ease;
-    text-align: center;
+.hotlineLabel {
+    font-size: 15px;
+    font-weight: 600;
+}
+.hotlineDetail {
+  font-size: 14px;
+  font-weight: 400; /* normal weight */
 }
 
-.hotlineContent {
-    font-size: 16px;
-    font-weight: 500;
+.contactLabel{
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 2px;
+}
+
+.contactNumbers span {
+
+  font-size: 14px;
+  font-weight: 400;
+}
+
+.hotlineNumbers {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); /* 2 columns */
+  padding-left: .2rem;
+}
+
+.hotlineNumbers span {
+  font-size: 14px;
+  font-weight: 400;
 }
 
 .divider {
-    height: 1px;
+    height: .5px;
     background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-    margin: 25px 0;
+    margin: 1.2rem;
 }
 
 .footerBottom {
@@ -54,13 +102,13 @@
 }
 
 .copyright {
-    font-size: 16px;
-    font-weight: 500;
-    margin-bottom: 6px;
+    font-size: 12px;
+    font-weight: 300;
     opacity: 0.95;
 }
 
 .poweredBy {
-    font-size: 14px;
-    opacity: 0.8;
+    font-size: 12px;
+    font-weight: 200;
+    opacity: 0.95;
 }
