@@ -30,7 +30,7 @@ const ProtectedRoute = ({
   // If route should only be accessible to unauthenticated users (like login page)
   if (!requireAuth && isAuthenticated) {
     // Redirect authenticated users away from auth pages
-    const from = location.state?.from?.pathname || '/dashboard';
+    const from = location.state?.from?.pathname || '/profile';
     return <Navigate to={from} replace />;
   }
 
