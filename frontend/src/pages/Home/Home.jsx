@@ -3,7 +3,7 @@ import styles from './Home.module.css';
 import konsiroy from '../../assets/home slides/konsi-roy.jpg';
 import withkonsi from '../../assets/home slides/withkonsi.jpg';
 import konsiCommunity from '../../assets/home slides/konsi-community.jpg';
-import { CircleChevronRight, CircleChevronLeft, CalendarDays, Trophy, BriefcaseBusiness, Mail, ScrollText } from "lucide-react";
+import { CircleChevronRight, CircleChevronLeft, CalendarDays, BellRing, BriefcaseBusiness, Mail, ScrollText } from "lucide-react";
 
 const Home = () => {
   const slides = [konsiroy, withkonsi, konsiCommunity];
@@ -129,8 +129,8 @@ const Home = () => {
           </div>
           
           <div className={styles.quickLinkCard}>
-            <Trophy size={48} />
-            <h3>Accomplishments</h3>
+            <BellRing size={48} />
+            <h3>Updates</h3>
           </div>
           
           <div className={styles.quickLinkCard}>
