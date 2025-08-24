@@ -4,11 +4,10 @@
   flex-direction: column;
 }
 
-/* Green background area */
+/* Slideshow area */
 .hero {
-  border: solid 2px rgb(242, 255, 0);
   position: relative;
-  background: #39a44f;
+  background: #ffffff;
   height: 25rem;
   display: flex;
   align-items: center;
@@ -17,27 +16,191 @@
 }
 
 .heroImage {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
   object-fit: cover; /* show full image without cropping */
-  object-position: 20% 20%;; 
+  object-position: 20% 20%;
+  opacity: 75%;
+}
+
+.currentImage {
+  z-index: 1;
+}
+
+.nextImage {
+  z-index: 2;
+}
+
+/* Slide animations */
+.slideOutLeft {
+  animation: slideOutLeft 0.5s ease-in-out forwards;
+}
+
+.slideOutRight {
+  animation: slideOutRight 0.5s ease-in-out forwards;
+}
+
+.slideInRight {
+  animation: slideInRight 0.5s ease-in-out forwards;
+}
+
+.slideInLeft {
+  animation: slideInLeft 0.5s ease-in-out forwards;
+}
+
+@keyframes slideOutLeft {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+@keyframes slideOutRight {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
 }
 
 /* Bottom welcome container */
 .welcomeContainer {
-  border: solid 2px rgb(64, 78, 231);
-  background: linear-gradient(to top, rgba(0,0,0,0.5), rgba(0,0,0,0));
+  position: absolute;
+  bottom: 0; /* sticks at the bottom of hero */
+  width: 100%;
+  padding: 2rem;
   color: white;
+  background: linear-gradient(to top, rgba(0,0,0,0.7), rgba(0,0,0,0));
+  z-index: 10; /* Ensure it's above the sliding images */
 }
 
 .highlight {
-  border: solid 2px red;
-  font-weight: bold;
-  font-size: 2rem;
-  color: #1e64c8; /* your blue */
+  font-weight: 800;
+  font-size: 48px;
+  color: var(--primary-color);
   text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+  -webkit-text-stroke: 1.8px rgb(255, 255, 255);
 }
 
 .welcomeText {
-  border: solid 2px yellow;
+  font-size: 1rem;
+}
+
+/* Arrows */
+.arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;  /* no circle */
+  padding: 0.25rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 20; /* Above everything else */
+  transition: transform 0.2s ease, color 0.3s ease;
+  border: none; /* Remove any default button borders */
+}
+
+.arrow svg {
+  width: 32px;   /* icon size */
+  height: 32px;
+  color: white;  /* default color */
+  opacity: 0.4;  /* less visible when not hovered */
+  transition: opacity 0.3s ease, transform 0.2s ease, color 0.3s ease;
+}
+
+.arrow:hover svg {
+  opacity: 1;         /* fully visible on hover */
+  transform: scale(1.1);
+  color: #ffffff;      /* highlight color */
+}
+
+.arrow.left {
+  left: 10px;
+}
+
+.arrow.right {
+  right: 10px;
+}
+
+/* Dots */
+.dots {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 0.5rem;
+  z-index: 20; /* Above everything else */
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  background: white;
+  opacity: 0.4;              /* less visible by default */
+  border-radius: 50%;
+  cursor: pointer;
+  transition: opacity 0.3s ease, transform 0.2s ease;
+}
+
+.dot:hover {
+  opacity: 0.7;              /* a bit brighter when hovered */
+  transform: scale(1.1);     /* slight zoom effect */
+}
+
+.activeDot {
+  opacity: 1;                /* fully visible when active */
+  transform: scale(1.2);     /* emphasize active dot */
+}
+
+/* Optional: Add a subtle shadow to improve visibility */
+.arrow, .dots {
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .highlight {
+    font-size: 32px;
+    -webkit-text-stroke: 1px rgb(255, 255, 255);
+  }
+  
+  .welcomeText {
+    font-size: 0.9rem;
+  }
+  
+  .arrow svg {
+    width: 28px;
+    height: 28px;
+  }
+  
+  .hero {
+    height: 20rem;
+  }
 }
