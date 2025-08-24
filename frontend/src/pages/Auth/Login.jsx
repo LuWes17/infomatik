@@ -1,13 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
 import styles from './Auth.module.css';
 import infomatiklogo from '../../assets/infomatik-logo.png';
-import { Phone, Lock, Eye, EyeOff } from 'lucide-react'; 
+import { Phone, Lock, Eye, EyeOff } from 'lucide-react';
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [activeTab, setActiveTab] = useState('login');
   const navigate = useNavigate();
+  const { login, isLoading, error, clearError, isAuthenticated } = useAuth();
+
   const [formData, setFormData] = useState({
     contactNumber: '',
     password: ''
@@ -21,6 +24,20 @@ const Login = () => {
   const [phoneNumberFocused, setPhoneNumberFocused] = useState(false);
   const [displayPhoneNumber, setDisplayPhoneNumber] = useState('');
 
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/dashboard', { replace: true });
+    }
+  }, [isAuthenticated, navigate]);
+
+  // Clear error when component mounts or form data changes
+  useEffect(() => {
+    if (error) {
+      clearError();
+    }
+  }, [formData]);
+
   const handleTabChange = (tab) => {
     setActiveTab(tab);
     if (tab === 'signup') {
@@ -30,13 +47,9 @@ const Login = () => {
 
   // Format phone number for display
   const formatPhoneNumber = (value) => {
-    // Remove all non-digits
     const digits = value.replace(/\D/g, '');
-    
-    // Limit to 10 digits (after +63)
     const limitedDigits = digits.substring(0, 10);
     
-    // Format as XXX XXX XXXX
     if (limitedDigits.length <= 3) {
       return limitedDigits;
     } else if (limitedDigits.length <= 6) {
@@ -50,7 +63,6 @@ const Login = () => {
   const validateField = (name, value) => {
     switch (name) {
       case 'contactNumber':
-        // Check if it has exactly 10 digits (after +63)
         const digits = value.replace(/\D/g, '');
         return digits.length === 10;
       case 'password':
@@ -73,19 +85,15 @@ const Login = () => {
     const { name, value } = e.target;
 
     if (name === 'contactNumber') {
-      // Store the raw digits
       const digits = value.replace(/\D/g, '');
       
-      // Limit to 10 digits maximum
       if (digits.length <= 10) {
         setFormData({
           ...formData,
           [name]: digits
         });
-        // Always update display format when typing
         setDisplayPhoneNumber(formatPhoneNumber(digits));
       }
-      // If digits.length > 10, do nothing (ignore the input)
     } else {
       setFormData({
         ...formData,
@@ -93,7 +101,6 @@ const Login = () => {
       });
     }
 
-    // Mark field as touched when user starts typing
     if (!touched[name]) {
       setTouched({
         ...touched,
@@ -124,7 +131,7 @@ const Login = () => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
     // Mark all fields as touched
@@ -140,35 +147,24 @@ const Login = () => {
     );
 
     if (!isFormValid) {
-      alert('Please fill in all fields correctly');
       return;
     }
 
     // Convert phone number to full format for submission
     const fullPhoneNumber = `+63${formData.contactNumber}`;
-    const submissionData = {
-      ...formData,
-      contactNumber: fullPhoneNumber
+    const loginData = {
+      contactNumber: fullPhoneNumber,
+      password: formData.password
     };
 
-    console.log('Login attempt:', submissionData);
-    // TODO: Implement actual login logic
-  };
-
-  // Prevent zoom on iOS when focusing inputs
-  const handleInputFocus = (e) => {
-    if (isMobile && /iPad|iPhone|iPod/.test(navigator.userAgent)) {
-      const viewport = document.querySelector('meta[name=viewport]');
-      viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0');
+    // Call login function from context
+    const result = await login(loginData);
+    
+    if (result.success) {
+      // Navigation will happen automatically via useEffect due to isAuthenticated change
+      console.log('Login successful');
     }
-  };
-
-  const handleInputBlur = (e) => {
-    if (isMobile && /iPad|iPhone|iPod/.test(navigator.userAgent)) {
-      const viewport = document.querySelector('meta[name=viewport]');
-      viewport.setAttribute('content', 'width=device-width, initial-scale=1.0');
-    }
-    handleBlur(e);
+    // Error handling is managed by the context and displayed in UI
   };
 
   return (
@@ -187,6 +183,7 @@ const Login = () => {
             Ang inyong sentralisadong plataporma para sa komunidad galing kay Konsehal Roy Bon.
           </div>
         </div>
+        
         <div className={styles.formContainer}>
           <div className={styles.formContent}>
             {/* Tab Navigation */}
@@ -205,6 +202,13 @@ const Login = () => {
               </button>
             </div>
 
+            {/* Error Display */}
+            {error && (
+              <div className={styles.errorMessage}>
+                {error}
+              </div>
+            )}
+
             {/* Form */}
             <form onSubmit={handleSubmit} className={styles.form}>
               <div className={styles.phoneInputWrapper}>
@@ -217,14 +221,12 @@ const Login = () => {
                   value={displayPhoneNumber}
                   onChange={handleChange}
                   onBlur={handleBlur}
-                  onFocus={(e) => {
-                    handleInputFocus(e);
-                    handlePhoneFocus();
-                  }}
+                  onFocus={handlePhoneFocus}
                   className={`${getInputClass('contactNumber')} ${styles.phoneInputWithIcon} ${phoneNumberFocused ? styles.phoneInputFocused : ''}`}
                   inputMode="numeric"
                   maxLength="13"
                   required
+                  disabled={isLoading}
                 />
               </div>
 
@@ -236,23 +238,28 @@ const Login = () => {
                   placeholder="Password (min. 6 characters)"
                   value={formData.password}
                   onChange={handleChange}
-                  onFocus={handleInputFocus}
-                  onBlur={handleInputBlur}
+                  onBlur={handleBlur}
                   className={`${getInputClass('password')} ${styles.inputWithIcon}`}
                   required
+                  disabled={isLoading}
                 />
                 <button
                   type="button"
                   className={styles.passwordToggle}
                   onClick={() => setShowPassword(!showPassword)}
                   aria-label={showPassword ? "Hide password" : "Show password"}
+                  disabled={isLoading}
                 >
                   {showPassword ? <Eye size={16} /> : <EyeOff size={16} />}
                 </button>
               </div>
 
-              <button type="submit" className={styles.submitButton}>
-                Login
+              <button 
+                type="submit" 
+                className={`${styles.submitButton} ${isLoading ? styles.submitButtonLoading : ''}`}
+                disabled={isLoading}
+              >
+                {isLoading ? 'Logging in...' : 'Login'}
               </button>
 
               <p className={styles.authPrompt}>

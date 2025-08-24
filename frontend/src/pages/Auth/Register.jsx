@@ -1,16 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
 import styles from './Auth.module.css';
-import infomatiklogo from '../../assets/infomatik-logo.png'
-import { UserRound, Phone, Building2, ChevronDown, Lock, Eye, EyeOff} from 'lucide-react';
+import infomatiklogo from '../../assets/infomatik-logo.png';
+import { UserRound, Phone, Lock, Eye, EyeOff, MapPin } from 'lucide-react';
 
 const Register = () => {
+  const navigate = useNavigate();
+  const { register, isLoading, error, clearError, isAuthenticated } = useAuth();
+
+  // State for form and UI
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [activeTab, setActiveTab] = useState('signup');
-  const [isMobile, setIsMobile] = useState(false);
-  const navigate = useNavigate();
   
+  // Form data state
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -20,6 +24,7 @@ const Register = () => {
     barangay: ''
   });
 
+  // Form validation state
   const [touched, setTouched] = useState({
     firstName: false,
     lastName: false,
@@ -29,20 +34,37 @@ const Register = () => {
     barangay: false
   });
 
+  // Phone number formatting state
   const [phoneNumberFocused, setPhoneNumberFocused] = useState(false);
   const [displayPhoneNumber, setDisplayPhoneNumber] = useState('');
 
-  // Check for mobile screen size
+  // Barangays list (from your PRD)
+  const barangays = [
+    'agnas', 'bacolod', 'bangkilingan', 'bantayan', 'baranghawon', 'basagan', 
+    'basud', 'bognabong', 'bombon', 'bonot', 'san isidro', 'buang', 'buhian', 
+    'cabagnan', 'cobo', 'comon', 'cormidal', 'divino rostro', 'fatima', 
+    'guinobat', 'hacienda', 'magapo', 'mariroc', 'matagbac', 'oras', 'oson', 
+    'panal', 'pawa', 'pinagbobong', 'quinale cabasan', 'quinastillojan', 'rawis', 
+    'sagurong', 'salvacion', 'san antonio', 'san carlos', 'san juan', 'san lorenzo', 
+    'san ramon', 'san roque', 'san vicente', 'santo cristo', 'sua-igot', 'tabiguian', 
+    'tagas', 'tayhi', 'visita'
+  ];
+
+  // Redirect if already authenticated
   useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth <= 768);
-    };
+    if (isAuthenticated) {
+      navigate('/dashboard', { replace: true });
+    }
+  }, [isAuthenticated, navigate]);
 
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
+  // Clear error when form data changes
+  useEffect(() => {
+    if (error) {
+      clearError();
+    }
+  }, [formData, clearError, error]);
 
+  // Tab change handler
   const handleTabChange = (tab) => {
     setActiveTab(tab);
     if (tab === 'login') {
@@ -50,26 +72,11 @@ const Register = () => {
     }
   };
 
-  const barangays = [
-    'Agnas', 'Bacolod', 'Bangkilingan', 'Bantayan', 'Baranghawon', 'Basagan', 
-    'Basud', 'Bognabong', 'Bombon', 'Bonot', 'San Isidro', 'Buang', 'Buhian',
-    'Cabagnan', 'Cobo', 'Comon', 'Cormidal', 'Divino Rostro', 'Fatima',
-    'Guinobat', 'Hacienda', 'Magapo', 'Mariroc', 'Matagbac', 'Oras', 'Oson',
-    'Panal', 'Pawa', 'Pinagbobong', 'Quinale Cabasan', 'Quinastillojan',
-    'Rawis', 'Sagurong', 'Salvacion', 'San Antonio', 'San Carlos', 'San Juan',
-    'San Lorenzo', 'San Ramon', 'San Roque', 'San Vicente', 'Santo Cristo',
-    'Sua-igot', 'Tabiguian', 'Tagas', 'Tayhi', 'Visita'
-  ];
-
-  // Format phone number for display
+  // Phone number formatting
   const formatPhoneNumber = (value) => {
-    // Remove all non-digits
     const digits = value.replace(/\D/g, '');
-    
-    // Limit to 10 digits (after +63)
     const limitedDigits = digits.substring(0, 10);
     
-    // Format as XXX XXX XXXX
     if (limitedDigits.length <= 3) {
       return limitedDigits;
     } else if (limitedDigits.length <= 6) {
@@ -79,22 +86,27 @@ const Register = () => {
     }
   };
 
-  // Validation functions
+  // Field validation - CORRECTED VERSION
   const validateField = (name, value) => {
     switch (name) {
       case 'firstName':
       case 'lastName':
-        return value.trim().length >= 2;
+        return value.trim().length >= 2 && 
+               value.trim().length <= 50 && 
+               /^[a-zA-Z\s]+$/.test(value.trim());
       case 'contactNumber':
-        // Check if it has exactly 10 digits (after +63)
         const digits = value.replace(/\D/g, '');
         return digits.length === 10;
+      case 'password':
+        return value.length >= 8 && 
+               /(?=.*[a-z])/.test(value) && 
+               /(?=.*[A-Z])/.test(value) && 
+               /(?=.*\d)/.test(value) && 
+               /(?=.*[@$!%*?&])/.test(value);
+      case 'confirmPassword':
+        return value === formData.password && value.length > 0;
       case 'barangay':
         return value !== '';
-      case 'password':
-        return value.length >= 6;
-      case 'confirmPassword':
-        return value === formData.password && value.length >= 6;
       default:
         return true;
     }
@@ -109,23 +121,20 @@ const Register = () => {
     return `${styles.input} ${isValid ? styles.inputValid : styles.inputInvalid}`;
   };
 
+  // Handle form input changes
   const handleChange = (e) => {
     const { name, value } = e.target;
 
     if (name === 'contactNumber') {
-      // Store the raw digits
       const digits = value.replace(/\D/g, '');
       
-      // Limit to 10 digits maximum
       if (digits.length <= 10) {
         setFormData({
           ...formData,
           [name]: digits
         });
-        // Always update display format when typing
         setDisplayPhoneNumber(formatPhoneNumber(digits));
       }
-      // If digits.length > 10, do nothing (ignore the input)
     } else {
       setFormData({
         ...formData,
@@ -133,8 +142,6 @@ const Register = () => {
       });
     }
 
-
-    // Mark field as touched when user starts typing
     if (!touched[name]) {
       setTouched({
         ...touched,
@@ -152,28 +159,26 @@ const Register = () => {
     }
   };
 
-  const handlePhoneBlur = () => {
-    // Keep the focused state for better UX on mobile
-    if (!isMobile) {
-      setPhoneNumberFocused(false);
-    }
-  };
-
   const handleBlur = (e) => {
     const { name } = e.target;
+    
+    if (name === 'contactNumber') {
+      setPhoneNumberFocused(false);
+    }
+    
     setTouched({
       ...touched,
       [name]: true
     });
-
-    // Handle phone blur separately
-    if (name === 'contactNumber') {
-      handlePhoneBlur();
-    }
   };
 
-  const handleSubmit = (e) => {
+  // ENHANCED SUBMIT HANDLER WITH DEBUGGING
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Debug logging
+    console.log('=== REGISTRATION ATTEMPT ===');
+    console.log('Current form data:', formData);
     
     // Mark all fields as touched
     const allTouched = {
@@ -191,41 +196,60 @@ const Register = () => {
       validateField(field, formData[field])
     );
 
+    console.log('Frontend validation result:', isFormValid);
+
+    // Log individual field validations
+    console.log('Field validations:', {
+      firstName: validateField('firstName', formData.firstName),
+      lastName: validateField('lastName', formData.lastName),
+      contactNumber: validateField('contactNumber', formData.contactNumber),
+      password: validateField('password', formData.password),
+      confirmPassword: validateField('confirmPassword', formData.confirmPassword),
+      barangay: validateField('barangay', formData.barangay)
+    });
+
     if (!isFormValid) {
-      alert('Please fill in all fields correctly');
+      console.log('Frontend validation failed, not submitting');
       return;
     }
 
-    if (formData.password !== formData.confirmPassword) {
-      alert('Passwords do not match');
-      return;
-    }
-
-    // Convert phone number to full format for submission
+    // Prepare registration data
     const fullPhoneNumber = `+63${formData.contactNumber}`;
-    const submissionData = {
-      ...formData,
-      contactNumber: fullPhoneNumber
+    const registrationData = {
+      firstName: formData.firstName.trim(),
+      lastName: formData.lastName.trim(),
+      contactNumber: fullPhoneNumber,
+      password: formData.password,
+      confirmPassword: formData.password, // ✅ ADDED THIS LINE
+      barangay: formData.barangay.toLowerCase()
     };
+    console.log('Sending registration data:', registrationData);
 
-    console.log('Registration attempt:', submissionData);
-    // TODO: Implement actual registration logic
-  };
+    // Validate the prepared data against backend requirements
+    console.log('Backend validation checks:', {
+      firstNameValid: registrationData.firstName.length >= 2 && 
+                     registrationData.firstName.length <= 50 &&
+                     /^[a-zA-Z\s]+$/.test(registrationData.firstName),
+      lastNameValid: registrationData.lastName.length >= 2 && 
+                    registrationData.lastName.length <= 50 &&
+                    /^[a-zA-Z\s]+$/.test(registrationData.lastName),
+      contactValid: /^(\+639)\d{9}$/.test(registrationData.contactNumber),
+      passwordValid: registrationData.password.length >= 8 &&
+                    /(?=.*[a-z])/.test(registrationData.password) &&
+                    /(?=.*[A-Z])/.test(registrationData.password) &&
+                    /(?=.*\d)/.test(registrationData.password) &&
+                    /(?=.*[@$!%*?&])/.test(registrationData.password),
+      barangayValid: barangays.includes(registrationData.barangay)
+    });
 
-  // Prevent zoom on iOS when focusing inputs
-  const handleInputFocus = (e) => {
-    if (isMobile && /iPad|iPhone|iPod/.test(navigator.userAgent)) {
-      const viewport = document.querySelector('meta[name=viewport]');
-      viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0');
+    // Call register function from context
+    const result = await register(registrationData);
+    
+    if (result.success) {
+      console.log('Registration successful');
+    } else {
+      console.log('Registration failed:', result.error);
     }
-  };
-
-  const handleInputBlur = (e) => {
-    if (isMobile && /iPad|iPhone|iPod/.test(navigator.userAgent)) {
-      const viewport = document.querySelector('meta[name=viewport]');
-      viewport.setAttribute('content', 'width=device-width, initial-scale=1.0');
-    }
-    handleBlur(e);
   };
 
   return (
@@ -244,6 +268,7 @@ const Register = () => {
             Ang inyong sentralisadong plataporma para sa komunidad galing kay Konsehal Roy Bon.
           </div>
         </div>
+        
         <div className={styles.formContainer}>
           <div className={styles.formContent}>
             {/* Tab Navigation */}
@@ -262,6 +287,13 @@ const Register = () => {
               </button>
             </div>
 
+            {/* Error Display */}
+            {error && (
+              <div className={styles.errorMessage}>
+                {error}
+              </div>
+            )}
+
             {/* Form */}
             <form onSubmit={handleSubmit} className={styles.form}>
               <div className={styles.inputWrapper}>
@@ -272,10 +304,11 @@ const Register = () => {
                   placeholder="Last Name"
                   value={formData.lastName}
                   onChange={handleChange}
-                  onFocus={handleInputFocus}
-                  onBlur={handleInputBlur}
+                  onBlur={handleBlur}
                   className={`${getInputClass('lastName')} ${styles.inputWithIcon}`}
                   required
+                  disabled={isLoading}
+                  maxLength={50}
                 />
               </div>
               
@@ -287,10 +320,11 @@ const Register = () => {
                   placeholder="First Name"
                   value={formData.firstName}
                   onChange={handleChange}
-                  onFocus={handleInputFocus}
-                  onBlur={handleInputBlur}
+                  onBlur={handleBlur}
                   className={`${getInputClass('firstName')} ${styles.inputWithIcon}`}
                   required
+                  disabled={isLoading}
+                  maxLength={50}
                 />
               </div>
 
@@ -304,56 +338,56 @@ const Register = () => {
                   value={displayPhoneNumber}
                   onChange={handleChange}
                   onBlur={handleBlur}
-                  onFocus={(e) => {
-                    handleInputFocus(e);
-                    handlePhoneFocus();
-                  }}
+                  onFocus={handlePhoneFocus}
                   className={`${getInputClass('contactNumber')} ${styles.phoneInputWithIcon} ${phoneNumberFocused ? styles.phoneInputFocused : ''}`}
                   inputMode="numeric"
                   maxLength="13"
                   required
+                  disabled={isLoading}
                 />
               </div>
 
-              <div className={styles.selectWrapper}>
-                <Building2 className={styles.inputIcon}/>
+              <div className={styles.inputWrapper}>
+                <MapPin className={styles.inputIcon}/>
                 <select
                   name="barangay"
                   value={formData.barangay}
                   onChange={handleChange}
-                  onFocus={handleInputFocus}
-                  onBlur={handleInputBlur}
-                  className={`${getInputClass('barangay')} ${formData.barangay === '' ? styles.selectPlaceholder : ''} ${styles.customSelect} ${styles.inputWithIcon}`}
+                  onBlur={handleBlur}
+                  className={`${getInputClass('barangay')} ${styles.inputWithIcon} ${!formData.barangay ? styles.selectPlaceholder : ''}`}
                   required
+                  disabled={isLoading}
                 >
-                  <option value="" disabled hidden>Barangay</option>
+                  <option value="">Select Barangay</option>
                   {barangays.map((barangay) => (
                     <option key={barangay} value={barangay}>
-                      {barangay}
+                      {barangay.split(' ').map(word => 
+                        word.charAt(0).toUpperCase() + word.slice(1)
+                      ).join(' ')}
                     </option>
                   ))}
                 </select>
-                <ChevronDown className={styles.selectArrow} size={16} />
               </div>
 
-              <div className={styles.passwordWrapper}>  
-                <Lock className={styles.inputIcon} /> 
+              <div className={styles.passwordWrapper}>
+                <Lock className={styles.inputIcon}/> 
                 <input
                   type={showPassword ? "text" : "password"}
                   name="password"
-                  placeholder="Password (min. 6 characters)"
+                  placeholder="Password (8+ chars, A-Z, a-z, 0-9, @$!%*?&)"
                   value={formData.password}
                   onChange={handleChange}
-                  onFocus={handleInputFocus}
-                  onBlur={handleInputBlur}
+                  onBlur={handleBlur}
                   className={`${getInputClass('password')} ${styles.inputWithIcon}`}
                   required
+                  disabled={isLoading}
                 />
                 <button
                   type="button"
                   className={styles.passwordToggle}
                   onClick={() => setShowPassword(!showPassword)}
                   aria-label={showPassword ? "Hide password" : "Show password"}
+                  disabled={isLoading}
                 >
                   {showPassword ? <Eye size={16} /> : <EyeOff size={16} />}
                 </button>
@@ -367,24 +401,33 @@ const Register = () => {
                   placeholder="Confirm Password"
                   value={formData.confirmPassword}
                   onChange={handleChange}
-                  onFocus={handleInputFocus}
-                  onBlur={handleInputBlur}
+                  onBlur={handleBlur}
                   className={`${getInputClass('confirmPassword')} ${styles.inputWithIcon}`}
                   required
+                  disabled={isLoading}
                 />
                 <button
                   type="button"
                   className={styles.passwordToggle}
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   aria-label={showConfirmPassword ? "Hide confirm password" : "Show confirm password"}
+                  disabled={isLoading}
                 >
                   {showConfirmPassword ? <Eye size={16} /> : <EyeOff size={16} />}
                 </button>
               </div>
 
-              <button type="submit" className={styles.submitButton}>
-                Sign up
+              <button 
+                type="submit" 
+                className={`${styles.submitButton} ${isLoading ? styles.submitButtonLoading : ''}`}
+                disabled={isLoading}
+              >
+                {isLoading ? 'Creating account...' : 'Sign up'}
               </button>
+
+              <p className={styles.authPrompt}>
+                Already have an account? <Link to="/login" className={styles.authLink}>Login here</Link>
+              </p>
             </form>
           </div>
         </div>

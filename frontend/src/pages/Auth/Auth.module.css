@@ -760,3 +760,151 @@
     font-size: 0.85rem;
   }
 }
+
+
+/* Error message styling */
+.errorMessage {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+  border-radius: 0.5rem;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+  text-align: center;
+  animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
+/* Success message styling */
+.successMessage {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+  border-radius: 0.5rem;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+/* Loading button states */
+.submitButtonLoading {
+  background-color: #6c757d !important;
+  cursor: not-allowed !important;
+  opacity: 0.7;
+}
+
+.submitButtonLoading:hover {
+  background-color: #6c757d !important;
+  transform: none !important;
+}
+
+/* Disabled input states */
+.input:disabled {
+  background-color: #f8f9fa;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.inputWithIcon:disabled {
+  background-color: #f8f9fa;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Password toggle button disabled state */
+.passwordToggle:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.passwordToggle:disabled:hover {
+  background-color: transparent;
+  color: #999;
+}
+
+
+/* Form validation feedback */
+.validationFeedback {
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+  margin-left: 1rem;
+}
+
+.validationFeedbackError {
+  color: #dc3545;
+}
+
+.validationFeedbackSuccess {
+  color: #28a745;
+}
+
+/* Loading overlay for forms */
+.formLoading {
+  position: relative;
+  pointer-events: none;
+}
+
+.formLoading::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: inherit;
+  z-index: 10;
+}
+
+/* Improved select styling for barangay dropdown */
+.input option {
+  padding: 0.5rem;
+  background-color: white;
+  color: #333;
+}
+
+.input option:hover {
+  background-color: #f8f9fa;
+}
+
+/* Better focus states for all inputs */
+.input:focus {
+  border-color: #1c62bb;
+  box-shadow: 0 0 0 0.2rem rgba(28, 98, 187, 0.25);
+  outline: none;
+}
+
+.inputWithIcon:focus {
+  border-color: #1c62bb;
+  box-shadow: 0 0 0 0.2rem rgba(28, 98, 187, 0.25);
+  outline: none;
+}
+
+/* Responsive improvements */
+@media (max-width: 768px) {
+  .errorMessage,
+  .successMessage {
+    font-size: 0.8rem;
+    padding: 0.5rem 0.75rem;
+  }
+  
+  .form {
+    width: 100%;
+    max-width: 320px;
+  }
+  
+  .submitButton {
+    width: 100%;
+    margin-top: 1.5rem;
+  }
+}

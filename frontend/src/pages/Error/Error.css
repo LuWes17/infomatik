@@ -1,0 +1,110 @@
+/* frontend/src/pages/Error/Error.css */
+.error-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 80vh;
+  padding: 2rem;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+}
+
+.error-content {
+  text-align: center;
+  max-width: 500px;
+  background: white;
+  padding: 3rem 2rem;
+  border-radius: 1rem;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+.error-code {
+  font-size: 6rem;
+  font-weight: 800;
+  color: #1c62bb;
+  margin: 0 0 1rem 0;
+  line-height: 1;
+}
+
+.error-title {
+  font-size: 2rem;
+  font-weight: 600;
+  color: #343a40;
+  margin: 0 0 1rem 0;
+}
+
+.error-message {
+  font-size: 1.1rem;
+  color: #6c757d;
+  margin: 0 0 2rem 0;
+  line-height: 1.6;
+}
+
+.error-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.error-button {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+}
+
+.error-button.primary {
+  background-color: #1c62bb;
+  color: white;
+}
+
+.error-button.primary:hover {
+  background-color: #1557a6;
+  transform: translateY(-2px);
+}
+
+.error-button.secondary {
+  background-color: transparent;
+  color: #1c62bb;
+  border-color: #1c62bb;
+}
+
+.error-button.secondary:hover {
+  background-color: #1c62bb;
+  color: white;
+  transform: translateY(-2px);
+}
+
+@media (max-width: 768px) {
+  .error-container {
+    padding: 1rem;
+  }
+
+  .error-content {
+    padding: 2rem 1.5rem;
+  }
+
+  .error-code {
+    font-size: 4rem;
+  }
+
+  .error-title {
+    font-size: 1.5rem;
+  }
+
+  .error-actions {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .error-button {
+    width: 100%;
+    max-width: 200px;
+    justify-content: center;
+  }
+}
