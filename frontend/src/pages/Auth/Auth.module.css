@@ -2,6 +2,8 @@
   display: flex;
   justify-content: center;
   margin-top: 5rem;
+  padding: 0 1rem; /* Add padding for mobile */
+  min-height: calc(100vh - 5rem); /* Ensure full height usage */
 }
 
 .cardContainer {
@@ -10,6 +12,7 @@
   border-radius: 2rem;
   display: flex;
   box-shadow: 0 16px 40px #9AAACF;
+  max-width: 100%; /* Prevent overflow on smaller screens */
 }
 
 .welcomeContainer {
@@ -21,7 +24,7 @@
   flex-direction: column;
   background-color: #1c62bb;
   position: relative;
-  overflow: hidden; /* Add this to contain the blobs */
+  overflow: hidden;
 }
 
 .imageContainer {
@@ -111,7 +114,6 @@
   background-color: white;
 }
 
-
 .input::placeholder {
   color: #999;
 }
@@ -154,7 +156,6 @@
   border-color: #dc3545;
 }
 
-
 /* Style for select placeholder option */
 .input option[value=""] {
   color: #999;
@@ -182,20 +183,20 @@
 }
 
 .phoneInputWrapper .input {
-  width: 100%; /* Add this */
+  width: 100%;
 }
 
 .phonePrefix {
   position: absolute;
-  left: 1rem;
-  color: #333;
+  left: 3rem;
+  color: #999;
   z-index: 1;
   pointer-events: none;
   font-size: 0.9rem;
 }
 
 .phoneInputFocused {
-  padding-left: 2.8rem !important;
+  padding-left: 10rem !important;
 }
 
 /* Blob shapes */
@@ -320,4 +321,436 @@
   margin-top: 1rem;
   color: gray;
   font-size: 0.9rem;
+}
+
+.inputWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.inputIcon {
+  position: absolute;
+  left: 1rem;
+  color: #999;
+  z-index: 1;
+  pointer-events: none;
+  height: 1.15rem;
+}
+
+.inputWithIcon {
+  padding-left: 2.5rem !important;
+  width: 100%;
+}
+
+.phoneInputWithIcon {
+  padding-left: 5rem !important;
+  width: 100%;
+}
+
+.selectWrapper {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.customSelect {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  padding-right: 2.5rem !important;
+  width: 100%;
+}
+
+.selectArrow {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #999;
+  pointer-events: none;
+}
+
+.passwordWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.passwordToggle {
+  position: absolute;
+  right: 1rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  z-index: 1;
+}
+
+.passwordToggle:hover {
+  color: #666;
+}
+
+/* ============================================
+   RESPONSIVE BREAKPOINTS
+   ============================================ */
+
+/* Large tablets and small desktops (1024px and below) */
+@media (max-width: 1024px) {
+  .authContainer {
+    margin-top: 3rem;
+  }
+  
+  .cardContainer {
+    width: 90%;
+    max-width: 50rem;
+    height: auto;
+    min-height: 32rem;
+  }
+  
+  .welcomeContainer {
+    width: 45%;
+    min-width: 20rem;
+  }
+  
+  .formContainer {
+    width: 55%;
+    min-width: 25rem;
+  }
+  
+  .textWelcomeContainer {
+    font-size: 1.1rem;
+    padding-left: 3rem;
+    width: 90%;
+  }
+  
+  .logoImg {
+    height: 4rem;
+  }
+}
+
+/* Tablets (768px and below) */
+@media (max-width: 768px) {
+  .authContainer {
+    margin-top: 2rem;
+    padding: 0 1rem;
+  }
+  
+  .cardContainer {
+    width: 100%;
+    max-width: 45rem;
+    height: auto;
+    min-height: 30rem;
+  }
+  
+  .welcomeContainer {
+    width: 40%;
+    min-width: 18rem;
+    height: auto;
+    min-height: 30rem;
+  }
+  
+  .formContainer {
+    width: 60%;
+    height: auto;
+    min-height: 30rem;
+  }
+  
+  .imageContainer {
+    margin-top: 4em;
+  }
+  
+  .logoImg {
+    height: 3.5rem;
+  }
+  
+  .textWelcomeContainer {
+    margin-top: 2rem;
+    height: auto;
+    font-size: 1rem;
+    padding-left: 2rem;
+    padding-right: 1rem;
+    width: 90%;
+  }
+  
+  .formContent {
+    padding: 1rem 0.5rem;
+    padding-top: 2rem;
+  }
+  
+  .form {
+    width: 90%;
+    max-width: 16rem;
+  }
+}
+
+/* Mobile devices (480px and below) */
+@media (max-width: 480px) {
+  .authContainer {
+    margin-top: 1rem;
+    padding: 0 0.5rem;
+    min-height: 100vh;
+    align-items: flex-start;
+  }
+  
+  .cardContainer {
+    width: 100%;
+    height: auto;
+    min-height: calc(100vh - 2rem);
+    flex-direction: column;
+    border-radius: 1rem;
+    box-shadow: 0 8px 25px rgba(154, 170, 207, 0.3);
+  }
+  
+  .welcomeContainer {
+    width: 100%;
+    height: 25vh;
+    min-height: 200px;
+    border-radius: 1rem 1rem 0 0;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+  }
+  
+  .imageContainer {
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+  }
+  
+  .logoImg {
+    height: 3rem;
+  }
+  
+  .textWelcomeContainer {
+    margin-top: 0;
+    height: auto;
+    width: 90%;
+    padding: 0 1rem;
+    font-size: 0.9rem;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .formContainer {
+    width: 100%;
+    height: auto;
+    min-height: 75vh;
+    border-radius: 0 0 1rem 1rem;
+    background-color: white;
+  }
+  
+  .formContent {
+    padding: 2rem 1rem;
+    height: 100%;
+    justify-content: flex-start;
+  }
+  
+  .tabContainer {
+    max-width: 100%;
+    margin-bottom: 2rem;
+  }
+  
+  .tab {
+    padding: 0.75rem;
+    font-size: 1rem;
+  }
+  
+  .form {
+    width: 100%;
+    max-width: none;
+    gap: 1rem;
+  }
+  
+  .input {
+    padding: 1rem;
+    font-size: 1rem;
+    border-radius: 0.75rem;
+  }
+  
+  .inputWithIcon {
+    padding-left: 3rem !important;
+  }
+  
+  .phoneInputWithIcon {
+    padding-left: 6rem !important;
+  }
+  
+  .phonePrefix {
+    left: 3.5rem;
+    font-size: 1rem;
+  }
+  
+  .phoneInputFocused {
+    padding-left: 6rem !important;
+  }
+  
+  .inputIcon {
+    left: 1.2rem;
+    height: 1.2rem;
+  }
+  
+  .submitButton {
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+    margin-top: 1.5rem;
+    border-radius: 0.75rem;
+  }
+  
+  /* Adjust blob animations for mobile */
+  .welcomeContainer::before,
+  .welcomeContainer::after {
+    opacity: 0.5;
+  }
+  
+  .blobShape {
+    opacity: 0.5;
+  }
+  
+  .welcomeContainer::before {
+    width: 100px;
+    height: 100px;
+    bottom: -25px;
+    right: -25px;
+  }
+  
+  .welcomeContainer::after {
+    width: 80px;
+    height: 80px;
+    bottom: 20px;
+    left: -15px;
+  }
+  
+  .blobShape {
+    width: 60px;
+    height: 60px;
+    top: 30px;
+    right: -10px;
+  }
+}
+
+/* Extra small devices (360px and below) */
+@media (max-width: 360px) {
+  .authContainer {
+    padding: 0 0.25rem;
+  }
+  
+  .cardContainer {
+    border-radius: 0.5rem;
+    min-height: 100vh;
+    margin: 0;
+  }
+  
+  .welcomeContainer {
+    height: 20vh;
+    min-height: 180px;
+    border-radius: 0.5rem 0.5rem 0 0;
+  }
+  
+  .logoImg {
+    height: 2.5rem;
+  }
+  
+  .textWelcomeContainer {
+    font-size: 0.8rem;
+    padding: 0 0.5rem;
+  }
+  
+  .formContainer {
+    min-height: 80vh;
+    border-radius: 0 0 0.5rem 0.5rem;
+  }
+  
+  .formContent {
+    padding: 1.5rem 0.75rem;
+  }
+  
+  .form {
+    gap: 0.75rem;
+  }
+  
+  .input {
+    padding: 0.9rem;
+    font-size: 0.95rem;
+  }
+  
+  .tab {
+    padding: 0.6rem;
+    font-size: 0.95rem;
+  }
+}
+
+/* Landscape orientation adjustments for mobile */
+@media (max-width: 768px) and (orientation: landscape) {
+  .authContainer {
+    margin-top: 1rem;
+    min-height: calc(100vh - 1rem);
+  }
+  
+  .cardContainer {
+    flex-direction: row;
+    min-height: calc(100vh - 2rem);
+    height: auto;
+  }
+  
+  .welcomeContainer {
+    width: 35%;
+    height: 100%;
+    border-radius: 1rem 0 0 1rem;
+  }
+  
+  .formContainer {
+    width: 65%;
+    height: 100%;
+    border-radius: 0 1rem 1rem 0;
+  }
+  
+  .imageContainer {
+    margin-top: 2rem;
+  }
+  
+  .logoImg {
+    height: 2.5rem;
+  }
+  
+  .textWelcomeContainer {
+    font-size: 0.8rem;
+    margin-top: 1rem;
+    padding: 0 1rem;
+  }
+  
+  .formContent {
+    padding: 1rem;
+    padding-top: 1.5rem;
+  }
+  
+  .form {
+    gap: 0.5rem;
+  }
+  
+  .input {
+    padding: 0.6rem 1rem;
+    font-size: 0.85rem;
+  }
+  
+  .inputWithIcon {
+    padding-left: 2.2rem !important;
+  }
+  
+  .phoneInputWithIcon {
+    padding-left: 4.5rem !important;
+  }
+  
+  .phonePrefix {
+    left: 2.7rem;
+    font-size: 0.85rem;
+  }
 }

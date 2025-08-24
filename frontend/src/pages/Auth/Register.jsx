@@ -1,11 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import styles from './Auth.module.css';
 import infomatiklogo from '../../assets/infomatik-logo.png'
+import { UserRound, Phone, Building2, ChevronDown, Lock, Eye, EyeOff} from 'lucide-react';
 
 const Register = () => {
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [activeTab, setActiveTab] = useState('signup');
+  const [isMobile, setIsMobile] = useState(false);
   const navigate = useNavigate();
+  
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -27,6 +32,17 @@ const Register = () => {
   const [phoneNumberFocused, setPhoneNumberFocused] = useState(false);
   const [displayPhoneNumber, setDisplayPhoneNumber] = useState('');
 
+  // Check for mobile screen size
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   const handleTabChange = (tab) => {
     setActiveTab(tab);
     if (tab === 'login') {
@@ -45,7 +61,7 @@ const Register = () => {
     'Sua-igot', 'Tabiguian', 'Tagas', 'Tayhi', 'Visita'
   ];
 
-   // Format phone number for display
+  // Format phone number for display
   const formatPhoneNumber = (value) => {
     // Remove all non-digits
     const digits = value.replace(/\D/g, '');
@@ -63,7 +79,7 @@ const Register = () => {
     }
   };
 
-   // Validation functions
+  // Validation functions
   const validateField = (name, value) => {
     switch (name) {
       case 'firstName':
@@ -93,18 +109,17 @@ const Register = () => {
     return `${styles.input} ${isValid ? styles.inputValid : styles.inputInvalid}`;
   };
 
-
-   const handleChange = (e) => {
+  const handleChange = (e) => {
     const { name, value } = e.target;
 
-     if (name === 'contactNumber') {
+    if (name === 'contactNumber') {
       // Store the raw digits
       const digits = value.replace(/\D/g, '');
       setFormData({
         ...formData,
         [name]: digits
       });
-     // Update display format
+      // Update display format
       setDisplayPhoneNumber(formatPhoneNumber(digits));
     } else {
       setFormData({
@@ -122,7 +137,7 @@ const Register = () => {
     }
   };
 
-   const handlePhoneFocus = () => {
+  const handlePhoneFocus = () => {
     setPhoneNumberFocused(true);
     if (formData.contactNumber === '') {
       setDisplayPhoneNumber('');
@@ -131,16 +146,27 @@ const Register = () => {
     }
   };
 
-   const handleBlur = (e) => {
+  const handlePhoneBlur = () => {
+    // Keep the focused state for better UX on mobile
+    if (!isMobile) {
+      setPhoneNumberFocused(false);
+    }
+  };
+
+  const handleBlur = (e) => {
     const { name } = e.target;
     setTouched({
       ...touched,
       [name]: true
     });
+
+    // Handle phone blur separately
+    if (name === 'contactNumber') {
+      handlePhoneBlur();
+    }
   };
 
-
-    const handleSubmit = (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     
     // Mark all fields as touched
@@ -169,7 +195,7 @@ const Register = () => {
       return;
     }
 
-     // Convert phone number to full format for submission
+    // Convert phone number to full format for submission
     const fullPhoneNumber = `+63${formData.contactNumber}`;
     const submissionData = {
       ...formData,
@@ -178,6 +204,22 @@ const Register = () => {
 
     console.log('Registration attempt:', submissionData);
     // TODO: Implement actual registration logic
+  };
+
+  // Prevent zoom on iOS when focusing inputs
+  const handleInputFocus = (e) => {
+    if (isMobile && /iPad|iPhone|iPod/.test(navigator.userAgent)) {
+      const viewport = document.querySelector('meta[name=viewport]');
+      viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0');
+    }
+  };
+
+  const handleInputBlur = (e) => {
+    if (isMobile && /iPad|iPhone|iPod/.test(navigator.userAgent)) {
+      const viewport = document.querySelector('meta[name=viewport]');
+      viewport.setAttribute('content', 'width=device-width, initial-scale=1.0');
+    }
+    handleBlur(e);
   };
 
   return (
@@ -216,31 +258,39 @@ const Register = () => {
 
             {/* Form */}
             <form onSubmit={handleSubmit} className={styles.form}>
-              <input
-                type="text"
-                name="lastName"
-                placeholder="Last Name"
-                value={formData.lastName}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                className={getInputClass('lastName')}
-                required
-              />
-              <input
-                type="text"
-                name="firstName"
-                placeholder="First Name"
-                value={formData.firstName}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                className={getInputClass('firstName')}
-                required
-              />
+              <div className={styles.inputWrapper}>
+                <UserRound className={styles.inputIcon}/>
+                <input
+                  type="text"
+                  name="lastName"
+                  placeholder="Last Name"
+                  value={formData.lastName}
+                  onChange={handleChange}
+                  onFocus={handleInputFocus}
+                  onBlur={handleInputBlur}
+                  className={`${getInputClass('lastName')} ${styles.inputWithIcon}`}
+                  required
+                />
+              </div>
+              
+              <div className={styles.inputWrapper}>
+                <UserRound className={styles.inputIcon}/>
+                <input
+                  type="text"
+                  name="firstName"
+                  placeholder="First Name"
+                  value={formData.firstName}
+                  onChange={handleChange}
+                  onFocus={handleInputFocus}
+                  onBlur={handleInputBlur}
+                  className={`${getInputClass('firstName')} ${styles.inputWithIcon}`}
+                  required
+                />
+              </div>
 
-               <div className={styles.phoneInputWrapper}>
-                {phoneNumberFocused && (
-                  <span className={styles.phonePrefix}>+63</span>
-                )}
+              <div className={styles.phoneInputWrapper}>
+                <Phone className={styles.inputIcon}/>               
+                <span className={styles.phonePrefix}>+63</span>
                 <input
                   type="tel"
                   name="contactNumber"
@@ -248,49 +298,83 @@ const Register = () => {
                   value={phoneNumberFocused ? displayPhoneNumber : (formData.contactNumber ? `09${formData.contactNumber.substring(1)}` : '')}
                   onChange={handleChange}
                   onBlur={handleBlur}
-                  onFocus={handlePhoneFocus}
-                  className={`${getInputClass('contactNumber')} ${phoneNumberFocused ? styles.phoneInputFocused : ''}`}
+                  onFocus={(e) => {
+                    handleInputFocus(e);
+                    handlePhoneFocus();
+                  }}
+                  className={`${getInputClass('contactNumber')} ${styles.phoneInputWithIcon} ${phoneNumberFocused ? styles.phoneInputFocused : ''}`}
+                  inputMode="numeric"
+                  pattern="[0-9]*"
                   required
                 />
               </div>
 
-              <select
-                name="barangay"
-                value={formData.barangay}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                className={`${getInputClass('barangay')} ${formData.barangay === '' ? styles.selectPlaceholder : ''}`}
-                required
-              >
-                <option value="" disabled hidden>Barangay</option>
-                {barangays.map((barangay) => (
-                  <option key={barangay} value={barangay}>
-                    {barangay}
-                  </option>
-                ))}
-              </select>
+              <div className={styles.selectWrapper}>
+                <Building2 className={styles.inputIcon}/>
+                <select
+                  name="barangay"
+                  value={formData.barangay}
+                  onChange={handleChange}
+                  onFocus={handleInputFocus}
+                  onBlur={handleInputBlur}
+                  className={`${getInputClass('barangay')} ${formData.barangay === '' ? styles.selectPlaceholder : ''} ${styles.customSelect} ${styles.inputWithIcon}`}
+                  required
+                >
+                  <option value="" disabled hidden>Barangay</option>
+                  {barangays.map((barangay) => (
+                    <option key={barangay} value={barangay}>
+                      {barangay}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown className={styles.selectArrow} size={16} />
+              </div>
 
-              <input
-                type="password"
-                name="password"
-                placeholder="Password (min. 6 characters)"
-                value={formData.password}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                className={getInputClass('password')}
-                required
-              />
+              <div className={styles.passwordWrapper}>  
+                <Lock className={styles.inputIcon} /> 
+                <input
+                  type={showPassword ? "text" : "password"}
+                  name="password"
+                  placeholder="Password (min. 6 characters)"
+                  value={formData.password}
+                  onChange={handleChange}
+                  onFocus={handleInputFocus}
+                  onBlur={handleInputBlur}
+                  className={`${getInputClass('password')} ${styles.inputWithIcon}`}
+                  required
+                />
+                <button
+                  type="button"
+                  className={styles.passwordToggle}
+                  onClick={() => setShowPassword(!showPassword)}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? <Eye size={16} /> : <EyeOff size={16} />}
+                </button>
+              </div>
 
-              <input
-                type="password"
-                name="confirmPassword"
-                placeholder="Confirm Password"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                className={getInputClass('confirmPassword')}
-                required
-              />
+              <div className={styles.passwordWrapper}>
+                <Lock className={styles.inputIcon}/> 
+                <input
+                  type={showConfirmPassword ? "text" : "password"}
+                  name="confirmPassword"
+                  placeholder="Confirm Password"
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  onFocus={handleInputFocus}
+                  onBlur={handleInputBlur}
+                  className={`${getInputClass('confirmPassword')} ${styles.inputWithIcon}`}
+                  required
+                />
+                <button
+                  type="button"
+                  className={styles.passwordToggle}
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  aria-label={showConfirmPassword ? "Hide confirm password" : "Show confirm password"}
+                >
+                  {showConfirmPassword ? <Eye size={16} /> : <EyeOff size={16} />}
+                </button>
+              </div>
 
               <button type="submit" className={styles.submitButton}>
                 Sign up
