@@ -3,7 +3,7 @@ import styles from './Home.module.css';
 import konsiroy from '../../assets/home slides/konsi-roy.jpg';
 import withkonsi from '../../assets/home slides/withkonsi.jpg';
 import konsiCommunity from '../../assets/home slides/konsi-community.jpg';
-import { CircleChevronRight, CircleChevronLeft } from "lucide-react";
+import { CircleChevronRight, CircleChevronLeft, CalendarDays, Trophy, BriefcaseBusiness, Mail, ScrollText } from "lucide-react";
 
 const Home = () => {
   const slides = [konsiroy, withkonsi, konsiCommunity];
@@ -19,7 +19,7 @@ const Home = () => {
 
     const interval = setInterval(() => {
       nextSlide();
-    }, 1000); // Change slide every 4 seconds
+    }, 4000); // Change slide every 4 seconds
 
     return () => clearInterval(interval); // Cleanup on unmount or dependency change
   }, [isAutoPlay, currentIndex]);
@@ -35,7 +35,7 @@ const Home = () => {
     setTimeout(() => {
       setCurrentIndex(newIndex);
       setIsAnimating(false);
-    }, 1000); // Match this with CSS transition duration
+    }, 500); // Match this with CSS transition duration
   };
 
   const prevSlide = () => {
@@ -43,7 +43,7 @@ const Home = () => {
     changeSlide(newIndex, 'prev');
     // Temporarily pause auto-play when user interacts
     setIsAutoPlay(false);
-    setTimeout(() => setIsAutoPlay(true), 8000); // Resume after 10 seconds
+    setTimeout(() => setIsAutoPlay(true), 10000); // Resume after 10 seconds
   };
 
   const nextSlide = () => {
@@ -51,7 +51,7 @@ const Home = () => {
     changeSlide(newIndex, 'next');
     // Temporarily pause auto-play when user interacts
     setIsAutoPlay(false);
-    setTimeout(() => setIsAutoPlay(true), 4000); // Resume after 10 seconds
+    setTimeout(() => setIsAutoPlay(true), 10000); // Resume after 10 seconds
   };
 
   const goToSlide = (index) => {
@@ -60,7 +60,7 @@ const Home = () => {
     changeSlide(index, direction);
     // Temporarily pause auto-play when user clicks dots
     setIsAutoPlay(false);
-    setTimeout(() => setIsAutoPlay(true), 4000); // Resume after 10 seconds
+    setTimeout(() => setIsAutoPlay(true), 10000); // Resume after 10 seconds
   };
   
   return (
@@ -117,6 +117,36 @@ const Home = () => {
               onClick={() => goToSlide(index)}
             ></span>
           ))}
+        </div>
+      </div>
+
+      {/* Quick Links Section */}
+      <div className={styles.quickLinks}>
+        <div className={styles.quickLinksContainer}>
+          <div className={styles.quickLinkCard}>
+            <CalendarDays size={48} />
+            <h3>Events</h3>
+          </div>
+          
+          <div className={styles.quickLinkCard}>
+            <Trophy size={48} />
+            <h3>Accomplishments</h3>
+          </div>
+          
+          <div className={styles.quickLinkCard}>
+            <BriefcaseBusiness size={48} />
+            <h3>Job Openings</h3>
+          </div>
+          
+          <div className={styles.quickLinkCard}>
+            <Mail size={48} />
+            <h3>Solicitation</h3>
+          </div>
+          
+          <div className={styles.quickLinkCard}>
+            <ScrollText size={48} />
+            <h3>Ordinance</h3>
+          </div>
         </div>
       </div>
     </div>

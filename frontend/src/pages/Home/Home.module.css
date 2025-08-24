@@ -15,6 +15,17 @@
   overflow: hidden; /* hides excess part of the image */
 }
 
+/* Slideshow area */
+.hero {
+  position: relative;
+  background: #ffffff;
+  height: 25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  overflow: hidden; /* hides excess part of the image */
+}
+
 .heroImage {
   position: absolute;
   top: 0;
@@ -92,7 +103,7 @@
   position: absolute;
   bottom: 0; /* sticks at the bottom of hero */
   width: 100%;
-  padding: 2rem;
+  padding: 1rem;
   color: white;
   background: linear-gradient(to top, rgba(0,0,0,0.7), rgba(0,0,0,0));
   z-index: 10; /* Ensure it's above the sliding images */
@@ -127,7 +138,7 @@
 }
 
 .arrow svg {
-  width: 32px;   /* icon size */
+  width: 32px;   /* default desktop size */
   height: 32px;
   color: white;  /* default color */
   opacity: 0.4;  /* less visible when not hovered */
@@ -184,23 +195,453 @@
   filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
 }
 
-/* Responsive adjustments */
+/* Responsive adjustments for arrows and dots */
+
+/* Large tablets and small laptops */
+@media (max-width: 1024px) {
+  .arrow svg {
+    width: 30px;
+    height: 30px;
+  }
+  
+  .arrow {
+    padding: 0.2rem;
+  }
+  
+  .dot {
+    width: 9px;
+    height: 9px;
+  }
+  
+  .dots {
+    gap: 0.45rem;
+    bottom: 8px;
+  }
+}
+
+/* Tablets */
 @media (max-width: 768px) {
-  .highlight {
-    font-size: 32px;
-    -webkit-text-stroke: 1px rgb(255, 255, 255);
-  }
-  
-  .welcomeText {
-    font-size: 0.9rem;
-  }
-  
   .arrow svg {
     width: 28px;
     height: 28px;
   }
   
+  .arrow {
+    padding: 0.15rem;
+  }
+  
+  .arrow.left {
+    left: 8px;
+  }
+  
+  .arrow.right {
+    right: 8px;
+  }
+  
+  .dot {
+    width: 8px;
+    height: 8px;
+  }
+  
+  .dots {
+    gap: 0.4rem;
+    bottom: 8px;
+  }
+  
+  .activeDot {
+    transform: scale(1.25);
+  }
+}
+
+/* Small tablets and large phones */
+@media (max-width: 640px) {
+  .arrow svg {
+    width: 26px;
+    height: 26px;
+  }
+  
+  .arrow {
+    padding: 0.1rem;
+  }
+  
+  .arrow.left {
+    left: 6px;
+  }
+  
+  .arrow.right {
+    right: 6px;
+  }
+  
+  .dot {
+    width: 7px;
+    height: 7px;
+  }
+  
+  .dots {
+    gap: 0.35rem;
+    bottom: 6px;
+  }
+}
+
+/* Mobile phones */
+@media (max-width: 480px) {
+  .arrow svg {
+    width: 24px;
+    height: 24px;
+  }
+  
+  .arrow {
+    padding: 0.05rem;
+  }
+  
+  .arrow.left {
+    left: 5px;
+  }
+  
+  .arrow.right {
+    right: 5px;
+  }
+  
+  .dot {
+    width: 6px;
+    height: 6px;
+  }
+  
+  .dots {
+    gap: 0.3rem;
+    bottom: 5px;
+  }
+  
+  .activeDot {
+    transform: scale(1.3);
+  }
+  
+  /* Reduce hover effects on mobile for better touch experience */
+  .arrow:hover svg {
+    transform: scale(1.05);
+  }
+  
+  .dot:hover {
+    transform: scale(1.05);
+  }
+}
+
+/* Very small phones */
+@media (max-width: 360px) {
+  .arrow svg {
+    width: 22px;
+    height: 22px;
+  }
+  
+  .arrow.left {
+    left: 4px;
+  }
+  
+  .arrow.right {
+    right: 4px;
+  }
+  
+  .dot {
+    width: 5px;
+    height: 5px;
+  }
+  
+  .dots {
+    gap: 0.25rem;
+    bottom: 4px;
+  }
+  
+  .activeDot {
+    transform: scale(1.4);
+  }
+  
+  /* Further reduce effects for very small screens */
+  .arrow:hover svg {
+    transform: scale(1.02);
+  }
+}
+
+/* Responsive adjustments for different screen sizes */
+
+/* Large tablets and small laptops */
+@media (max-width: 1024px) {
+  .welcomeContainer {
+    padding: 0.8rem;
+  }
+  
+  .highlight {
+    font-size: 42px;
+    -webkit-text-stroke: 1.6px rgb(255, 255, 255);
+  }
+  
+  .welcomeText {
+    font-size: 0.95rem;
+  }
+  
+  .hero {
+    height: 22rem;
+  }
+}
+
+/* Tablets */
+@media (max-width: 768px) {
+  .welcomeContainer {
+    padding: 0.7rem;
+  }
+  
+  .highlight {
+    font-size: 32px;
+    -webkit-text-stroke: 1.4px rgb(255, 255, 255);
+    margin-bottom: 0.4rem;
+  }
+  
+  .welcomeText {
+    font-size: 0.9rem;
+    line-height: 1.3;
+  }
+  
+  .welcomeText p {
+    margin: 0.25rem 0;
+  }
+  
   .hero {
     height: 20rem;
+  }
+}
+
+/* Small tablets and large phones */
+@media (max-width: 640px) {
+  .welcomeContainer {
+    padding: 0.6rem;
+  }
+  
+  .highlight {
+    font-size: 28px;
+    -webkit-text-stroke: 1.2px rgb(255, 255, 255);
+    margin-bottom: 0.3rem;
+  }
+  
+  .welcomeText {
+    font-size: 0.85rem;
+    line-height: 1.3;
+  }
+  
+  .hero {
+    height: 18rem;
+  }
+}
+
+/* Mobile phones */
+@media (max-width: 480px) {
+  .welcomeContainer {
+    padding: 0.5rem;
+  }
+  
+  .highlight {
+    font-size: 24px;
+    -webkit-text-stroke: 1px rgb(255, 255, 255);
+    margin-bottom: 0.2rem;
+  }
+  
+  .welcomeText {
+    font-size: 0.8rem;
+    line-height: 1.25;
+  }
+  
+  .welcomeText p {
+    margin: 0.2rem 0;
+  }
+  
+  .hero {
+    height: 16rem;
+  }
+}
+
+/* Very small phones */
+@media (max-width: 360px) {
+  .welcomeContainer {
+    padding: 0.4rem;
+  }
+  
+  .highlight {
+    font-size: 20px;
+    -webkit-text-stroke: 0.8px rgb(255, 255, 255);
+    margin-bottom: 0.2rem;
+  }
+  
+  .welcomeText {
+    font-size: 0.75rem;
+    line-height: 1.2;
+  }
+  
+  .welcomeText p {
+    margin: 0.15rem 0;
+  }
+  
+  .hero {
+    height: 14rem;
+  }
+}
+
+/* Quick Links Section */
+.quickLinks {
+  padding: 3rem 0;
+  background: #f8fafc;
+}
+
+.quickLinksContainer {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
+  display: flex;
+  gap: 2rem;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.quickLinkCard {
+  background: white;
+  padding: 2.5rem 2rem;
+  border-radius: 12px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 5px 10px #9AAACF;
+  border: 2px solid transparent;
+  flex: 1;
+  position: relative;
+}
+
+/* Simple hover effect with slight separation */
+.quickLinksContainer:hover .quickLinkCard:not(:hover) {
+  opacity: 0.7;
+  transform: scale(0.98);
+}
+
+.quickLinkCard:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 5px 10px #9AAACF;
+  background: var(--primary-color, #1c62bb);
+  border-color: var(--primary-color, #1c62bb);
+}
+
+.quickLinkCard:hover svg {
+  color: white;
+  transform: scale(1.1);
+}
+
+.quickLinkCard:hover h3 {
+  color: white;
+}
+
+.quickLinkCard svg {
+  color: var(--primary-color, #1c62bb);
+  margin-bottom: 1rem;
+  transition: all 0.3s ease;
+}
+
+.quickLinkCard h3 {
+  color: var(--gray-800, #374151);
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0;
+  transition: all 0.3s ease;
+}
+
+/* Responsive design for quick links */
+@media (max-width: 1024px) {
+  .quickLinksContainer {
+    gap: 1.5rem;
+  }
+  
+  .quickLinkCard {
+    min-width: 160px;
+    padding: 1.8rem 1.2rem;
+  }
+  
+  .quickLinkCard svg {
+    margin-bottom: 0.8rem;
+  }
+  
+  .quickLinkCard h3 {
+    font-size: 1rem;
+  }
+  
+  .quickLinkCard:hover {
+    transform: scale(1.05) translateY(-10px);
+  }
+}
+
+@media (max-width: 768px) {
+  .quickLinks {
+    padding: 2rem 0;
+  }
+  
+  .quickLinksContainer {
+    padding: 0 1rem;
+    gap: 1rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    max-width: 600px;
+  }
+  
+  .quickLinkCard {
+    padding: 1.2rem 0.8rem;
+    min-width: 120px;
+    border-radius: 8px;
+    box-shadow: 0 3px 6px rgba(154, 170, 207, 0.4);
+  }
+  
+  .quickLinkCard svg {
+    width: 32px;
+    height: 32px;
+    margin-bottom: 0.6rem;
+  }
+  
+  .quickLinkCard h3 {
+    font-size: 0.85rem;
+    font-weight: 600;
+    line-height: 1.2;
+  }
+  
+  /* Simplified hover effects for mobile */
+  .quickLinkCard:hover {
+    transform: scale(1.02) translateY(-4px);
+    box-shadow: 0 4px 8px rgba(154, 170, 207, 0.6);
+  }
+  
+  .quickLinksContainer:hover .quickLinkCard:not(:hover) {
+    opacity: 0.9;
+    transform: scale(0.98);
+  }
+}
+
+@media (max-width: 480px) {
+  .quickLinksContainer {
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 0.8rem;
+    padding: 0 0.8rem;
+  }
+  
+  .quickLinkCard {
+    padding: 1rem 0.6rem;
+    min-width: 100px;
+    border-radius: 6px;
+  }
+  
+  .quickLinkCard svg {
+    width: 28px;
+    height: 28px;
+    margin-bottom: 0.5rem;
+  }
+  
+  .quickLinkCard h3 {
+    font-size: 0.75rem;
+    font-weight: 500;
+  }
+  
+  .quickLinks {
+    padding: 1.5rem 0;
   }
 }
