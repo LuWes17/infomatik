@@ -98,11 +98,8 @@ const Register = () => {
         const digits = value.replace(/\D/g, '');
         return digits.length === 10;
       case 'password':
-        return value.length >= 8 && 
-               /(?=.*[a-z])/.test(value) && 
-               /(?=.*[A-Z])/.test(value) && 
-               /(?=.*\d)/.test(value) && 
-               /(?=.*[@$!%*?&])/.test(value);
+      // UPDATED: Only requires 8 characters minimum
+        return value.length >= 8;
       case 'confirmPassword':
         return value === formData.password && value.length > 0;
       case 'barangay':
@@ -234,11 +231,8 @@ const Register = () => {
                     registrationData.lastName.length <= 50 &&
                     /^[a-zA-Z\s]+$/.test(registrationData.lastName),
       contactValid: /^(\+639)\d{9}$/.test(registrationData.contactNumber),
-      passwordValid: registrationData.password.length >= 8 &&
-                    /(?=.*[a-z])/.test(registrationData.password) &&
-                    /(?=.*[A-Z])/.test(registrationData.password) &&
-                    /(?=.*\d)/.test(registrationData.password) &&
-                    /(?=.*[@$!%*?&])/.test(registrationData.password),
+      // UPDATED: Only check for minimum length
+      passwordValid: registrationData.password.length >= 8,
       barangayValid: barangays.includes(registrationData.barangay)
     });
 
@@ -374,7 +368,7 @@ const Register = () => {
                 <input
                   type={showPassword ? "text" : "password"}
                   name="password"
-                  placeholder="Password (8+ chars, A-Z, a-z, 0-9, @$!%*?&)"
+                  placeholder="Password (min. 8 characters)"
                   value={formData.password}
                   onChange={handleChange}
                   onBlur={handleBlur}
