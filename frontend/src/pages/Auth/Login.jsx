@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import styles from './Auth.module.css';
-import infomatiklogo from '../../assets/infomatik-logo.png'
+import infomatiklogo from '../../assets/infomatik-logo.png';
+import { Phone, Lock, Eye, EyeOff } from 'lucide-react'; 
 
 const Login = () => {
+  const [showPassword, setShowPassword] = useState(false);
   const [activeTab, setActiveTab] = useState('login');
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
@@ -73,13 +75,17 @@ const Login = () => {
     if (name === 'contactNumber') {
       // Store the raw digits
       const digits = value.replace(/\D/g, '');
-      setFormData({
-        ...formData,
-        [name]: digits
-      });
       
-      // Update display format
-      setDisplayPhoneNumber(formatPhoneNumber(digits));
+      // Limit to 10 digits maximum
+      if (digits.length <= 10) {
+        setFormData({
+          ...formData,
+          [name]: digits
+        });
+        // Always update display format when typing
+        setDisplayPhoneNumber(formatPhoneNumber(digits));
+      }
+      // If digits.length > 10, do nothing (ignore the input)
     } else {
       setFormData({
         ...formData,
@@ -149,6 +155,22 @@ const Login = () => {
     // TODO: Implement actual login logic
   };
 
+  // Prevent zoom on iOS when focusing inputs
+  const handleInputFocus = (e) => {
+    if (isMobile && /iPad|iPhone|iPod/.test(navigator.userAgent)) {
+      const viewport = document.querySelector('meta[name=viewport]');
+      viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0');
+    }
+  };
+
+  const handleInputBlur = (e) => {
+    if (isMobile && /iPad|iPhone|iPod/.test(navigator.userAgent)) {
+      const viewport = document.querySelector('meta[name=viewport]');
+      viewport.setAttribute('content', 'width=device-width, initial-scale=1.0');
+    }
+    handleBlur(e);
+  };
+
   return (
     <div className={styles.authContainer}>
       <div className={styles.cardContainer}>
@@ -186,32 +208,48 @@ const Login = () => {
             {/* Form */}
             <form onSubmit={handleSubmit} className={styles.form}>
               <div className={styles.phoneInputWrapper}>
-                {phoneNumberFocused && (
-                  <span className={styles.phonePrefix}>+63</span>
-                )}
+                <Phone className={styles.inputIcon}/>               
+                <span className={styles.phonePrefix}>+63</span>
                 <input
                   type="tel"
                   name="contactNumber"
                   placeholder={phoneNumberFocused ? "123 456 7890" : "Contact Number"}
-                  value={phoneNumberFocused ? displayPhoneNumber : (formData.contactNumber ? `09${formData.contactNumber.substring(1)}` : '')}
+                  value={displayPhoneNumber}
                   onChange={handleChange}
                   onBlur={handleBlur}
-                  onFocus={handlePhoneFocus}
-                  className={`${getInputClass('contactNumber')} ${phoneNumberFocused ? styles.phoneInputFocused : ''}`}
+                  onFocus={(e) => {
+                    handleInputFocus(e);
+                    handlePhoneFocus();
+                  }}
+                  className={`${getInputClass('contactNumber')} ${styles.phoneInputWithIcon} ${phoneNumberFocused ? styles.phoneInputFocused : ''}`}
+                  inputMode="numeric"
+                  maxLength="13"
                   required
                 />
               </div>
 
-              <input
-                type="password"
-                name="password"
-                placeholder="Password"
-                value={formData.password}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                className={getInputClass('password')}
-                required
-              />
+              <div className={styles.passwordWrapper}>  
+                <Lock className={styles.inputIcon} /> 
+                <input
+                  type={showPassword ? "text" : "password"}
+                  name="password"
+                  placeholder="Password (min. 6 characters)"
+                  value={formData.password}
+                  onChange={handleChange}
+                  onFocus={handleInputFocus}
+                  onBlur={handleInputBlur}
+                  className={`${getInputClass('password')} ${styles.inputWithIcon}`}
+                  required
+                />
+                <button
+                  type="button"
+                  className={styles.passwordToggle}
+                  onClick={() => setShowPassword(!showPassword)}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? <Eye size={16} /> : <EyeOff size={16} />}
+                </button>
+              </div>
 
               <button type="submit" className={styles.submitButton}>
                 Login
