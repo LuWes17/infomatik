@@ -26,7 +26,7 @@ import Login from '@pages/Auth/Login';
 import Register from '@pages/Auth/Register';
 
 // Protected/Dashboard Pages (create these as needed)
-import Dashboard from '@pages/Dashboard/Dashboard';
+import Profile from '@pages/Profile/Profile';
 
 
 // Error Pages
@@ -74,18 +74,10 @@ function App() {
 
               {/* Protected Routes - require authentication */}
               <Route 
-                path="/dashboard" 
-                element={
-                  <ProtectedRoute>
-                    <Dashboard />
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
                 path="/profile" 
                 element={
                   <ProtectedRoute>
-                    
+                    <Profile/>
                   </ProtectedRoute>
                 } 
               />
