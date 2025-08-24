@@ -115,18 +115,24 @@ const Register = () => {
     if (name === 'contactNumber') {
       // Store the raw digits
       const digits = value.replace(/\D/g, '');
-      setFormData({
-        ...formData,
-        [name]: digits
-      });
-      // Update display format
-      setDisplayPhoneNumber(formatPhoneNumber(digits));
+      
+      // Limit to 10 digits maximum
+      if (digits.length <= 10) {
+        setFormData({
+          ...formData,
+          [name]: digits
+        });
+        // Always update display format when typing
+        setDisplayPhoneNumber(formatPhoneNumber(digits));
+      }
+      // If digits.length > 10, do nothing (ignore the input)
     } else {
       setFormData({
         ...formData,
         [name]: value
       });
     }
+
 
     // Mark field as touched when user starts typing
     if (!touched[name]) {
@@ -295,7 +301,7 @@ const Register = () => {
                   type="tel"
                   name="contactNumber"
                   placeholder={phoneNumberFocused ? "123 456 7890" : "Contact Number"}
-                  value={phoneNumberFocused ? displayPhoneNumber : (formData.contactNumber ? `09${formData.contactNumber.substring(1)}` : '')}
+                  value={displayPhoneNumber}
                   onChange={handleChange}
                   onBlur={handleBlur}
                   onFocus={(e) => {
@@ -304,7 +310,7 @@ const Register = () => {
                   }}
                   className={`${getInputClass('contactNumber')} ${styles.phoneInputWithIcon} ${phoneNumberFocused ? styles.phoneInputFocused : ''}`}
                   inputMode="numeric"
-                  pattern="[0-9]*"
+                  maxLength="13"
                   required
                 />
               </div>

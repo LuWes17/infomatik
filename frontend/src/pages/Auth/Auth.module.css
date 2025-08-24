@@ -197,6 +197,7 @@
 
 .phoneInputFocused {
   padding-left: 10rem !important;
+  color: black !important;
 }
 
 /* Blob shapes */
@@ -347,6 +348,11 @@
 .phoneInputWithIcon {
   padding-left: 5rem !important;
   width: 100%;
+  color: black !important;
+}
+
+.phoneInputWithIcon:focus {
+  color: black !important;
 }
 
 .selectWrapper {
