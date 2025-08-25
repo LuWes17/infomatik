@@ -1,4 +1,3 @@
-// backend/src/server.js
 const express = require('express');
 const dotenv = require('dotenv');
 const connectDB = require('./config/database');
@@ -18,10 +17,26 @@ setupMiddleware(app);
 // Import routes
 const authRoutes = require('./routes/auth');
 const adminRoutes = require('./routes/admin');
+const jobRoutes = require('./routes/jobs');
+const solicitationRoutes = require('./routes/solicitations');
+const feedbackRoutes = require('./routes/feedback');
+const announcementRoutes = require('./routes/announcements');
+const accomplishmentRoutes = require('./routes/accomplishments');
+const policyRoutes = require('./routes/policies');
+const riceDistributionRoutes = require('./routes/riceDistribution');
+const dashboardRoutes = require('./routes/dashboard');
 
 // Mount routes
 app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/jobs', jobRoutes);
+app.use('/api/solicitations', solicitationRoutes);
+app.use('/api/feedback', feedbackRoutes);
+app.use('/api/announcements', announcementRoutes);
+app.use('/api/accomplishments', accomplishmentRoutes);
+app.use('/api/policies', policyRoutes);
+app.use('/api/rice-distribution', riceDistributionRoutes);
+app.use('/api/dashboard', dashboardRoutes);
 
 // Basic health check route
 app.get('/api/health', (req, res) => {
@@ -30,14 +45,6 @@ app.get('/api/health', (req, res) => {
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV || 'development',
     version: '1.0.0'
-  });
-});
-
-// Test route to check authentication
-app.get('/api/test-auth', require('./middleware/auth').protect, (req, res) => {
-  res.json({
-    message: 'Authentication working!',
-    user: req.user
   });
 });
 
