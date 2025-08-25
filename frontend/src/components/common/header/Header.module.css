@@ -8,10 +8,13 @@
 
 .nav {
   display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
 }
 
 .logoContainer {
-  margin-right: 12rem;
+  flex-shrink: 0;
   margin-left: 2rem;
 }
 
@@ -21,11 +24,14 @@
   max-width: 13.75rem;
 }
 
+/* Desktop Navigation */
 .navList {
   display: flex;
   list-style: none;
   gap: var(--spacing-lg);
   align-items: center;
+  margin: 0;
+  padding: 0;
 }
 
 .navLink {
@@ -34,6 +40,7 @@
   transition: color 0.2s ease;
   padding: var(--spacing-sm) 0;
   display: block;
+  text-decoration: none;
 }
 
 .navLink:hover {
@@ -54,6 +61,7 @@
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
   border-radius: 8px;
   padding: 8px 0;
+  opacity: 0;
   visibility: hidden;
   transform: translateY(-10px);
   transition: all 0.3s ease;
@@ -88,27 +96,7 @@
   gap: var(--spacing-md);
   align-items: center;
   flex-shrink: 0;
-  margin-left: 1.5rem;
-}
-
-@media (max-width: 768px) {
-  .navList {
-    display: none;
-  }
-  
-  .dropdownContent {
-    position: static;
-    opacity: 1;
-    visibility: visible;
-    transform: none;
-    box-shadow: none;
-    background: transparent;
-  }
-  
-  .dropdownLink {
-    color: var(--white);
-    padding: 8px 0;
-  }
+  margin-right: 2rem;
 }
 
 /* Dropdown Arrow */
@@ -123,3 +111,249 @@
   transform: rotate(180deg);
 }
 
+/* Mobile Menu Button */
+.mobileMenuBtn {
+  display: none;
+  background: none;
+  border: none;
+  color: var(--white);
+  padding: 0.5rem;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+.mobileMenuBtn:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Sidebar Styles */
+.noScroll {
+  overflow: hidden;
+  height: 100%;
+}
+
+.sidebar {
+  position: fixed;
+  top: 0;
+  right: -100%;
+  width: 300px;
+  height: 100vh;
+  background: var(--white);
+  z-index: 1002;
+  transition: right 0.3s ease;
+  overflow-y: auto;
+  box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
+  border-top-left-radius: 10px; /* Add rounded top-left corner */
+  border-bottom-left-radius: 10px; /* Add rounded bottom-left corner */
+}
+
+.sidebarOpen {
+  right: 0;
+}
+
+.sidebarHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background: var(--primary-color);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-top-left-radius: 10px;
+}
+
+.sidebarLogo {
+  height: 2.5rem;
+  width: auto;
+  max-width: 8rem;
+}
+
+.closeSidebarBtn {
+  background: none;
+  border: none;
+  color: var(--white);
+  padding: 0.25rem;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+.closeSidebarBtn:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.sidebarNav {
+  padding: 1rem 0;
+}
+
+.sidebarNavList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.sidebarNavList > li {
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.sidebarNavLink {
+  display: block;
+  padding: 1rem 1.5rem;
+  color: var(--text-color, #333);
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  font-size: 12px;
+}
+
+.sidebarNavLink:hover {
+  background-color: #f8f9fa;
+  color: var(--primary-color);
+}
+
+/* Sidebar Dropdown Styles */
+.sidebarDropdown {
+  position: relative;
+}
+
+.sidebarDropdownHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+}
+
+.sidebarDropdownHeader .sidebarNavLink {
+  flex: 1;
+  margin: 0;
+}
+
+.sidebarDropdownArrow {
+  margin-right: 1.5rem;
+  transition: transform 0.2s ease;
+  color: var(--text-color, #666);
+}
+
+.sidebarDropdownArrowOpen {
+  transform: rotate(180deg);
+}
+
+.sidebarDropdownContent {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+  background-color: #f8f9fa;
+}
+
+.sidebarDropdownContentOpen {
+  max-height: 500px;
+}
+
+.sidebarDropdownLink {
+  display: block;
+  padding: 0.75rem 3rem;
+  color: var(--text-color, #666);
+  text-decoration: none;
+  font-weight: 400;
+  font-size: 10px;
+  transition: all 0.2s ease;
+}
+
+.sidebarDropdownLink:hover {
+
+  background-color: #e9ecef;
+  color: var(--primary-color);
+}
+
+.sidebarAuthButtons {
+  padding: 1rem;
+  color: var(--primary-color);
+  font-weight: 600;
+  text-align: center;
+}
+
+.sidebarAuthButtons .btn {
+  text-align: center;
+}
+
+.sidebarAuthButtons a {
+  border: 2px solid var(--primary-color);
+  padding: 0.5rem;
+  border-radius: 1rem;
+  transition: all 0.3s ease;
+  width: 70%; /* Takes 80% of container width */
+  display: inline-block;
+  font-size: 12px;
+}
+
+.sidebarAuthButtons a:hover {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+/* Sidebar Overlay */
+.sidebarOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1001;
+}
+
+/* Responsive Styles */
+@media (max-width: 1024px) {
+  .logoContainer {
+    margin-right: 2rem;
+    margin-left: 1rem;
+  }
+  
+  .navList {
+    gap: var(--spacing-md);
+  }
+}
+
+@media (max-width: 768px) {
+  .nav {
+    padding: 0.5rem 1rem;
+  }
+  
+  .logoContainer {
+    margin-right: auto;
+    margin-left: 0;
+  }
+  
+  .logoImg {
+    height: 3rem;
+    max-width: 10rem;
+  }
+  
+  .navList {
+    display: none;
+  }
+  
+  .authButtons {
+    display: none;
+  }
+  
+  .mobileMenuBtn {
+    display: block;
+  }
+}
+
+@media (max-width: 480px) {
+  .sidebar {
+    width: 280px;
+  }
+  
+  .logoImg {
+    height: 2.5rem;
+    max-width: 8rem;
+  }
+  
+  .sidebarLogo {
+    height: 2rem;
+    max-width: 6rem;
+  }
+}
