@@ -3,27 +3,7 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 
-// Cloudinary configuration (for production)
-const cloudinary = require('cloudinary').v2;
-
-// Configure Cloudinary if credentials are provided
-if (process.env.CLOUDINARY_CLOUD_NAME && 
-    process.env.CLOUDINARY_API_KEY && 
-    process.env.CLOUDINARY_API_SECRET) {
-  
-  cloudinary.config({
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-    api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET,
-    secure: true
-  });
-  
-  console.log('Cloudinary configured for production');
-} else {
-  console.log('Using local storage for development (Cloudinary not configured)');
-}
-
-// Local storage configuration (for development)
+// Local storage configuration
 const localStorage = multer.diskStorage({
   destination: (req, file, cb) => {
     let uploadPath = 'uploads/';
@@ -95,122 +75,20 @@ const fileFilter = (req, file, cb) => {
 };
 
 // Multer configuration for local storage
-const uploadLocal = multer({
-  storage: localStorage,
-  fileFilter,
-  limits: {
-    fileSize: 10 * 1024 * 1024, // 10MB limit
-    files: 5 // Maximum 5 files per request
-  }
-});
-
-// Multer configuration for memory storage (used with Cloudinary)
-const uploadMemory = multer({
-  storage: multer.memoryStorage(),
-  fileFilter,
-  limits: {
-    fileSize: 10 * 1024 * 1024, // 10MB limit
-    files: 5 // Maximum 5 files per request
-  }
-});
-
-// Upload to Cloudinary
-const uploadToCloudinary = (buffer, options = {}) => {
-  return new Promise((resolve, reject) => {
-    const uploadOptions = {
-      resource_type: 'auto',
-      folder: 'city-councilor',
-      use_filename: true,
-      unique_filename: true,
-      overwrite: false,
-      ...options
-    };
-
-    cloudinary.uploader.upload_stream(
-      uploadOptions,
-      (error, result) => {
-        if (error) {
-          reject(error);
-        } else {
-          resolve(result);
-        }
-      }
-    ).end(buffer);
+const upload = () => {
+  return multer({
+    storage: localStorage,
+    fileFilter,
+    limits: {
+      fileSize: 10 * 1024 * 1024, // 10MB limit
+      files: 5 // Maximum 5 files per request
+    }
   });
 };
 
-// Main upload middleware that chooses between local and cloud storage
-const upload = (fieldConfig) => {
-  return async (req, res, next) => {
-    // Determine storage method based on environment
-    const useCloudinary = process.env.NODE_ENV === 'production' && 
-                          process.env.CLOUDINARY_CLOUD_NAME;
-    
-    const uploadMiddleware = useCloudinary ? uploadMemory : uploadLocal;
-    
-    // Handle the upload
-    uploadMiddleware.any()(req, res, async (err) => {
-      if (err) {
-        console.error('Upload error:', err.message);
-        return res.status(400).json({
-          success: false,
-          message: err.message
-        });
-      }
-      
-      // If using Cloudinary, upload files to cloud
-      if (useCloudinary && req.files && req.files.length > 0) {
-        try {
-          const uploadPromises = req.files.map(async (file) => {
-            const folderMap = {
-              'avatar': 'avatars',
-              'images': 'images',
-              'documents': 'documents'
-            };
-            
-            const folder = `city-councilor/${folderMap[file.fieldname] || 'misc'}`;
-            
-            const result = await uploadToCloudinary(file.buffer, {
-              folder,
-              resource_type: file.fieldname === 'documents' ? 'raw' : 'auto'
-            });
-            
-            return {
-              ...file,
-              cloudinary: result,
-              url: result.secure_url,
-              public_id: result.public_id
-            };
-          });
-          
-          req.files = await Promise.all(uploadPromises);
-          console.log(`Uploaded ${req.files.length} files to Cloudinary`);
-          
-        } catch (cloudError) {
-          console.error('Cloudinary upload error:', cloudError);
-          return res.status(500).json({
-            success: false,
-            message: 'File upload to cloud storage failed'
-          });
-        }
-      }
-      
-      next();
-    });
-  };
-};
-
-// Delete file from storage
-const deleteFile = async (filePath, publicId = null) => {
+// Delete file from local storage
+const deleteFile = async (filePath) => {
   try {
-    // If using Cloudinary and public_id is provided
-    if (publicId && process.env.NODE_ENV === 'production') {
-      const result = await cloudinary.uploader.destroy(publicId);
-      console.log('Deleted from Cloudinary:', publicId);
-      return result;
-    }
-    
-    // Delete from local storage
     if (fs.existsSync(filePath)) {
       fs.unlinkSync(filePath);
       console.log('Deleted local file:', filePath);
@@ -224,44 +102,11 @@ const deleteFile = async (filePath, publicId = null) => {
   }
 };
 
-// Specific upload configurations
-const uploadConfigs = {
-  avatar: upload().single('avatar'),
-  images: upload().array('images', 4), // Max 4 images
-  documents: upload().array('documents', 3), // Max 3 documents
-  mixed: upload().fields([
-    { name: 'images', maxCount: 4 },
-    { name: 'documents', maxCount: 3 }
-  ])
-};
-
 // Helper function to get file URL
 const getFileUrl = (file, req) => {
-  if (file.url) {
-    // Cloudinary URL
-    return file.url;
-  }
-  
   // Local file URL
   const baseUrl = `${req.protocol}://${req.get('host')}`;
   return `${baseUrl}/${file.path.replace(/\\/g, '/')}`;
-};
-
-// Image optimization for Cloudinary
-const getOptimizedImageUrl = (publicId, options = {}) => {
-  if (!publicId) return null;
-  
-  const defaultOptions = {
-    width: 800,
-    height: 600,
-    crop: 'fill',
-    quality: 'auto',
-    format: 'auto'
-  };
-  
-  const transformOptions = { ...defaultOptions, ...options };
-  
-  return cloudinary.url(publicId, transformOptions);
 };
 
 // Validate file size and type after upload
@@ -286,10 +131,7 @@ const validateUploadedFiles = (files, maxSize = 10 * 1024 * 1024) => {
 
 module.exports = {
   upload,
-  uploadConfigs,
   deleteFile,
   getFileUrl,
-  getOptimizedImageUrl,
-  validateUploadedFiles,
-  cloudinary: process.env.CLOUDINARY_CLOUD_NAME ? cloudinary : null
+  validateUploadedFiles
 };
