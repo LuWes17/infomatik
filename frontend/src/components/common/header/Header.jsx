@@ -50,10 +50,10 @@ const Header = () => {
             
             {/* Services Dropdown */}
             <li className={styles.dropdown}>
-              <Link to="/services" className={styles.navLink}>
+              <p className={styles.navLink}>
                 Services
                 <ChevronDown size={14} className={styles.dropdownArrow} />
-              </Link>
+              </p>
               <div className={styles.dropdownContent}>
                 <Link to="/services/job-openings" className={styles.dropdownLink}>Job Openings</Link>
                 <Link to="/services/solicitation-requests" className={styles.dropdownLink}>Solicitation Requests</Link>
@@ -65,10 +65,10 @@ const Header = () => {
             
             {/* Local Policies Dropdown */}
             <li className={styles.dropdown}>
-              <Link to="/policies" className={styles.navLink}>
+              <p className={styles.navLink}>
                 Local Policies
                 <ChevronDown size={14} className={styles.dropdownArrow} />
-              </Link>
+              </p>
               <div className={styles.dropdownContent}>
                 <Link to="/policies/ordinance" className={styles.dropdownLink}>Ordinance</Link>
                 <Link to="/policies/resolution" className={styles.dropdownLink}>Resolution</Link>
@@ -79,10 +79,10 @@ const Header = () => {
             
             {/* About Us Dropdown */}
             <li className={styles.dropdown}>
-              <Link to="/about" className={styles.navLink}>
+              <p className={styles.navLink}>
                 About Us
                 <ChevronDown size={14} className={styles.dropdownArrow} />
-              </Link>
+              </p>
               <div className={styles.dropdownContent}>
                 <Link to="/about/leadership" className={styles.dropdownLink}>Leadership</Link>
                 <Link to="/about/feedback" className={styles.dropdownLink}>Feedback</Link>
@@ -134,7 +134,7 @@ const Header = () => {
             {/* Services Dropdown - Mobile */}
             <li className={styles.sidebarDropdown}>
               <div className={styles.sidebarDropdownHeader} onClick={() => toggleDropdown('services')}>
-                <Link to="/services" className={styles.sidebarNavLink}>Services</Link>
+                <p className={styles.sidebarNavLink}>Services</p>
                 <ChevronDown 
                   size={18} 
                   className={`${styles.sidebarDropdownArrow} ${openDropdowns.services ? styles.sidebarDropdownArrowOpen : ''}`}
@@ -162,7 +162,7 @@ const Header = () => {
             {/* Local Policies Dropdown - Mobile */}
             <li className={styles.sidebarDropdown}>
               <div className={styles.sidebarDropdownHeader} onClick={() => toggleDropdown('policies')}>
-                <Link to="/policies" className={styles.sidebarNavLink}>Local Policies</Link>
+                <p className={styles.sidebarNavLink}>Local Policies</p>
                 <ChevronDown 
                   size={18} 
                   className={`${styles.sidebarDropdownArrow} ${openDropdowns.policies ? styles.sidebarDropdownArrowOpen : ''}`}
@@ -187,7 +187,7 @@ const Header = () => {
             {/* About Us Dropdown - Mobile */}
             <li className={styles.sidebarDropdown}>
               <div className={styles.sidebarDropdownHeader} onClick={() => toggleDropdown('about')}>
-                <Link to="/about" className={styles.sidebarNavLink}>About Us</Link>
+                <p className={styles.sidebarNavLink}>About Us</p>
                 <ChevronDown 
                   size={18} 
                   className={`${styles.sidebarDropdownArrow} ${openDropdowns.about ? styles.sidebarDropdownArrowOpen : ''}`}
