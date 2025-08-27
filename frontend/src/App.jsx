@@ -16,9 +16,7 @@ import AdminRoute from '@components/auth/AdminRoute';
 import Home from '@pages/Home/Home';
 import Announcements from '@pages/Announcements/Announcements';
 import Accomplishments from '@pages/Accomplishments/Accomplishments';
-import LocalPolicies from '@pages/LocalPolicies/LocalPolicies';
 import CitizenGuide from '@pages/CitizenGuide/CitizenGuide';
-import AboutUs from '@pages/AboutUs/AboutUs';
 
 // Services Pages
 import JobOpenings from '@pages/Services/JobOpenings'
@@ -36,6 +34,9 @@ import Feedback from './pages/AboutUs/Feedback';
 // Auth Pages
 import Login from '@pages/Auth/Login';
 import Register from '@pages/Auth/Register';
+
+// Admin Pages
+import Admin from './pages/Admin/Admin';
 
 // Protected/Dashboard Pages (create these as needed)
 import Profile from '@pages/Profile/Profile';
@@ -111,7 +112,7 @@ function App() {
                 path="/admin" 
                 element={
                   <AdminRoute>
-                    
+                    <Admin />
                   </AdminRoute>
                 } 
               />
@@ -119,7 +120,6 @@ function App() {
                 path="/admin/users" 
                 element={
                   <AdminRoute>
-                    
                   </AdminRoute>
                 } 
               />

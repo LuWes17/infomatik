@@ -1,3 +1,4 @@
+// frontend/src/components/auth/ProtectedRoute.jsx
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
@@ -29,8 +30,9 @@ const ProtectedRoute = ({
 
   // If route should only be accessible to unauthenticated users (like login page)
   if (!requireAuth && isAuthenticated) {
-    // Redirect authenticated users away from auth pages
-    const from = location.state?.from?.pathname || '/profile';
+    // Redirect authenticated users away from auth pages based on their role
+    const defaultRedirect = user?.role === 'admin' ? '/admin' : '/profile';
+    const from = location.state?.from?.pathname || defaultRedirect;
     return <Navigate to={from} replace />;
   }
 

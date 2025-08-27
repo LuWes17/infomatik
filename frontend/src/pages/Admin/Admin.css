@@ -1,0 +1,17 @@
+.logout-container {
+  background-color: rgb(219, 219, 219);
+  border-radius: 0.5rem;
+  height: 2rem;
+  width: 10rem;
+  margin-top: 5rem;
+  padding: 0.4rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  color: #6b7280;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}

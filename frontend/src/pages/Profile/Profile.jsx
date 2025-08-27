@@ -39,7 +39,7 @@ const Profile = () => {
         </div>
         <div className='name-container'>
             <UserRound size={36} />
-            <p className='name-text'>{user?.firstName}, {user?.lastName}</p>
+            <p className='name-text'>{user?.firstName} {user?.lastName}</p>
         </div>
         <div className='profile-details'>
             <div className='phone-container'>

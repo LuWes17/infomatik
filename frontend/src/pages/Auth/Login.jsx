@@ -9,7 +9,7 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [activeTab, setActiveTab] = useState('login');
   const navigate = useNavigate();
-  const { login, isLoading, error, clearError, isAuthenticated } = useAuth();
+  const { login, isLoading, error, clearError, isAuthenticated, user } = useAuth();
 
   const [formData, setFormData] = useState({
     contactNumber: '',
@@ -24,12 +24,17 @@ const Login = () => {
   const [phoneNumberFocused, setPhoneNumberFocused] = useState(false);
   const [displayPhoneNumber, setDisplayPhoneNumber] = useState('');
 
-  // Redirect if already authenticated
+  // Redirect based on user role when authenticated
   useEffect(() => {
-    if (isAuthenticated) {
-      navigate('/profile', { replace: true });
+    if (isAuthenticated && user) {
+      // Redirect admin users to /admin, regular users to /profile
+      if (user.role === 'admin') {
+        navigate('/admin', { replace: true });
+      } else {
+        navigate('/profile', { replace: true });
+      }
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, user, navigate]);
 
   // Clear error when component mounts or form data changes
   useEffect(() => {
