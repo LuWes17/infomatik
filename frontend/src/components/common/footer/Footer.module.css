@@ -39,9 +39,13 @@
     margin-bottom: 5px;
 }
 
-
 .contactIcon {
     height: 2rem;
+}
+
+.emergencyIcon {
+    height: 2rem;
+    margin-bottom: .3rem;
 }
 
 .contactusContainer {
@@ -49,6 +53,14 @@
     align-items: center;
     justify-content: center;
     margin-right: 1rem;
+}
+
+.emergencyContainer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 1.2rem;
+    margin-left: .3rem;
 }
 
 .hotlinesGrid {
@@ -63,6 +75,7 @@
     font-size: 15px;
     font-weight: 600;
 }
+
 .hotlineDetail {
   font-size: 14px;
   font-weight: 400; /* normal weight */
@@ -75,7 +88,6 @@
 }
 
 .contactNumbers span {
-
   font-size: 14px;
   font-weight: 400;
 }
@@ -111,4 +123,73 @@
     font-size: 12px;
     font-weight: 200;
     opacity: 0.95;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .hotlinesGrid {
+    grid-template-columns: 1fr; /* Single column on small screens */
+    margin-left: 0; /* Remove left margin for center alignment */
+    gap: 1rem; /* Increase gap for better spacing */
+    text-align: center; /* Center align content */
+    justify-items: center; /* Center grid items */
+    max-width: 600px; /* Limit width for better readability */
+    margin: 0 auto; /* Center the grid container */
+  }
+  
+  .hotlineNumbers {
+    grid-template-columns: 1fr; /* Single column for phone numbers too */
+    text-align: center; /* Center align phone numbers */
+    justify-items: center; /* Center grid items */
+  }
+  
+  .contactHeader,
+  .emergencyHeader {
+    font-size: 16px; /* Slightly smaller headers on mobile */
+    justify-content: center; /* Center the headers */
+  }
+  
+  .contactSection,
+  .emergencySection {
+    text-align: center; /* Center align sections */
+  }
+  
+  .footer {
+    padding: 0.75rem; /* Reduce padding on smaller screens */
+  }
+}
+
+@media (max-width: 480px) {
+  .hotlinesGrid {
+    max-width: 100%; /* Full width on very small screens */
+    padding: 0 1rem; /* Add side padding */
+  }
+  
+  .contactusContainer {
+    margin-right: 0.5rem; /* Reduce margin */
+  }
+  
+  .emergencyContainer {
+    margin-right: 0.5rem;
+    margin-left: 0.1rem;
+  }
+  
+  .contactHeader,
+  .emergencyHeader {
+    font-size: 14px; /* Even smaller headers on very small screens */
+    flex-wrap: wrap; /* Allow wrapping if needed */
+    justify-content: center; /* Keep centered */
+  }
+  
+  .hotlineLabel {
+    font-size: 14px;
+  }
+  
+  .hotlineDetail {
+    font-size: 13px;
+  }
+  
+  .hotlineItem {
+    text-align: center; /* Ensure individual items are centered */
+  }
 }
