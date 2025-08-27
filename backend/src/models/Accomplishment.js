@@ -33,68 +33,10 @@ const accomplishmentSchema = new mongoose.Schema({
     required: true
   },
   
-  beneficiaries: {
-    count: {
-      type: Number,
-      min: [0, 'Beneficiary count cannot be negative']
-    },
-    description: {
-      type: String,
-      maxlength: [300, 'Beneficiary description cannot exceed 300 characters']
-    }
-  },
-  
-  budget: {
-    amount: {
-      type: Number,
-      min: [0, 'Budget amount cannot be negative']
-    },
-    currency: {
-      type: String,
-      default: 'PHP'
-    },
-    source: {
-      type: String,
-      maxlength: [150, 'Budget source cannot exceed 150 characters']
-    }
-  },
-  
-  // Location information
-  barangaysAffected: [{
-    type: String,
-    enum: [
-      'Agnas', 'Bacolod', 'Bangkilingan', 'Bantayan', 'Baranghawon', 'Basagan', 
-      'Basud', 'Bognabong', 'Bombon', 'Bonot', 'San Isidro', 'Buang', 'Buhian', 
-      'Cabagnan', 'Cobo', 'Comon', 'Cormidal', 'Divino Rostro', 'Fatima', 
-      'Guinobat', 'Hacienda', 'Magapo', 'Mariroc', 'Matagbac', 'Oras', 'Oson', 
-      'Panal', 'Pawa', 'Pinagbobong', 'Quinale Cabasan', 'Quinastillojan', 
-      'Rawis', 'Sagurong', 'Salvacion', 'San Antonio', 'San Carlos', 'San Juan', 
-      'San Lorenzo', 'San Ramon', 'San Roque', 'San Vicente', 'Santo Cristo', 
-      'Sua-igot', 'Tabiguian', 'Tagas', 'Tayhi', 'Visita'
-    ]
-  }],
-  
   // Media documentation
   photos: [{
     fileName: String,
     filePath: String,
-    caption: {
-      type: String,
-      maxlength: [200, 'Photo caption cannot exceed 200 characters']
-    },
-    uploadedAt: {
-      type: Date,
-      default: Date.now
-    }
-  }],
-  
-  documents: [{
-    fileName: String,
-    filePath: String,
-    documentType: {
-      type: String,
-      enum: ['Report', 'Certificate', 'Contract', 'Proposal', 'Other']
-    },
     uploadedAt: {
       type: Date,
       default: Date.now
@@ -133,6 +75,15 @@ const accomplishmentSchema = new mongoose.Schema({
 }, {
   timestamps: true
 });
+
+// Validation for photos limit (max 4)
+accomplishmentSchema.pre('save', function(next) {
+  if (this.photos && this.photos.length > 4) {
+    return next(new Error('Maximum 4 photos allowed per accomplishment'));
+  }
+  next();
+});
+
 
 // Indexes for performance
 accomplishmentSchema.index({ projectType: 1 });
