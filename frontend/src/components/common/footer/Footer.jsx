@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import styles from './Footer.module.css';
 import contactus from '../../../assets/footer icon/contact-us.png'
+import { ShieldAlert } from 'lucide-react';
 const Footer = () => {
     return(
         <footer className={styles.footer}>
@@ -43,16 +44,12 @@ const Footer = () => {
             
             
                 <div className={styles.emergencySection}>
-                    <div className={styles.emergencyHeader}>
-                        <div className={styles.contactusContainer}>
-                            <img 
-                                src={contactus} 
-                                alt="contact-us" 
-                                className={styles.contactIcon}
-                            />
-                        </div>
-                        Emergency Hotlines:
+                  <div className={styles.emergencyHeader}>
+                    <div className={styles.emergencyContainer}>
+                      <ShieldAlert className={styles.emergencyIcon} />
                     </div>
+                    Emergency Hotlines:
+                  </div>
 
                 <div className={styles.hotlinesGrid}>
                 {/* CDRMMO */}
