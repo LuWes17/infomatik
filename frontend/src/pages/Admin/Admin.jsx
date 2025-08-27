@@ -1,29 +1,21 @@
 // frontend/src/pages/Admin/AdminDashboard.jsx
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { 
-  Users, 
-  Briefcase, 
-  MessageSquare, 
-  FileText, 
-  Settings, 
-  BarChart3,
-  Bell,
-  Calendar,
-  LogOut
-} from 'lucide-react';
+import { LogOut } from 'lucide-react';
 import './Admin.css';
 
 const Admin = () => {
 
-    const { user, logout, isAdmin } = useAuth();
+    const { user, logout, isAuthenticated } = useAuth();
+    const navigate = useNavigate();
+
 
     const handleLogout = async () => {
       await logout();
     };
 
-    
+
   return (
     <div>Admin
         <div className='logout-container' onClick={handleLogout}>

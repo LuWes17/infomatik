@@ -223,6 +223,9 @@ const register = async (userData) => {
       console.error('Logout error:', error);
     } finally {
       dispatch({ type: AUTH_ACTIONS.LOGOUT });
+      
+      // Force navigation to login after logout
+      window.location.href = '/login';
     }
   };
 
