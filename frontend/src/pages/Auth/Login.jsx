@@ -240,7 +240,7 @@ const Login = () => {
                 <input
                   type={showPassword ? "text" : "password"}
                   name="password"
-                  placeholder="Password (min. 8 characters)"
+                  placeholder="Password"
                   value={formData.password}
                   onChange={handleChange}
                   onBlur={handleBlur}

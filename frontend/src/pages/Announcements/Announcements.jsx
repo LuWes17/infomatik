@@ -1,53 +1,65 @@
-import React from 'react';
-import styles from './Announcements.module.css';
+import React, { useState, useEffect } from 'react'
+import styles from './Announcements.module.css'
+import { Megaphone } from 'lucide-react';
 
 const Announcements = () => {
-  const sampleAnnouncements = [
-    {
-      id: 1,
-      title: "Community Health Program Launch",
-      date: "2025-01-25",
-      category: "Update",
-      details: "We are excited to announce the launch of our new community health program starting next month."
-    },
-    {
-      id: 2,
-      title: "Town Hall Meeting",
-      date: "2025-02-01",
-      category: "Event",
-      details: "Join us for our monthly town hall meeting to discuss community concerns and upcoming projects."
+  const [announcements,setAnnouncements] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [selectedAnnouncement, setSelectedAnnouncement] = useState(null);
+  const [filteredAnnouncements, setFilteredAnnouncements] = useState([]);
+  const [selectedFilter, setSelectedFilter] = useState('All');
+
+  // Public Fetch Announcements
+  const fetchAnnouncements = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('/api/announcements/');
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch announcements');
+      }
+
+      const data = await response.json();
+      setAnnouncements(data.data); // adjust based on your backend's response
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
+
+  useEffect(() => {
+    fetchAnnouncements();
+  }, []);  
+
+  const openViewModal = (announcement) => {
+    setSelectedAnnouncement(announcement);
+    setShowViewModal(true);
+  }
+
+  if (loading) {
+      return (
+        <div className='loadingContainer'>
+          <div className='spinner'></div>
+          <p>Loading announcements...</p>
+        </div>
+      );
+    }
 
   return (
-    <div className={styles.announcements}>
-      <div className="container">
-        <header className={styles.header}>
-          <h1>Announcements</h1>
-          <p>Stay updated with the latest news and events from our office</p>
-        </header>
+    <div className={styles.publicAnnouncements}>
+      <div className={styles.header}>
+        <div className={styles.headerText}>
+          <Megaphone size={120} className={styles.icon}/>
+        </div>
+        <div className={styles.filterContainer}>
 
-        <div className={styles.announcementGrid}>
-          {sampleAnnouncements.map((announcement) => (
-            <div key={announcement.id} className={`card ${styles.announcementCard}`}>
-              <div className="card-header">
-                <div className={styles.cardHeader}>
-                  <h3>{announcement.title}</h3>
-                  <span className={`${styles.category} ${styles[announcement.category.toLowerCase()]}`}>
-                    {announcement.category}
-                  </span>
-                </div>
-                <p className={styles.date}>{announcement.date}</p>
-              </div>
-              <div className="card-body">
-                <p>{announcement.details}</p>
-              </div>
-            </div>
-          ))}
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default Announcements;
+export default Announcements

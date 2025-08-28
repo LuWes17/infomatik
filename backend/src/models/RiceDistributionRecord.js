@@ -1,14 +1,14 @@
 const mongoose = require('mongoose');
 
 const BARANGAYS = [
-  'Agnas', 'Bacolod', 'Bangkilingan', 'Bantayan', 'Baranghawon', 'Basagan', 
-  'Basud', 'Bognabong', 'Bombon', 'Bonot', 'San Isidro', 'Buang', 'Buhian', 
-  'Cabagnan', 'Cobo', 'Comon', 'Cormidal', 'Divino Rostro', 'Fatima', 
-  'Guinobat', 'Hacienda', 'Magapo', 'Mariroc', 'Matagbac', 'Oras', 'Oson', 
-  'Panal', 'Pawa', 'Pinagbobong', 'Quinale Cabasan', 'Quinastillojan', 
-  'Rawis', 'Sagurong', 'Salvacion', 'San Antonio', 'San Carlos', 'San Juan', 
-  'San Lorenzo', 'San Ramon', 'San Roque', 'San Vicente', 'Santo Cristo', 
-  'Sua-igot', 'Tabiguian', 'Tagas', 'Tayhi', 'Visita'
+  'agnas', 'bacolod', 'bangkilingan', 'bantayan', 'baranghawon', 'basagan', 
+  'basud', 'bognabong', 'bombon', 'bonot', 'san isidro', 'buang', 'buhian', 
+  'cabagnan', 'cobo', 'comon', 'cormidal', 'divino Rostro', 'fatima', 
+  'guinobat', 'hacienda', 'magapo', 'mariroc', 'matagbac', 'oras', 'oson', 
+  'panal', 'pawa', 'pinagbobong', 'quinale cabasan', 'quinastillojan', 
+  'rawis', 'sagurong', 'salvacion', 'san antonio', 'san carlos', 'san juan', 
+  'san lorenzo', 'san ramon', 'san roque', 'san vicente', 'santo cristo', 
+  'sua-igot', 'tabiguian', 'tagas', 'tayhi', 'visita'
 ];
 
 const riceDistributionRecordSchema = new mongoose.Schema({
@@ -46,18 +46,6 @@ const riceDistributionRecordSchema = new mongoose.Schema({
     date: {
       type: Date,
       required: true
-    },
-    time: {
-      start: {
-        type: String,
-        required: true,
-        match: [/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/, 'Start time must be in HH:MM format']
-      },
-      end: {
-        type: String,
-        required: true,
-        match: [/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/, 'End time must be in HH:MM format']
-      }
     },
     location: {
       type: String,
