@@ -96,39 +96,6 @@ const riceDistributionRecordSchema = new mongoose.Schema({
     }
   },
   
-  // Beneficiary information
-  estimatedBeneficiaries: {
-    totalFamilies: {
-      type: Number,
-      min: [0, 'Total families cannot be negative']
-    },
-    totalIndividuals: {
-      type: Number,
-      min: [0, 'Total individuals cannot be negative']
-    }
-  },
-  
-  // Actual distribution tracking
-  actualDistribution: [{
-    barangay: {
-      type: String,
-      enum: BARANGAYS
-    },
-    distributedKilos: {
-      type: Number,
-      min: [0, 'Distributed kilos cannot be negative']
-    },
-    familiesServed: {
-      type: Number,
-      min: [0, 'Families served cannot be negative']
-    },
-    distributionDate: Date,
-    notes: {
-      type: String,
-      maxlength: [300, 'Distribution notes cannot exceed 300 characters']
-    }
-  }],
-  
   // SMS notification tracking
   smsNotifications: {
     sent: {
@@ -190,17 +157,6 @@ riceDistributionRecordSchema.pre('save', function(next) {
   next();
 });
 
-// Methods
-riceDistributionRecordSchema.methods.addActualDistribution = function(barangay, distributedKilos, familiesServed, notes) {
-  this.actualDistribution.push({
-    barangay,
-    distributedKilos,
-    familiesServed,
-    distributionDate: new Date(),
-    notes
-  });
-  return this.save();
-};
 
 riceDistributionRecordSchema.methods.markCompleted = function(adminId, notes) {
   this.status = 'completed';
