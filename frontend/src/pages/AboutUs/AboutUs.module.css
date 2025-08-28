@@ -1,40 +1,281 @@
-.aboutUs {
-  padding: var(--spacing-2xl) 0;
-  min-height: 80vh;
+.container {
+  padding: var(--spacing-2xl) var(--spacing-lg) 0; /* remove bottom padding */
+  max-width: 1400px;
+  margin: 0 auto;
+  background-color: var(--white);
 }
 
+/* Header Section */
 .header {
-  height: 2rem;
+  display: flex;
+  align-items: center;   /* vertically align image with text */
+  gap: 1rem;             
+  flex-wrap: wrap; 
+}
+
+.headerImage {
+  width: 100px;          /* adjust size as needed */
+  height: 100px;
+  object-fit: cover;     /* keeps aspect ratio */
+  border-radius: 50%;    /* makes it circular (optional) */
+}
+
+.headerText {
+  display: flex;
+  flex-direction: column; /* stack title and name */
+}
+
+.headerTitle {
+  font-size: var(--font-size-2xl);
+  font-weight: 600;
+  color: black;
+}
+
+.councilor {
+  font-size: var(--font-size-4xl);
+  font-weight: bold;
+  color: black;
+}
+
+.royName {
+  font-family: 'Dancing Script', cursive;
+  font-weight: 700;
+  font-size: 1.8rem;
+}
+
+
+
+/* Profile Section */
+.profileContainer {
+  display: flex;
+  flex-direction: row;        /* side by side */
+  flex-wrap: wrap; 
+}
+
+.profileColumn {
+  flex: 2;                    /* text side takes more space */
+  display: flex;
+  flex-direction: column;
+}
+
+
+.textContainer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+  padding: var(--spacing-xs);
+  width: 95%;
+}
+
+.introSection,
+.visionSection {
+  line-height: 1.7;
+}
+
+.introText {
+  font-size: var(--font-size-base);
+  color: var(--gray-800);
+  text-align: justify;
+
+}
+
+.visionText {
+  font-size: var(--font-size-base);
+  color: var(--gray-700);
+  text-align: justify;
+}
+
+.imageContainer {
+  flex: 2;                    /* image side takes less space */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Divider */
+.divider {
+  height: 5px;
+  background: linear-gradient(90deg, transparent, var(--primary-color), transparent);
+  width: 100%;
+  border-radius: 2px;
+}
+
+/* Staff Section */
+.staffSection {
+  width: 100%;                 /* full width */
+  background-color: var(--secondary-color);
+  padding: var(--spacing-xl) var(--spacing-xl);  /* vertical spacing only */
+}
+
+.staffContent {
+  max-width: 1400px;           /* keep staff content centered */
+  margin: 0 auto;
+  padding: 0 var(--spacing-lg);
+}
+
+.staffHeader {
+  text-align: center;
+  margin-bottom: var(--spacing-2xl);
+}
+
+.staffTitle {
+  font-size: var(--font-size-4xl);
+  font-weight: 600;
+  color: black;
+  margin-bottom: var(--spacing-sm);
+}
+
+.staffSubtitle {
+  font-size: var(--font-size-lg);
+  color: var(--gray-700);
+  margin: 0;
+}
+
+.staffGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: var(--spacing-xl);
+  margin-top: var(--spacing-xl);
+}
+
+.staffCard {
+  background: var(--white);
+  border-radius: var(--border-radius-lg);
+  padding: var(--spacing-xl);
+  text-align: center;
+  box-shadow: 0 16px 40px #9AAACF;;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border: 1px solid var(--gray-200);
+}
+
+.staffCard:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-lg);
+}
+
+.staffImagePlaceholder {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: var(--gray-200);
+  margin: 0 auto var(--spacing-lg);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 3rem;
-  font-weight: bold;
-  color: #1c62bb;
+  border: 3px solid var(--primary-color);
 }
 
-.profileContainer {
-  height: 40rem;
-  border: solid 2px red;
-  margin: 1rem;
-
+.placeholderIcon {
+  font-size: var(--font-size-3xl);
+  color: var(--gray-500);
 }
 
-.textContainer {
-  border: solid 2px blue;
-  height: 40rem;
-  width: 50%;
+.staffInfo {
+  text-align: center;
 }
 
-.line {
-  border: solid 1px #1c62bb;
-  width: 75%;
-  margin: 0 auto;
-  border-radius: 5rem;
+.staffName {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  color: var(--primary-color);
+  margin-bottom: var(--spacing-sm);
 }
 
-.staffContainer {
-  border: solid 2px red;
-  margin: 1rem;
-  height: 60rem;
+.staffPosition {
+  font-size: var(--font-size-base);
+  color: var(--gray-600);
+  margin: 0;
 }
+
+/* Responsive Design */
+@media (max-width: 968px) {
+  .container {
+    padding: var(--spacing-xl) var(--spacing-md);
+  }
+
+  .profileContainer {
+    flex-direction: column; /* stack vertically */
+    align-items: center;
+  }
+
+  .headerTitle {
+    font-size: var(--font-size-xl);
+  }
+
+  .councilor {
+    font-size: var(--font-size-3xl);
+  }
+
+  .imageContainer {
+    order: 2; /* image always below text */
+    margin-bottom: 0; /* ✅ no bottom margin */
+  }
+
+  .imageWrapper {
+    max-width: 300px;
+    margin-bottom: 0; /* ✅ ensure wrapper has no bottom margin */
+  }
+
+  .staffGrid {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--spacing-lg);
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: var(--spacing-lg) var(--spacing-sm);
+  }
+
+  .header {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .headerTitle {
+    font-size: var(--font-size-lg);
+  }
+
+  .councilor {
+    font-size: var(--font-size-2xl);
+  }
+
+  .textContainer {
+    padding: var(--spacing-md);
+    width: 100%;
+  }
+
+  .introText,
+  .visionText {
+    font-size: var(--font-size-sm);
+  }
+
+  .imageWrapper {
+    max-width: 220px;
+    margin-bottom: 0;
+  }
+
+  /* ✅ Remove gap between divider and staff section */
+  .divider {
+    margin-bottom: 0;
+  }
+
+  .staffSection {
+    margin-top: 0; /* ✅ ensures staff starts right after divider */ /* keep some breathing space inside */
+  }
+
+  .staffTitle {
+    font-size: var(--font-size-2xl);
+  }
+
+  .staffGrid {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-md);
+  }
+
+  .staffCard {
+    padding: var(--spacing-lg);
+  }
+}
+
