@@ -62,49 +62,6 @@ const localPolicySchema = new mongoose.Schema({
     ]
   },
   
-  tags: [{
-    type: String,
-    trim: true,
-    maxlength: [30, 'Tag cannot exceed 30 characters']
-  }],
-  
-  // Affected areas
-  barangaysAffected: [{
-    type: String,
-    enum: [
-      'All', 'Agnas', 'Bacolod', 'Bangkilingan', 'Bantayan', 'Baranghawon', 'Basagan', 
-      'Basud', 'Bognabong', 'Bombon', 'Bonot', 'San Isidro', 'Buang', 'Buhian', 
-      'Cabagnan', 'Cobo', 'Comon', 'Cormidal', 'Divino Rostro', 'Fatima', 
-      'Guinobat', 'Hacienda', 'Magapo', 'Mariroc', 'Matagbac', 'Oras', 'Oson', 
-      'Panal', 'Pawa', 'Pinagbobong', 'Quinale Cabasan', 'Quinastillojan', 
-      'Rawis', 'Sagurong', 'Salvacion', 'San Antonio', 'San Carlos', 'San Juan', 
-      'San Lorenzo', 'San Ramon', 'San Roque', 'San Vicente', 'Santo Cristo', 
-      'Sua-igot', 'Tabiguian', 'Tagas', 'Tayhi', 'Visita'
-    ]
-  }],
-  
-  // Status and validity
-  status: {
-    type: String,
-    enum: ['active', 'amended', 'repealed', 'expired'],
-    default: 'active'
-  },
-  
-  effectiveUntil: {
-    type: Date // null for indefinite
-  },
-  
-  // Relationships
-  amendedBy: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'LocalPolicy'
-  },
-  
-  repealsPolicy: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'LocalPolicy'
-  },
-  
   // Publishing and access
   isPublished: {
     type: Boolean,
