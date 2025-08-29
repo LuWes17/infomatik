@@ -1,0 +1,322 @@
+/* frontend/src/pages/Admin/AdminLocalPolicies.module.css */
+
+.container {
+  padding: var(--spacing-xl);
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.header {
+  margin-bottom: var(--spacing-2xl);
+}
+
+.title {
+  font-size: var(--font-size-3xl);
+  font-weight: 700;
+  color: var(--gray-800);
+  margin-bottom: var(--spacing-sm);
+}
+
+.subtitle {
+  font-size: var(--font-size-lg);
+  color: var(--gray-600);
+}
+
+/* Controls Section */
+.controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-2xl);
+  gap: var(--spacing-lg);
+  flex-wrap: wrap;
+}
+
+.createButton {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md) var(--spacing-lg);
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: var(--border-radius-md);
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.createButton:hover {
+  background: var(--primary-dark);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.icon {
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+}
+
+.filters {
+  display: flex;
+  gap: var(--spacing-md);
+  flex: 1;
+  max-width: 500px;
+}
+
+.searchInput {
+  flex: 1;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 1px solid var(--gray-300);
+  border-radius: var(--border-radius-md);
+  font-size: var(--font-size-base);
+  transition: border-color 0.2s ease;
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.filterSelect {
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 1px solid var(--gray-300);
+  border-radius: var(--border-radius-md);
+  font-size: var(--font-size-base);
+  background: white;
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+}
+
+.filterSelect:focus {
+  outline: none;
+  border-color: var(--primary-color);
+}
+
+/* Loading State */
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-3xl);
+}
+
+.spinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid var(--gray-200);
+  border-top-color: var(--primary-color);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loading p {
+  margin-top: var(--spacing-lg);
+  color: var(--gray-600);
+  font-size: var(--font-size-base);
+}
+
+/* Empty State */
+.empty {
+  text-align: center;
+  padding: var(--spacing-3xl);
+  color: var(--gray-600);
+}
+
+.empty p {
+  font-size: var(--font-size-lg);
+  margin-bottom: var(--spacing-sm);
+}
+
+.emptyHint {
+  font-size: var(--font-size-base);
+  color: var(--gray-500);
+}
+
+/* Policies Grid */
+.policiesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: var(--spacing-xl);
+}
+
+/* Policy Card */
+.policyCard {
+  background: white;
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.policyCard:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-xl);
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-md) var(--spacing-lg);
+  background: var(--gray-50);
+  border-bottom: 1px solid var(--gray-200);
+}
+
+.policyType {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--border-radius-sm);
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.policyType.ordinance {
+  background: var(--primary-color);
+  color: white;
+}
+
+.policyType.resolution {
+  background: var(--accent-color);
+  color: white;
+}
+
+.policyNumber {
+  font-size: var(--font-size-sm);
+  color: var(--gray-600);
+  font-weight: 600;
+}
+
+.cardBody {
+  padding: var(--spacing-lg);
+}
+
+.policyTitle {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  color: var(--gray-800);
+  margin-bottom: var(--spacing-sm);
+  line-height: 1.4;
+}
+
+.policySummary {
+  font-size: var(--font-size-base);
+  color: var(--gray-600);
+  line-height: 1.6;
+  margin-bottom: var(--spacing-md);
+}
+
+.cardMeta {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  margin-bottom: var(--spacing-md);
+  padding-top: var(--spacing-md);
+  border-top: 1px solid var(--gray-200);
+}
+
+.metaItem {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.metaLabel {
+  font-size: var(--font-size-sm);
+  color: var(--gray-500);
+  font-weight: 500;
+}
+
+.metaValue {
+  font-size: var(--font-size-sm);
+  color: var(--gray-700);
+}
+
+.cardFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: var(--spacing-md);
+  border-top: 1px solid var(--gray-200);
+}
+
+.stats {
+  display: flex;
+  gap: var(--spacing-md);
+}
+
+.stat {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  font-size: var(--font-size-sm);
+  color: var(--gray-600);
+}
+
+.statIcon {
+  font-size: var(--font-size-base);
+}
+
+.status {
+  display: flex;
+  align-items: center;
+}
+
+.published {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background: var(--success-light);
+  color: var(--success-dark);
+  border-radius: var(--border-radius-sm);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+}
+
+.draft {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background: var(--warning-light);
+  color: var(--warning-dark);
+  border-radius: var(--border-radius-sm);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .container {
+    padding: var(--spacing-lg);
+  }
+
+  .controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .createButton {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .filters {
+    max-width: 100%;
+    flex-direction: column;
+  }
+
+  .policiesGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .cardMeta {
+    flex-direction: column;
+  }
+}

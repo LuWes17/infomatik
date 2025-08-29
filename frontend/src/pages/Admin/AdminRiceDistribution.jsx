@@ -46,7 +46,7 @@ const AdminRiceDistribution = () => {
         params.append('status', statusFilter);
       }
       
-      const response = await api.get(`/rice-distribution?${params}`);
+      const response = await api.get(`/rice-distribution/all`);
       setDistributions(response.data.data);
       setPagination(response.data.pagination);
     } catch (error) {

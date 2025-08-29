@@ -15,7 +15,8 @@ const BARANGAYS = [
 
 const CreateDistributionModal = ({ onClose, onSubmit }) => {
   const [formData, setFormData] = useState({
-    title: '',
+    distributionTitle: '',
+    distributionMonth: new Date().toISOString().slice(0, 7), // Default to current month YYYY-MM
     selectedBarangays: [],
     distributionSchedule: [{
       date: '',
@@ -112,15 +113,21 @@ const CreateDistributionModal = ({ onClose, onSubmit }) => {
   const selectAllBarangays = () => {
     setFormData(prev => ({
       ...prev,
-      selectedBarangays: prev.selectedBarangays.length === BARANGAYS.length ? [] : [...BARANGAYS]
+      selectedBarangays: prev.selectedBarangays.length === BARANGAYS.length 
+        ? [] 
+        : [...BARANGAYS]
     }));
   };
 
   const validateForm = () => {
     const newErrors = {};
     
-    if (!formData.title.trim()) {
-      newErrors.title = 'Title is required';
+    if (!formData.distributionTitle.trim()) {
+      newErrors.distributionTitle = 'Distribution title is required';
+    }
+    
+    if (!formData.distributionMonth) {
+      newErrors.distributionMonth = 'Distribution month is required';
     }
     
     if (formData.selectedBarangays.length === 0) {
@@ -159,7 +166,20 @@ const CreateDistributionModal = ({ onClose, onSubmit }) => {
     e.preventDefault();
     
     if (validateForm()) {
-      onSubmit(formData);
+      // Transform the form data to match backend schema
+      const transformedData = {
+        ...formData,
+        // Convert date and time to proper Date objects for distributionSchedule
+        distributionSchedule: formData.distributionSchedule.map(schedule => ({
+          date: new Date(`${schedule.date}T${schedule.time}`),
+          location: schedule.location,
+          contactPerson: schedule.contactPerson
+        }))
+      };
+      console.log(transformedData);
+      
+      
+      onSubmit(transformedData);
     }
   };
 
@@ -175,20 +195,35 @@ const CreateDistributionModal = ({ onClose, onSubmit }) => {
         
         <form onSubmit={handleSubmit} className={styles.form}>
           <div className={styles.modalBody}>
-            {/* Title */}
+            {/* Distribution Title */}
             <div className={styles.formGroup}>
               <label className={styles.label}>
-                Title <span className={styles.required}>*</span>
+                Distribution Title <span className={styles.required}>*</span>
               </label>
               <input
                 type="text"
-                name="title"
-                value={formData.title}
+                name="distributionTitle"
+                value={formData.distributionTitle}
                 onChange={handleInputChange}
                 className={styles.input}
                 placeholder="e.g., Q1 2025 Rice Distribution"
               />
-              {errors.title && <span className={styles.error}>{errors.title}</span>}
+              {errors.distributionTitle && <span className={styles.error}>{errors.distributionTitle}</span>}
+            </div>
+
+            {/* Distribution Month */}
+            <div className={styles.formGroup}>
+              <label className={styles.label}>
+                Distribution Month <span className={styles.required}>*</span>
+              </label>
+              <input
+                type="month"
+                name="distributionMonth"
+                value={formData.distributionMonth}
+                onChange={handleInputChange}
+                className={styles.input}
+              />
+              {errors.distributionMonth && <span className={styles.error}>{errors.distributionMonth}</span>}
             </div>
             
             {/* Selected Barangays */}
@@ -204,21 +239,25 @@ const CreateDistributionModal = ({ onClose, onSubmit }) => {
                 >
                   {formData.selectedBarangays.length === BARANGAYS.length ? 'Deselect All' : 'Select All'}
                 </button>
-                <span className={styles.selectedCount}>
-                  {formData.selectedBarangays.length} of {BARANGAYS.length} selected
-                </span>
+                <span>{formData.selectedBarangays.length} of {BARANGAYS.length} selected</span>
               </div>
               <div className={styles.barangayGrid}>
-                {BARANGAYS.map((barangay) => (
-                  <label key={barangay} className={styles.checkboxLabel}>
+                {BARANGAYS.map(barangay => (
+                  <div key={barangay} className={styles.checkboxGroup}>
                     <input
                       type="checkbox"
+                      id={`barangay_${barangay}`}
+                      className={styles.checkbox}
                       checked={formData.selectedBarangays.includes(barangay)}
                       onChange={() => handleBarangayToggle(barangay)}
-                      className={styles.checkbox}
                     />
-                    <span>{barangay}</span>
-                  </label>
+                    <label 
+                      htmlFor={`barangay_${barangay}`} 
+                      className={styles.checkboxLabel}
+                    >
+                      {barangay}
+                    </label>
+                  </div>
                 ))}
               </div>
               {errors.selectedBarangays && <span className={styles.error}>{errors.selectedBarangays}</span>}
@@ -226,29 +265,26 @@ const CreateDistributionModal = ({ onClose, onSubmit }) => {
             
             {/* Distribution Schedule */}
             <div className={styles.formGroup}>
-              <div className={styles.sectionHeader}>
-                <label className={styles.label}>
-                  Distribution Schedule <span className={styles.required}>*</span>
-                </label>
-                <button
-                  type="button"
-                  onClick={addSchedule}
-                  className={styles.addButton}
-                >
-                  <Plus size={16} />
-                  Add Schedule
-                </button>
-              </div>
+              <label className={styles.label}>
+                Distribution Schedule <span className={styles.required}>*</span>
+              </label>
+              <button
+                type="button"
+                onClick={addSchedule}
+                className={styles.addScheduleButton}
+              >
+                <Plus size={16} /> Add Schedule
+              </button>
               
               {formData.distributionSchedule.map((schedule, index) => (
                 <div key={index} className={styles.scheduleCard}>
                   <div className={styles.scheduleHeader}>
-                    <h4>Schedule {index + 1}</h4>
+                    <h4 className={styles.scheduleTitle}>Schedule {index + 1}</h4>
                     {formData.distributionSchedule.length > 1 && (
                       <button
                         type="button"
                         onClick={() => removeSchedule(index)}
-                        className={styles.removeButton}
+                        className={styles.removeScheduleButton}
                       >
                         <Trash2 size={16} />
                       </button>
@@ -257,7 +293,9 @@ const CreateDistributionModal = ({ onClose, onSubmit }) => {
                   
                   <div className={styles.scheduleGrid}>
                     <div>
-                      <label className={styles.label}>Date <span className={styles.required}>*</span></label>
+                      <label className={styles.label}>
+                        Date <span className={styles.required}>*</span>
+                      </label>
                       <input
                         type="date"
                         value={schedule.date}
@@ -270,7 +308,9 @@ const CreateDistributionModal = ({ onClose, onSubmit }) => {
                     </div>
                     
                     <div>
-                      <label className={styles.label}>Time <span className={styles.required}>*</span></label>
+                      <label className={styles.label}>
+                        Time <span className={styles.required}>*</span>
+                      </label>
                       <input
                         type="time"
                         value={schedule.time}
@@ -281,21 +321,25 @@ const CreateDistributionModal = ({ onClose, onSubmit }) => {
                         <span className={styles.error}>{errors[`schedule_${index}_time`]}</span>
                       )}
                     </div>
-                    
-                    <div className={styles.fullWidth}>
-                      <label className={styles.label}>Location <span className={styles.required}>*</span></label>
-                      <input
-                        type="text"
-                        value={schedule.location}
-                        onChange={(e) => handleScheduleChange(index, 'location', e.target.value)}
-                        className={styles.input}
-                        placeholder="e.g., Barangay Hall"
-                      />
-                      {errors[`schedule_${index}_location`] && (
-                        <span className={styles.error}>{errors[`schedule_${index}_location`]}</span>
-                      )}
-                    </div>
-                    
+                  </div>
+                  
+                  <div>
+                    <label className={styles.label}>
+                      Location <span className={styles.required}>*</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={schedule.location}
+                      onChange={(e) => handleScheduleChange(index, 'location', e.target.value)}
+                      className={styles.input}
+                      placeholder="e.g., Barangay Hall"
+                    />
+                    {errors[`schedule_${index}_location`] && (
+                      <span className={styles.error}>{errors[`schedule_${index}_location`]}</span>
+                    )}
+                  </div>
+                  
+                  <div className={styles.scheduleGrid}>
                     <div>
                       <label className={styles.label}>Contact Person</label>
                       <input
@@ -314,7 +358,7 @@ const CreateDistributionModal = ({ onClose, onSubmit }) => {
                         value={schedule.contactPerson.phone}
                         onChange={(e) => handleScheduleChange(index, 'contactPerson.phone', e.target.value)}
                         className={styles.input}
-                        placeholder="09XX XXX XXXX"
+                        placeholder="09XXXXXXXXX"
                       />
                     </div>
                   </div>
@@ -325,7 +369,7 @@ const CreateDistributionModal = ({ onClose, onSubmit }) => {
             {/* Rice Details */}
             <div className={styles.formGroup}>
               <label className={styles.label}>Rice Details</label>
-              <div className={styles.riceGrid}>
+              <div className={styles.riceDetailsGrid}>
                 <div>
                   <label className={styles.label}>
                     Total Kilos <span className={styles.required}>*</span>
@@ -336,7 +380,7 @@ const CreateDistributionModal = ({ onClose, onSubmit }) => {
                     value={formData.riceDetails.totalKilos}
                     onChange={handleInputChange}
                     className={styles.input}
-                    placeholder="e.g., 5000"
+                    placeholder="e.g., 1000"
                     min="1"
                   />
                   {errors.totalKilos && <span className={styles.error}>{errors.totalKilos}</span>}
@@ -352,7 +396,7 @@ const CreateDistributionModal = ({ onClose, onSubmit }) => {
                     value={formData.riceDetails.typeOfRice}
                     onChange={handleInputChange}
                     className={styles.input}
-                    placeholder="e.g., NFA Rice"
+                    placeholder="e.g., Regular Milled Rice"
                   />
                   {errors.typeOfRice && <span className={styles.error}>{errors.typeOfRice}</span>}
                 </div>
