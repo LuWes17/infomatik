@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Edit3, Trash2, Eye, Calendar, MapPin, Pin, PinOff, Image, X } from 'lucide-react';
-import './styles/AdminAccomplishments.css';
+import styles from './styles/AdminAccomplishments.module.css';
 
 const AdminAccomplishments = () => { 
   const [accomplishments, setAccomplishments] = useState([]);
@@ -23,7 +23,7 @@ const AdminAccomplishments = () => {
     try {
       setLoading(true);
       const token = localStorage.getItem('token');
-      const response = await fetch('/api/accomplishments?page=1&limit=50', {
+      const response = await fetch('http://localhost:4000/api/accomplishments?page=1&limit=50', {
         headers: {
           'Authorization' : `Bearer ${token}`
         }
@@ -85,149 +85,97 @@ const AdminAccomplishments = () => {
     });
   };
 
-  const handleCreateAccomplishment = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (!formData.title || !formData.description || !formData.completionDate || !formData.projectType){
-      alert('Please fill in all required fields');
-      return;
-    }
+    if (!formData.title || !formData.description) return;
 
     try {
       const token = localStorage.getItem('token');
       const submitData = new FormData();
-
-      submitData.append('title', formData.title);
-      submitData.append('description', formData.description);
-      submitData.append('completionDate', formData.completionDate)
-      submitData.append('projectType', formData.projectType);
-
-      formData.photos.forEach((photo) => {
-        submitData.append('images', photo);
+      
+      Object.keys(formData).forEach(key => {
+        if (key !== 'photos') {
+          submitData.append(key, formData[key]);
+        }
       });
 
-      const response = await fetch('/api/accomplishments', {
-        method: 'POST',
+      formData.photos.forEach(photo => {
+        submitData.append('photos', photo);
+      });
+
+      const url = isEditMode 
+        ? `http://localhost:4000/api/accomplishments/${selectedAccomplishment._id}` 
+        : 'http://localhost:4000/api/accomplishments';
+      
+      const method = isEditMode ? 'PUT' : 'POST';
+
+      const response = await fetch(url, {
+        method,
         headers: {
-          'Authorization' : `Bearer ${token}`
+          'Authorization': `Bearer ${token}`
         },
         body: submitData
       });
 
       if (!response.ok) {
-        throw new Error('Failed to create accomplishment');
+        throw new Error(isEditMode ? 'Failed to update accomplishment' : 'Failed to create accomplishment');
       }
 
       await fetchAccomplishments();
-      setShowCreateModal(false);
-      resetForm();
-      alert('Accomplishment created successfully!');
+      closeModal();
     } catch (err) {
       setError(err.message);
-    } 
+    }
   };
 
-  const handleUpdateAccomplishment = async (e) => {
-  e.preventDefault();
+  const handleDelete = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this accomplishment?')) return;
 
-  try {
-    const token = localStorage.getItem('token');
-    const submitData = new FormData();
-
-    submitData.append('title', formData.title);
-    submitData.append('description', formData.description);
-    submitData.append('completionDate', formData.completionDate);
-    submitData.append('projectType', formData.projectType);
-
-    formData.photos.forEach((photo) => {
-      submitData.append('images', photo);
-    });
-
-    const response = await fetch(`/api/accomplishments/${selectedAccomplishment._id}`, {
-      method: 'PUT', 
-      headers: {
-        'Authorization': `Bearer ${token}`
-      },
-      body: submitData
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to update accomplishment');
-    }
-
-    await fetchAccomplishments();
-    setIsEditMode(false);
-    setShowViewModal(false);
-    resetForm();
-    alert('Accomplishment updated successfully!');
-  } catch (err) {
-    setError(err.message);
-  }
-};
-
-const handleDeleteAccomplishment = async (id) => {
-  if (!window.confirm('Are you sure you want to delete this accomplishment?')) {
-    return;
-  }
-
-  try {
-    const token = localStorage.getItem('token');
-
-    const response = await fetch(`/api/accomplishments/${id}`, {
-      method: 'DELETE',
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to delete accomplishment');
-    }
-
-    await fetchAccomplishments();
-    setShowViewModal(false);
-    alert('Accomplishment deleted successfully!');
-  } catch (err) {
-    setError(err.message);
-  }
-};
-
-  const handleToggleFeature = async (id, currentFeatureStatus) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`/api/accomplishments/${id}/toggle-feature`, {
-        method: 'PUT',
+      const response = await fetch(`http://localhost:4000/api/accomplishments/${id}`, {
+        method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
         }
       });
 
       if (!response.ok) {
-        throw new Error('Failed to toggle feature status');
+        throw new Error('Failed to delete accomplishment');
       }
 
       await fetchAccomplishments();
-    } catch (error) {
+      closeModal();
+    } catch (err) {
       setError(err.message);
     }
-  }
+  };
 
-  // Open view modal
+  const closeModal = () => {
+    setShowCreateModal(false);
+    setShowViewModal(false);
+    setSelectedAccomplishment(null);
+    setIsEditMode(false);
+    resetForm();
+  };
+
   const openViewModal = (accomplishment) => {
     setSelectedAccomplishment(accomplishment);
     setShowViewModal(true);
-    setIsEditMode(false);
   };
 
-  const openEditMode = () => {
+  const openEditModal = () => {
     setFormData({
       title: selectedAccomplishment.title,
       description: selectedAccomplishment.description,
-      completionDate: selectedAccomplishment.completionDate ? selectedAccomplishment.completionDate.split('T')[0] : '',
-      projectType: selectedAccomplishment.projectType,
+      completionDate: selectedAccomplishment.completionDate ? 
+        selectedAccomplishment.completionDate.split('T')[0] : '',
+      projectType: selectedAccomplishment.projectType || '',
       photos: selectedAccomplishment.photos || []
     });
     setIsEditMode(true);
+    setShowViewModal(false);
+    setShowCreateModal(true);
   };
 
   // Format date
@@ -240,57 +188,72 @@ const handleDeleteAccomplishment = async (id) => {
   };
 
   if (loading) {
-      return (
-        <div className='loadingContainer'>
-          <div className='spinner'></div>
-          <p>Loading accomplishments...</p>
-        </div>
-      );
-    }
+    return (
+      <div className={styles.loadingContainer}>
+        <div className={styles.spinner}></div>
+        <p>Loading accomplishments...</p>
+      </div>
+    );
+  }
 
   return (
-    <div className='adminAccomplishments'>
-      <div className='header'>
+    <div className={styles.adminAccomplishments}>
+      <div className={styles.header}>
         <h1>Manage Accomplishments</h1>
-        <button className='createButton' onClick={() => setShowCreateModal(true)}>
+        <button 
+          className={styles.createButton}
+          onClick={() => setShowCreateModal(true)}
+        >
           <Plus size={20} />
           Create Accomplishment
         </button>
       </div>
 
       {error && (
-        <div className='errorMessage'>
+        <div className={styles.errorMessage}>
           {error}
         </div>
       )}
 
-      <div className="accomplishmentGrid">
-        {accomplishments.map((acc) => (
-          <div key={acc._id} className="accomplishmentCard" onClick={() => openViewModal(acc)}>
-            <div className="cardHeader">
-              <div className="cardTitle">
-                <h3>{acc.title}</h3>
-                {acc.isPinned && <Pin className="pinnedIcon" size={16} />}
+      <div className={styles.accomplishmentGrid}>
+        {accomplishments.map((accomplishment) => (
+          <div 
+            key={accomplishment._id} 
+            className={styles.accomplishmentCard}
+            onClick={() => openViewModal(accomplishment)}
+          >
+            <div className={styles.cardHeader}>
+              <div className={styles.cardTitle}>
+                <h3>{accomplishment.title}</h3>
+                {accomplishment.isPinned && (
+                  <Pin className={styles.pinnedIcon} size={16} />
+                )}
               </div>
-              <span className="typeBadge">{acc.projectType}</span>
+              <span className={`${styles.category} ${styles[accomplishment.projectType?.toLowerCase()]}`}>
+                {accomplishment.projectType || 'General'}
+              </span>
             </div>
-
-            <div className="cardBody">
-              <p className="description">
-                {acc.description.length > 150 ? `${acc.description.substring(0, 150)}...` : acc.description}
+            
+            <div className={styles.cardBody}>
+              <p className={styles.details}>
+                {accomplishment.description.length > 150 
+                  ? `${accomplishment.description.substring(0, 150)}...` 
+                  : accomplishment.description}
               </p>
-              {acc.completionDate && (
-                <div className="eventDetail">
-                  <Calendar size={14} /> {formatDate(acc.completionDate)}
+              {accomplishment.completionDate && (
+                <div className={styles.eventDetail}>
+                  <Calendar size={14} /> {formatDate(accomplishment.completionDate)}
                 </div>
               )}
             </div>
 
-            <div className="cardFooter">
-              <span className="date">Created: {formatDate(acc.createdAt)}</span>
-              <div className="stats">
-                <span><Eye size={14} /> {acc.views || 0}</span>
-                {acc.photos?.length > 0 && <span><Image size={14} /> {acc.photos.length}</span>}
+            <div className={styles.cardFooter}>
+              <span className={styles.date}>Created: {formatDate(accomplishment.createdAt)}</span>
+              <div className={styles.stats}>
+                <span><Eye size={14} /> {accomplishment.views || 0}</span>
+                {accomplishment.photos?.length > 0 && (
+                  <span><Image size={14} /> {accomplishment.photos.length}</span>
+                )}
               </div>
             </div>
           </div>
@@ -298,133 +261,245 @@ const handleDeleteAccomplishment = async (id) => {
       </div>
 
       {accomplishments.length === 0 && !loading && (
-        <div className="emptyState">
+        <div className={styles.emptyState}>
           <p>No accomplishments yet. Create your first one!</p>
         </div>
       )}
 
-      {/* Create Modal */}
+      {/* Create/Edit Modal */}
       {showCreateModal && (
-        <div className="modal" onClick={(e) => e.target === e.currentTarget && setShowCreateModal(false)}>
-          <div className="modalContent">
-            <div className="modalHeader">
-              <h2>Create New Accomplishment</h2>
-              <button className="closeButton" onClick={() => setShowCreateModal(false)}>
-                <X size={24} />
-              </button>
+        <div className={styles.modal}>
+          <div className={styles.modalContent}>
+            <div className={styles.modalHeader}>
+              <h2>{isEditMode ? 'Edit Accomplishment' : 'Create New Accomplishment'}</h2>
+              <div className={styles.modalActions}>
+                <button 
+                  className={styles.closeButton}
+                  onClick={closeModal}
+                >
+                  <X size={20} />
+                </button>
+              </div>
             </div>
-            <form onSubmit={handleCreateAccomplishment} className="form">
-              <div className="formGroup">
-                <label>Title *</label>
-                <input type="text" name="title" value={formData.title} onChange={handleInputChange} required />
+            
+            <form onSubmit={handleSubmit} className={styles.form}>
+              <div className={styles.formRow}>
+                <div className={styles.formGroup}>
+                  <label className={styles.label}>Title *</label>
+                  <input
+                    type="text"
+                    name="title"
+                    value={formData.title}
+                    onChange={handleInputChange}
+                    className={styles.input}
+                    required
+                  />
+                </div>
+
+                <div className={styles.formGroup}>
+                  <label className={styles.label}>Project Type</label>
+                  <select
+                    name="projectType"
+                    value={formData.projectType}
+                    onChange={handleInputChange}
+                    className={styles.select}
+                  >
+                    <option value="">Select Type</option>
+                    <option value="Infrastructure">Infrastructure</option>
+                    <option value="Social Program">Social Program</option>
+                    <option value="Health Initiative">Health Initiative</option>
+                    <option value="Education">Education</option>
+                    <option value="Environment">Environment</option>
+                    <option value="Economic Development">Economic Development</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
               </div>
-              <div className="formGroup">
-                <label>Description *</label>
-                <textarea name="description" value={formData.description} onChange={handleInputChange} required rows={6} />
+
+              <div className={styles.formGroup + ' ' + styles.fullWidth}>
+                <label className={styles.label}>Description *</label>
+                <textarea
+                  name="description"
+                  value={formData.description}
+                  onChange={handleInputChange}
+                  className={styles.textarea}
+                  rows="6"
+                  required
+                />
               </div>
-              <div className="formGroup">
-                <label>Completion Date *</label>
-                <input type="date" name="completionDate" value={formData.completionDate} onChange={handleInputChange} required />
+
+              <div className={styles.formRow}>
+                <div className={styles.formGroup}>
+                  <label className={styles.label}>Completion Date</label>
+                  <input
+                    type="date"
+                    name="completionDate"
+                    value={formData.completionDate}
+                    onChange={handleInputChange}
+                    className={styles.input}
+                  />
+                </div>
               </div>
-              <div className="formGroup">
-                <label>Project Type *</label>
-                <input type="text" name="projectType" value={formData.projectType} onChange={handleInputChange} required />
-              </div>
-              <div className="formGroup">
-                <label>Photos (Max 4)</label>
-                <input type="file" multiple accept="image/*" onChange={handleFileUpload} />
+
+              <div className={styles.formGroup + ' ' + styles.fullWidth}>
+                <label className={styles.label}>Photos (Max 4)</label>
+                <input
+                  type="file"
+                  multiple
+                  accept="image/*"
+                  onChange={handleFileUpload}
+                  className={styles.fileInput}
+                  id="photo-upload"
+                />
+                <label htmlFor="photo-upload" className={styles.fileInputLabel}>
+                  <Image size={20} />
+                  Choose Photos
+                </label>
+                
                 {formData.photos.length > 0 && (
-                  <div className="photoPreview">
-                    {formData.photos.map((photo, i) => (
-                      <div key={i} className="photoItem">
-                        <span>{photo.name || `Photo ${i + 1}`}</span>
-                        <button type="button" onClick={() => removePhoto(i)}><X size={16} /></button>
+                  <div className={styles.photosGrid}>
+                    {formData.photos.map((photo, index) => (
+                      <div key={index} className={styles.photoPreview}>
+                        {typeof photo === 'string' ? (
+                          <img 
+                            src={photo} 
+                            alt={`Preview ${index + 1}`} 
+                            className={styles.photoImage}
+                          />
+                        ) : (
+                          <img 
+                            src={URL.createObjectURL(photo)} 
+                            alt={`Preview ${index + 1}`} 
+                            className={styles.photoImage}
+                          />
+                        )}
+                        <div className={styles.photoOverlay}>
+                          <button
+                            type="button"
+                            onClick={() => removePhoto(index)}
+                            className={styles.removePhotoButton}
+                          >
+                            <X size={16} />
+                          </button>
+                        </div>
                       </div>
                     ))}
                   </div>
                 )}
               </div>
-              <div className="formActions">
-                <button type="button" onClick={() => setShowCreateModal(false)}>Cancel</button>
-                <button type="submit">Create</button>
+
+              <div className={styles.formActions}>
+                <button 
+                  type="button" 
+                  onClick={closeModal}
+                  className={styles.cancelButton}
+                >
+                  Cancel
+                </button>
+                <button 
+                  type="submit"
+                  className={styles.submitButton}
+                >
+                  {isEditMode ? 'Update' : 'Create'} Accomplishment
+                </button>
               </div>
             </form>
           </div>
         </div>
       )}
 
-      {/* View/Edit Modal */}
+      {/* View Modal */}
       {showViewModal && selectedAccomplishment && (
-        <div className="modal" onClick={(e) => e.target === e.currentTarget && setShowViewModal(false)}>
-          <div className="modalContent">
-            <div className="modalHeader">
-              <h2>{isEditMode ? 'Edit Accomplishment' : selectedAccomplishment.title}</h2>
-              <div className="modalActions">
-                {!isEditMode && (
-                  <>
-                    <button onClick={() => handleToggleFeature(selectedAccomplishment._id)}>
-                      {selectedAccomplishment.isPinned ? <PinOff size={18} /> : <Pin size={18} />}
-                    </button>
-                    <button onClick={openEditMode}><Edit3 size={18} /></button>
-                    <button onClick={() => handleDeleteAccomplishment(selectedAccomplishment._id)}><Trash2 size={18} /></button>
-                  </>
-                )}
-                <button onClick={() => { setShowViewModal(false); setIsEditMode(false); resetForm(); }}>
-                  <X size={24} />
+        <div className={styles.modal}>
+          <div className={styles.modalContent}>
+            <div className={styles.modalHeader}>
+              <h2>{selectedAccomplishment.title}</h2>
+              <div className={styles.modalActions}>
+                <button 
+                  className={styles.iconButton + ' ' + styles.editButton}
+                  onClick={openEditModal}
+                >
+                  <Edit3 size={16} />
+                </button>
+                <button 
+                  className={styles.iconButton + ' ' + styles.deleteButton}
+                  onClick={() => handleDelete(selectedAccomplishment._id)}
+                >
+                  <Trash2 size={16} />
+                </button>
+                <button 
+                  className={styles.iconButton + ' ' + styles.closeButton}
+                  onClick={closeModal}
+                >
+                  <X size={16} />
                 </button>
               </div>
             </div>
+            
+            <div className={styles.viewContent}>
+              <div className={styles.accomplishmentDetails}>
+                <div className={styles.categoryBadge}>
+                  <span className={`${styles.category} ${styles[selectedAccomplishment.projectType?.toLowerCase()]}`}>
+                    {selectedAccomplishment.projectType || 'General'}
+                  </span>
+                  {selectedAccomplishment.isPinned && (
+                    <span className={styles.pinnedBadge}>
+                      <Pin size={12} />
+                      Pinned
+                    </span>
+                  )}
+                </div>
 
-            {isEditMode ? (
-              <form onSubmit={handleUpdateAccomplishment} className="form">
-                <div className="formGroup">
-                  <label>Title *</label>
-                  <input type="text" name="title" value={formData.title} onChange={handleInputChange} required />
+                <div className={styles.fullDetails}>
+                  {selectedAccomplishment.description}
                 </div>
-                <div className="formGroup">
-                  <label>Description *</label>
-                  <textarea name="description" value={formData.description} onChange={handleInputChange} required rows={6} />
-                </div>
-                <div className="formGroup">
-                  <label>Completion Date *</label>
-                  <input type="date" name="completionDate" value={formData.completionDate} onChange={handleInputChange} required />
-                </div>
-                <div className="formGroup">
-                  <label>Project Type *</label>
-                  <input type="text" name="projectType" value={formData.projectType} onChange={handleInputChange} required />
-                </div>
-                <div className="formGroup">
-                  <label>Add Photos</label>
-                  <input type="file" multiple accept="image/*" onChange={handleFileUpload} />
-                </div>
-                <div className="formActions">
-                  <button type="button" onClick={() => { setIsEditMode(false); resetForm(); }}>Cancel</button>
-                  <button type="submit">Update</button>
-                </div>
-              </form>
-            ) : (
-              <div className="viewContent">
-                <p>{selectedAccomplishment.description}</p>
+
                 {selectedAccomplishment.completionDate && (
-                  <div><Calendar size={16} /> {formatDate(selectedAccomplishment.completionDate)}</div>
+                  <div className={styles.eventInfoFull}>
+                    <div className={styles.eventDetail}>
+                      <Calendar size={16} />
+                      <strong>Completed:</strong> {formatDate(selectedAccomplishment.completionDate)}
+                    </div>
+                  </div>
                 )}
-                {selectedAccomplishment.photos?.length > 0 && (
-                  <div className="photosSection">
+
+                {selectedAccomplishment.photos && selectedAccomplishment.photos.length > 0 && (
+                  <div className={styles.photosSection}>
                     <h4>Photos</h4>
-                    <div className="photoGrid">
-                      {selectedAccomplishment.photos.map((photo, i) => (
-                        <img key={i} src={photo.filePath} alt={`Photo ${i + 1}`} />
+                    <div className={styles.photoGrid}>
+                      {selectedAccomplishment.photos.map((photo, index) => (
+                        <div key={index} className={styles.photoContainer}>
+                          <img 
+                            src={photo} 
+                            alt={`Accomplishment ${index + 1}`}
+                            className={styles.photo}
+                          />
+                        </div>
                       ))}
                     </div>
                   </div>
                 )}
+
+                <div className={styles.metadata}>
+                  <div className={styles.metaItem}>
+                    <strong>Created:</strong> {formatDate(selectedAccomplishment.createdAt)}
+                  </div>
+                  <div className={styles.metaItem}>
+                    <strong>Views:</strong> {selectedAccomplishment.views || 0}
+                  </div>
+                  {selectedAccomplishment.updatedAt !== selectedAccomplishment.createdAt && (
+                    <div className={styles.metaItem}>
+                      <strong>Last Updated:</strong> {formatDate(selectedAccomplishment.updatedAt)}
+                    </div>
+                  )}
+                </div>
               </div>
-            )}
+            </div>
           </div>
         </div>
       )}
     </div>
-  )
-}
+  );
+};
 
-export default AdminAccomplishments
+export default AdminAccomplishments;
