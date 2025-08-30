@@ -225,9 +225,6 @@ const AdminAccomplishments = () => {
             <div className={styles.cardHeader}>
               <div className={styles.cardTitle}>
                 <h3>{accomplishment.title}</h3>
-                {accomplishment.isPinned && (
-                  <Pin className={styles.pinnedIcon} size={16} />
-                )}
               </div>
               <span className={`${styles.category} ${styles[accomplishment.projectType?.toLowerCase()]}`}>
                 {accomplishment.projectType || 'General'}
@@ -410,28 +407,28 @@ const AdminAccomplishments = () => {
 
       {/* View Modal */}
       {showViewModal && selectedAccomplishment && (
-        <div className={styles.modal}>
+        <div className={styles.modal} onClick={(e) => e.target === e.currentTarget && setShowViewModal(false)}>
           <div className={styles.modalContent}>
             <div className={styles.modalHeader}>
               <h2>{selectedAccomplishment.title}</h2>
               <div className={styles.modalActions}>
                 <button 
-                  className={styles.iconButton + ' ' + styles.editButton}
+                  className={styles.iconButton}
                   onClick={openEditModal}
                 >
-                  <Edit3 size={16} />
+                  <Edit3 size={18} />
                 </button>
                 <button 
-                  className={styles.iconButton + ' ' + styles.deleteButton}
+                  className={styles.deleteButton}
                   onClick={() => handleDelete(selectedAccomplishment._id)}
                 >
-                  <Trash2 size={16} />
+                  <Trash2 size={18} />
                 </button>
                 <button 
-                  className={styles.iconButton + ' ' + styles.closeButton}
+                  className={styles.closeButton}
                   onClick={closeModal}
                 >
-                  <X size={16} />
+                  <X size={18} />
                 </button>
               </div>
             </div>
