@@ -431,26 +431,10 @@ const AdminFeedback = () => {
                 </div>
               )}
 
-              {/* Follow-up Responses */}
-              {selectedFeedback.followUpResponses?.length > 0 && (
-                <div className={styles.responseSection}>
-                  <h3>Follow-up Responses</h3>
-                  {selectedFeedback.followUpResponses.map((response, index) => (
-                    <div key={index} className={styles.existingResponse}>
-                      <p>{response.message}</p>
-                      <div className={styles.responseInfo}>
-                        <span>By: {response.respondedBy?.firstName} {response.respondedBy?.lastName}</span>
-                        <span>{formatDate(response.respondedAt)}</span>
-                        {response.isEdited && <span>(Edited {formatDate(response.editedAt)})</span>}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
 
-              {/* Add New Response */}
+              {/* Edit Response */}
               <div className={styles.responseSection}>
-                <h3>Add Response</h3>
+                <h3>Edit Response</h3>
                 <div className={styles.responseForm}>
                   <textarea
                     value={responseMessage}

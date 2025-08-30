@@ -3,14 +3,6 @@ const User = require('../models/User');
 const asyncHandler = require('../middleware/async');
 const smsService = require('../services/smsService');
 
-exports.getCurrentDistribution = asyncHandler(async (req, res) => {
-  const currentDistribution = await RiceDistributionRecord.getCurrentDistribution();
-  
-  res.status(200).json({
-    success: true,
-    data: currentDistribution
-  });
-});
 
 exports.createDistribution = asyncHandler(async (req, res) => {
   req.body.createdBy = req.user.id;
