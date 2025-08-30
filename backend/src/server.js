@@ -37,6 +37,7 @@ app.use('/api/accomplishments', accomplishmentRoutes);
 app.use('/api/policies', policyRoutes);
 app.use('/api/rice-distribution', riceDistributionRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+app.use('/uploads', express.static('uploads'));
 
 // Basic health check route
 app.get('/api/health', (req, res) => {

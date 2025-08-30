@@ -32,12 +32,14 @@ const AdminLocalPolicies = () => {
     'Finance and Budget', 'Governance', 'Other'
   ];
 
-  // Fetch policies from API
+  // FIXED: Fetch policies from API - for admin, get all policies including unpublished
   const fetchPolicies = async () => {
     try {
       setLoading(true);
       const token = localStorage.getItem('token');
-      const response = await fetch('/api/policies', {
+      
+      // Use admin-specific endpoint or add admin parameter to get all policies
+      const response = await fetch('/api/policies?admin=true', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -101,7 +103,7 @@ const AdminLocalPolicies = () => {
     });
   };
 
-  // Handle create/edit policy
+  // FIXED: Handle create/edit policy - ensure isPublished is set to true
   const handleSubmit = async (e) => {
     e.preventDefault();
     
@@ -109,11 +111,15 @@ const AdminLocalPolicies = () => {
       const token = localStorage.getItem('token');
       const formDataToSend = new FormData();
       
+      // Add all form data
       Object.keys(formData).forEach(key => {
         if (formData[key] !== null) {
           formDataToSend.append(key, formData[key]);
         }
       });
+
+      // FIXED: Ensure the policy is published by default for admin creation
+      formDataToSend.append('isPublished', 'true');
 
       const url = isEditing ? `/api/policies/${selectedPolicy._id}` : '/api/policies';
       const method = isEditing ? 'PUT' : 'POST';
@@ -353,19 +359,34 @@ const AdminLocalPolicies = () => {
                 className={styles.closeButton}
                 onClick={() => {
                   setShowCreateModal(false);
-                  setIsEditing(false);
                   resetForm();
+                  setIsEditing(false);
+                  setSelectedPolicy(null);
                 }}
               >
                 ×
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className={styles.form}>
-              <div className={styles.formRow}>
+            <form className={styles.form} onSubmit={handleSubmit}>
+              <div className={styles.formGrid}>
                 <div className={styles.formGroup}>
-                  <label>Policy Type *</label>
+                  <label htmlFor="title">Policy Title *</label>
+                  <input
+                    type="text"
+                    id="title"
+                    name="title"
+                    value={formData.title}
+                    onChange={handleInputChange}
+                    required
+                    placeholder="Enter policy title"
+                  />
+                </div>
+
+                <div className={styles.formGroup}>
+                  <label htmlFor="type">Policy Type *</label>
                   <select
+                    id="type"
                     name="type"
                     value={formData.type}
                     onChange={handleInputChange}
@@ -377,35 +398,34 @@ const AdminLocalPolicies = () => {
                 </div>
 
                 <div className={styles.formGroup}>
-                  <label>Policy Number *</label>
+                  <label htmlFor="policyNumber">Policy Number *</label>
                   <input
                     type="text"
+                    id="policyNumber"
                     name="policyNumber"
                     value={formData.policyNumber}
                     onChange={handleInputChange}
+                    required
                     placeholder="e.g., 2024-001"
+                  />
+                </div>
+
+                <div className={styles.formGroup}>
+                  <label htmlFor="implementationDate">Implementation Date *</label>
+                  <input
+                    type="date"
+                    id="implementationDate"
+                    name="implementationDate"
+                    value={formData.implementationDate}
+                    onChange={handleInputChange}
                     required
                   />
                 </div>
-              </div>
 
-              <div className={styles.formGroup}>
-                <label>Title *</label>
-                <input
-                  type="text"
-                  name="title"
-                  value={formData.title}
-                  onChange={handleInputChange}
-                  placeholder="Enter policy title"
-                  maxLength={200}
-                  required
-                />
-              </div>
-
-              <div className={styles.formRow}>
                 <div className={styles.formGroup}>
-                  <label>Category *</label>
+                  <label htmlFor="category">Category *</label>
                   <select
+                    id="category"
                     name="category"
                     value={formData.category}
                     onChange={handleInputChange}
@@ -418,43 +438,32 @@ const AdminLocalPolicies = () => {
                 </div>
 
                 <div className={styles.formGroup}>
-                  <label>Implementation Date *</label>
+                  <label htmlFor="fullDocument">Upload Document</label>
                   <input
-                    type="date"
-                    name="implementationDate"
-                    value={formData.implementationDate}
+                    type="file"
+                    id="fullDocument"
+                    name="fullDocument"
                     onChange={handleInputChange}
-                    required
+                    accept=".pdf,.doc,.docx"
+                    className={styles.fileInput}
                   />
+                  <small className={styles.fileHint}>
+                    Upload PDF or Word document (optional)
+                  </small>
                 </div>
               </div>
 
               <div className={styles.formGroup}>
-                <label>Summary *</label>
+                <label htmlFor="summary">Summary *</label>
                 <textarea
+                  id="summary"
                   name="summary"
                   value={formData.summary}
                   onChange={handleInputChange}
-                  placeholder="Enter policy summary"
-                  maxLength={1000}
-                  rows={4}
                   required
+                  placeholder="Provide a brief summary of the policy"
+                  rows={4}
                 />
-                <div className={styles.charCount}>
-                  {formData.summary.length}/1000
-                </div>
-              </div>
-
-              <div className={styles.formGroup}>
-                <label>Full Document {!isEditing && '*'}</label>
-                <input
-                  type="file"
-                  name="fullDocument"
-                  onChange={handleInputChange}
-                  accept=".pdf,.doc,.docx"
-                  required={!isEditing}
-                />
-                <small>Accepted formats: PDF, DOC, DOCX</small>
               </div>
 
               <div className={styles.formActions}>
@@ -463,13 +472,17 @@ const AdminLocalPolicies = () => {
                   className={styles.cancelButton}
                   onClick={() => {
                     setShowCreateModal(false);
-                    setIsEditing(false);
                     resetForm();
+                    setIsEditing(false);
+                    setSelectedPolicy(null);
                   }}
                 >
                   Cancel
                 </button>
-                <button type="submit" className={styles.submitButton}>
+                <button
+                  type="submit"
+                  className={styles.submitButton}
+                >
                   {isEditing ? 'Update Policy' : 'Create Policy'}
                 </button>
               </div>
@@ -478,12 +491,12 @@ const AdminLocalPolicies = () => {
         </div>
       )}
 
-      {/* View/Detail Modal */}
+      {/* View Modal */}
       {showViewModal && selectedPolicy && (
         <div className={styles.modalOverlay}>
-          <div className={styles.modal}>
+          <div className={styles.viewModal}>
             <div className={styles.modalHeader}>
-              <h2>Policy Details</h2>
+              <h2>{selectedPolicy.title}</h2>
               <button 
                 className={styles.closeButton}
                 onClick={() => setShowViewModal(false)}
@@ -492,7 +505,7 @@ const AdminLocalPolicies = () => {
               </button>
             </div>
 
-            <div className={styles.policyDetail}>
+            <div className={styles.viewContent}>
               <div className={styles.detailHeader}>
                 <span className={`${styles.policyType} ${styles[selectedPolicy.type]}`}>
                   {selectedPolicy.type}
@@ -502,54 +515,41 @@ const AdminLocalPolicies = () => {
                 </span>
               </div>
 
-              <h3 className={styles.detailTitle}>{selectedPolicy.title}</h3>
-
               <div className={styles.detailMeta}>
-                <div className={styles.metaItem}>
+                <div className={styles.metaRow}>
                   <span className={styles.metaLabel}>Category:</span>
                   <span className={styles.metaValue}>{selectedPolicy.category}</span>
                 </div>
-                <div className={styles.metaItem}>
+                <div className={styles.metaRow}>
                   <span className={styles.metaLabel}>Implementation Date:</span>
                   <span className={styles.metaValue}>
                     {formatDate(selectedPolicy.implementationDate)}
                   </span>
                 </div>
-                <div className={styles.metaItem}>
+                <div className={styles.metaRow}>
                   <span className={styles.metaLabel}>Created:</span>
                   <span className={styles.metaValue}>
                     {formatDate(selectedPolicy.createdAt)}
                   </span>
                 </div>
-                {selectedPolicy.updatedAt !== selectedPolicy.createdAt && (
-                  <div className={styles.metaItem}>
-                    <span className={styles.metaLabel}>Last Updated:</span>
-                    <span className={styles.metaValue}>
-                      {formatDate(selectedPolicy.updatedAt)}
-                    </span>
-                  </div>
-                )}
               </div>
 
-              <div className={styles.detailSection}>
+              <div className={styles.detailSummary}>
                 <h4>Summary</h4>
                 <p>{selectedPolicy.summary}</p>
               </div>
 
               {selectedPolicy.fullDocument && (
-                <div className={styles.detailSection}>
-                  <h4>Full Document</h4>
-                  <div className={styles.documentInfo}>
-                    <span>📄 {selectedPolicy.fullDocument.fileName}</span>
-                    <a 
-                      href={selectedPolicy.fullDocument.filePath}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={styles.downloadLink}
-                    >
-                      Download
-                    </a>
-                  </div>
+                <div className={styles.detailDocument}>
+                  <h4>Document</h4>
+                  <a 
+                    href={selectedPolicy.fullDocument.filePath}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={styles.downloadLink}
+                  >
+                    📄 {selectedPolicy.fullDocument.fileName}
+                  </a>
                 </div>
               )}
 
