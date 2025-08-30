@@ -10,8 +10,7 @@ const {
   markDistributionComplete
 } = require('../controllers/riceDistributionController');
 
-// Public routes
-router.get('/current', getCurrentDistribution);
+
 
 // Admin routes
 router.post('/', protect, adminOnly, createDistribution);
