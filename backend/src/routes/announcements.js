@@ -8,8 +8,7 @@ const {
   getAnnouncementById,
   createAnnouncement,
   updateAnnouncement,
-  deleteAnnouncement,
-  togglePinAnnouncement
+  deleteAnnouncement
 } = require('../controllers/announcementController');
 
 // Public routes
@@ -32,6 +31,5 @@ router.put('/:id',
 );
 
 router.delete('/:id', protect, adminOnly, deleteAnnouncement);
-router.put('/:id/toggle-pin', protect, adminOnly, togglePinAnnouncement);
 
 module.exports = router;

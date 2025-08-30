@@ -221,27 +221,6 @@ const AdminAnnouncements = () => {
     }
   };
 
-  // Handle pin/unpin announcement
-  const handleTogglePin = async (id, currentPinStatus) => {
-    try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`/api/announcements/${id}/toggle-pin`, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to toggle pin status');
-      }
-
-      await fetchAnnouncements();
-    } catch (err) {
-      setError(err.message);
-    }
-  };
-
   // Open view modal
   const openViewModal = (announcement) => {
     setSelectedAnnouncement(announcement);
@@ -309,9 +288,6 @@ const AdminAnnouncements = () => {
             <div className={styles.cardHeader}>
               <div className={styles.cardTitle}>
                 <h3>{announcement.title}</h3>
-                {announcement.isPinned && (
-                  <Pin className={styles.pinnedIcon} size={16} />
-                )}
               </div>
               <span className={`${styles.category} ${styles[announcement.category.toLowerCase()]}`}>
                 {announcement.category}
@@ -506,13 +482,6 @@ const AdminAnnouncements = () => {
               <div className={styles.modalActions}>
                 {!isEditMode && (
                   <>
-                    <button
-                      onClick={() => handleTogglePin(selectedAnnouncement._id, selectedAnnouncement.isPinned)}
-                      className={styles.iconButton}
-                      title={selectedAnnouncement.isPinned ? 'Unpin' : 'Pin'}
-                    >
-                      {selectedAnnouncement.isPinned ? <PinOff size={18} /> : <Pin size={18} />}
-                    </button>
                     <button 
                       onClick={openEditMode}
                       className={styles.iconButton}
@@ -667,11 +636,6 @@ const AdminAnnouncements = () => {
                     <span className={`${styles.category} ${styles[selectedAnnouncement.category.toLowerCase()]}`}>
                       {selectedAnnouncement.category}
                     </span>
-                    {selectedAnnouncement.isPinned && (
-                      <span className={styles.pinnedBadge}>
-                        <Pin size={14} /> Pinned
-                      </span>
-                    )}
                   </div>
                   
                   <p className={styles.fullDetails}>{selectedAnnouncement.details}</p>
