@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import styles from './Announcements.module.css'
 import { Megaphone, Search, Filter, Calendar, MapPin, Eye } from 'lucide-react';
-
+import megaphone from '../../assets/announcement/megaphone.png'
 const API_BASE = import.meta.env.VITE_API_URL; // e.g. http://localhost:4000/api
 
 const PublicAnnouncements = () => {
@@ -115,10 +115,10 @@ const PublicAnnouncements = () => {
       {/* Header Section */}
       <div className={styles.header}>
         <div className={styles.headerText}>
-          <Megaphone size={120} className={styles.icon}/>
+          <img src={megaphone} alt="Megaphone" className={styles.icon} />
           <div className={styles.headerContent}>
             <h1>Community Announcements</h1>
-            <p>Stay updated with the latest news, events, and important information</p>
+            <p>Narito ang mga pinakabagong balita, paalala, at impormasyon para sa ating komunidad, mula sa aming opisina.</p>
           </div>
         </div>
         
