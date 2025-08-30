@@ -8,7 +8,6 @@ const {
   createAccomplishment,
   updateAccomplishment,
   deleteAccomplishment,
-  toggleFeatureAccomplishment
 } = require('../controllers/accomplishmentController');
 
 // Public routes
@@ -19,6 +18,5 @@ router.get('/:id', getAccomplishmentById);
 router.post('/', protect, adminOnly, upload().array('images', 4),createAccomplishment);
 router.put('/:id', protect, adminOnly, upload().array('images', 4), updateAccomplishment);
 router.delete('/:id', protect, adminOnly, deleteAccomplishment);
-router.put('/:id/toggle-feature', protect, adminOnly, toggleFeatureAccomplishment);
 
 module.exports = router;

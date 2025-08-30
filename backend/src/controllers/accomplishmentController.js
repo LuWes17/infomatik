@@ -195,23 +195,3 @@ exports.deleteAccomplishment = asyncHandler(async (req, res) => {
     message: 'Accomplishment deleted successfully'
   });
 });
-
-exports.toggleFeatureAccomplishment = asyncHandler(async (req, res) => {
-  const accomplishment = await Accomplishment.findById(req.params.id);
-  
-  if (!accomplishment) {
-    return res.status(404).json({
-      success: false,
-      message: 'Accomplishment not found'
-    });
-  }
-  
-  accomplishment.isFeatured = !accomplishment.isFeatured;
-  await accomplishment.save();
-  
-  res.status(200).json({
-    success: true,
-    message: `Accomplishment ${accomplishment.isFeatured ? 'featured' : 'unfeatured'} successfully`,
-    data: accomplishment
-  });
-});
