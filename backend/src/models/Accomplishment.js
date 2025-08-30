@@ -49,10 +49,6 @@ const accomplishmentSchema = new mongoose.Schema({
     default: true
   },
   
-  isFeatured: {
-    type: Boolean,
-    default: false
-  },
   
   // Admin who created the accomplishment
   createdBy: {
