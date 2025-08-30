@@ -1,5 +1,6 @@
 const LocalPolicy = require('../models/LocalPolicy');
 const asyncHandler = require('../middleware/async');
+const { getFileUrl } = require('../config/upload'); 
 
 exports.getAllPolicies = asyncHandler(async (req, res) => {
   const { type, category, page = 1, limit = 10 } = req.query;
@@ -49,7 +50,18 @@ exports.getPolicyById = asyncHandler(async (req, res) => {
 });
 
 exports.createPolicy = asyncHandler(async (req, res) => {
+  // Set the creator
   req.body.createdBy = req.user.id;
+  
+  // Handle file upload
+  if (req.file) {
+    const fileUrl = getFileUrl(req.file, req);
+    req.body.fullDocument = {
+      fileName: req.file.originalname,
+      filePath: fileUrl,
+      uploadedAt: new Date()
+    };
+  }
   
   const policy = await LocalPolicy.create(req.body);
   
@@ -62,6 +74,16 @@ exports.createPolicy = asyncHandler(async (req, res) => {
 
 exports.updatePolicy = asyncHandler(async (req, res) => {
   req.body.updatedBy = req.user.id;
+  
+  // Handle file upload if new file provided
+  if (req.file) {
+    const fileUrl = getFileUrl(req.file, req);
+    req.body.fullDocument = {
+      fileName: req.file.originalname,
+      filePath: fileUrl,
+      uploadedAt: new Date()
+    };
+  }
   
   const policy = await LocalPolicy.findByIdAndUpdate(
     req.params.id,
