@@ -33,22 +33,11 @@ const feedbackSchema = new mongoose.Schema({
     ]
   },
   
-  priority: {
-    type: String,
-    enum: ['low', 'medium', 'high', 'urgent'],
-    default: 'medium'
-  },
-  
   // Public visibility settings
   isPublic: {
     type: Boolean,
     default: true,
     required: true
-  },
-  
-  isAnonymous: {
-    type: Boolean,
-    default: false
   },
   
   // Status tracking
@@ -120,22 +109,7 @@ const feedbackSchema = new mongoose.Schema({
     ref: 'User'
   },
   
-  resolutionNotes: {
-    type: String,
-    maxlength: [500, 'Resolution notes cannot exceed 500 characters']
-  },
   
-  // Contact preferences
-  allowFollowUp: {
-    type: Boolean,
-    default: true
-  },
-  
-  preferredContactMethod: {
-    type: String,
-    enum: ['sms', 'none'],
-    default: 'sms'
-  }
 }, {
   timestamps: true
 });

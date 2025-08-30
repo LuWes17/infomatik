@@ -58,11 +58,6 @@ const announcementSchema = new mongoose.Schema({
     default: true
   },
   
-  isPinned: {
-    type: Boolean,
-    default: false
-  },
-  
   // Admin who created the announcement
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,

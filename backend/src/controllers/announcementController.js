@@ -223,23 +223,3 @@ exports.deleteAnnouncement = asyncHandler(async (req, res) => {
     message: 'Announcement deleted successfully'
   });
 });
-
-exports.togglePinAnnouncement = asyncHandler(async (req, res) => {
-  const announcement = await Announcement.findById(req.params.id);
-  
-  if (!announcement) {
-    return res.status(404).json({
-      success: false,
-      message: 'Announcement not found'
-    });
-  }
-  
-  announcement.isPinned = !announcement.isPinned;
-  await announcement.save();
-  
-  res.status(200).json({
-    success: true,
-    message: `Announcement ${announcement.isPinned ? 'pinned' : 'unpinned'} successfully`,
-    data: announcement
-  });
-});
