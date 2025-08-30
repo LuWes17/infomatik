@@ -1,11 +1,16 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../../contexts/AuthContext';
 import styles from './Header.module.css';
 import infomatiklogo from '../../../assets/infomatik-logo.png';
-import { ChevronDown, Menu, X } from 'lucide-react';
+import { ChevronDown, Menu, X, CircleUserRound } from 'lucide-react';
+
 const Header = () => {
+  const { isAuthenticated, user, logout } = useAuth();
+  const navigate = useNavigate();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [openDropdowns, setOpenDropdowns] = useState({});
+  const [showUserDropdown, setShowUserDropdown] = useState(false);
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -21,17 +26,43 @@ const Header = () => {
   const closeSidebar = () => {
     setIsSidebarOpen(false);
     setOpenDropdowns({});
-  };useEffect(() => {
-  if (isSidebarOpen) {
-    document.body.style.overflow = 'hidden';
-  } else {
-    document.body.style.overflow = 'unset';
-  }
-  
-  // Cleanup function to restore scroll when component unmounts
-  return () => {
-    document.body.style.overflow = 'unset';
-  };}, [isSidebarOpen]);
+  };
+
+  const handleUserIconClick = () => {
+    // Navigate to profile page based on user role
+    if (user?.role === 'admin') {
+      navigate('/admin');
+    } else {
+      navigate('/profile');
+    }
+  };
+
+  useEffect(() => {
+    if (isSidebarOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    
+    // Cleanup function to restore scroll when component unmounts
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isSidebarOpen]);
+
+  // Close user dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (showUserDropdown && !event.target.closest(`.${styles.userDropdown}`)) {
+        setShowUserDropdown(false);
+      }
+    };
+
+    document.addEventListener('click', handleClickOutside);
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+    };
+  }, [showUserDropdown]);
 
   return (
     <header className={styles.header}>
@@ -90,8 +121,19 @@ const Header = () => {
             </li>
           </ul>
 
+          {/* Auth Section */}
           <div className={styles.authButtons}>
-            <Link to="/login" className="btn btn-outline">Login</Link>
+            {isAuthenticated ? (
+              <button 
+                className={styles.userButton}
+                onClick={handleUserIconClick}
+                aria-label={`Go to ${user?.role === 'admin' ? 'Dashboard' : 'Profile'}`}
+              >
+                <CircleUserRound size={28} />
+              </button>
+            ) : (
+              <Link to="/login" className="btn btn-outline">Login</Link>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -204,10 +246,27 @@ const Header = () => {
             </li>
           </ul>
 
+          {/* Mobile Auth Section */}
           <div className={styles.sidebarAuthButtons}>
-            <Link to="/login" onClick={closeSidebar}>
-              Login
-            </Link>
+            {isAuthenticated ? (
+              <div className={styles.sidebarUserSection}>
+                <div className={styles.sidebarUserActions}>
+                  <button 
+                    className={styles.sidebarLogoutButton}
+                    onClick={() => {
+                      closeSidebar();
+                      logout();
+                    }}
+                  >
+                    Logout
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <Link to="/login" onClick={closeSidebar}>
+                Login
+              </Link>
+            )}
           </div>
         </nav>
       </div>
