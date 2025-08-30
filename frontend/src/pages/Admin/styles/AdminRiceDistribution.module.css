@@ -1,0 +1,691 @@
+/* AdminRiceDistribution.module.css */
+
+.adminRiceDistribution {
+  padding: 0;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* Header Section */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid var(--gray-200, #e2e8f0);
+}
+
+.header h1 {
+  margin: 0;
+  color: var(--gray-800, #1e293b);
+  font-size: 2rem;
+  font-weight: 600;
+}
+
+.createButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background-color: var(--primary-color, #1c62bb);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.createButton:hover {
+  background-color: var(--primary-dark, #1557a6);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md, 0 4px 6px -1px rgb(0 0 0 / 0.1));
+}
+
+.icon {
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+/* Loading State */
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  gap: 1rem;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--gray-200, #e2e8f0);
+  border-top: 3px solid var(--primary-color, #1c62bb);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Error Message */
+.errorMessage {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+/* Distribution Grid */
+.distributionGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.emptyState {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--gray-600, #475569);
+}
+
+.emptyState h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.5rem;
+  color: var(--gray-700, #334155);
+}
+
+.emptyState p {
+  margin: 0;
+  font-size: 1rem;
+}
+
+/* Distribution Cards */
+.distributionCard {
+  background: white;
+  border-radius: 12px;
+  box-shadow: var(--shadow-sm, 0 1px 2px 0 rgb(0 0 0 / 0.05));
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 1px solid var(--gray-200, #e2e8f0);
+}
+
+.distributionCard:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg, 0 10px 15px -3px rgb(0 0 0 / 0.1));
+}
+
+.cardHeader {
+  padding: 1.25rem 1.25rem 0.75rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  border-bottom: 1px solid var(--gray-100, #f1f5f9);
+}
+
+.cardHeader h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--gray-800, #1e293b);
+  flex: 1;
+  padding-right: 1rem;
+}
+
+.statusBadge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.statusBadge.planned {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.statusBadge.completed {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.cardBody {
+  padding: 0.75rem 1.25rem;
+}
+
+.cardInfo {
+  margin: 0.5rem 0;
+  font-size: 0.9rem;
+  color: var(--gray-600, #475569);
+  display: flex;
+  align-items: center;
+}
+
+.label {
+  font-weight: 600;
+  color: var(--gray-700, #334155);
+  min-width: 100px;
+  margin-right: 0.5rem;
+}
+
+.cardFooter {
+  padding: 0.75rem 1.25rem;
+  background-color: var(--gray-50, #f8fafc);
+  border-top: 1px solid var(--gray-100, #f1f5f9);
+}
+
+.cardFooter small {
+  color: var(--gray-500, #64748b);
+  font-size: 0.8rem;
+}
+
+/* Pagination */
+.pagination {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 2rem;
+}
+
+.pageButton {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--gray-300, #cbd5e1);
+  background: white;
+  color: var(--gray-700, #334155);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pageButton:hover {
+  background-color: var(--gray-100, #f1f5f9);
+  border-color: var(--gray-400, #94a3b8);
+}
+
+.pageButton.active {
+  background-color: var(--primary-color, #1c62bb);
+  color: white;
+  border-color: var(--primary-color, #1c62bb);
+}
+
+/* Modal Styles */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.modalContent {
+  background: white;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 900px;
+  max-height: 90vh;
+  overflow: hidden;
+  box-shadow: var(--shadow-xl, 0 20px 25px -5px rgb(0 0 0 / 0.1));
+  display: flex;
+  flex-direction: column;
+}
+
+.modalHeader {
+  padding: 1.5rem;
+  border-bottom: 1px solid var(--gray-200, #e2e8f0);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: var(--gray-50, #f8fafc);
+}
+
+.modalHeader h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--gray-800, #1e293b);
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0.25rem;
+  color: var(--gray-500, #64748b);
+  border-radius: 4px;
+  transition: color 0.2s ease;
+}
+
+.closeButton:hover {
+  color: var(--gray-700, #334155);
+  background-color: var(--gray-100, #f1f5f9);
+}
+
+.modalBody {
+  padding: 1.5rem;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.modalFooter {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid var(--gray-200, #e2e8f0);
+  background-color: var(--gray-50, #f8fafc);
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+/* Form Sections */
+.section {
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--gray-100, #f1f5f9);
+}
+
+.section:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+.section h3 {
+  margin: 0 0 1rem 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--gray-800, #1e293b);
+}
+
+/* Form Groups */
+.formGroup {
+  margin-bottom: 1rem;
+}
+
+.formGroup label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: var(--gray-700, #334155);
+  font-size: 0.9rem;
+}
+
+.formGroup input,
+.formGroup select,
+.formGroup textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid var(--gray-300, #cbd5e1);
+  border-radius: 6px;
+  font-size: 0.9rem;
+  transition: border-color 0.2s ease;
+}
+
+.formGroup input:focus,
+.formGroup select:focus,
+.formGroup textarea:focus {
+  outline: none;
+  border-color: var(--primary-color, #1c62bb);
+  box-shadow: 0 0 0 3px rgba(28, 98, 187, 0.1);
+}
+
+.formGroup input.error,
+.formGroup select.error,
+.formGroup textarea.error {
+  border-color: var(--error-color, #ef4444);
+}
+
+.errorText {
+  display: block;
+  color: var(--error-color, #ef4444);
+  font-size: 0.8rem;
+  margin-top: 0.25rem;
+}
+
+.formRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+/* Barangay Selection */
+.barangayGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.barangayLabel {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  border: 1px solid var(--gray-300, #cbd5e1);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.barangayLabel:hover {
+  background-color: var(--gray-50, #f8fafc);
+  border-color: var(--primary-color, #1c62bb);
+}
+
+.barangayLabel input[type="checkbox"] {
+  width: auto;
+  margin: 0;
+}
+
+.barangayName {
+  font-size: 0.9rem;
+  color: var(--gray-700, #334155);
+}
+
+/* Schedule Cards */
+.scheduleCard {
+  background-color: var(--gray-50, #f8fafc);
+  border: 1px solid var(--gray-200, #e2e8f0);
+  border-radius: 8px;
+  padding: 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.scheduleCard h4 {
+  margin: 0 0 1rem 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--primary-color, #1c62bb);
+  text-transform: capitalize;
+}
+
+.viewScheduleCard {
+  background-color: white;
+  border: 1px solid var(--gray-200, #e2e8f0);
+  border-radius: 8px;
+  padding: 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.viewScheduleCard h4 {
+  margin: 0 0 1rem 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--primary-color, #1c62bb);
+  text-transform: capitalize;
+  border-bottom: 1px solid var(--gray-100, #f1f5f9);
+  padding-bottom: 0.5rem;
+}
+
+/* Detail Rows */
+.detailRow {
+  display: flex;
+  margin-bottom: 0.75rem;
+  align-items: flex-start;
+}
+
+.detailLabel {
+  font-weight: 600;
+  color: var(--gray-700, #334155);
+  min-width: 140px;
+  margin-right: 1rem;
+  font-size: 0.9rem;
+}
+
+.detailRow span:last-child {
+  color: var(--gray-600, #475569);
+  font-size: 0.9rem;
+  flex: 1;
+}
+
+/* Barangay Tags */
+.barangayList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.barangayTag {
+  background-color: var(--primary-color, #1c62bb);
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+/* Button Styles */
+.saveButton {
+  background-color: var(--primary-color, #1c62bb);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.saveButton:hover {
+  background-color: var(--primary-dark, #1557a6);
+  transform: translateY(-1px);
+}
+
+.editButton {
+  background-color: var(--accent-color, #f59e0b);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.editButton:hover {
+  background-color: #d97706;
+  transform: translateY(-1px);
+}
+
+.deleteButton {
+  background-color: var(--error-color, #ef4444);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.deleteButton:hover {
+  background-color: #dc2626;
+  transform: translateY(-1px);
+}
+
+.statusButton {
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.completeStatus {
+  background-color: var(--success-color, #10b981);
+  color: white;
+}
+
+.completeStatus:hover {
+  background-color: #059669;
+  transform: translateY(-1px);
+}
+
+.plannedStatus {
+  background-color: var(--warning-color, #f59e0b);
+  color: white;
+}
+
+.plannedStatus:hover {
+  background-color: #d97706;
+  transform: translateY(-1px);
+}
+
+.cancelButton {
+  background-color: var(--gray-500, #64748b);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cancelButton:hover {
+  background-color: var(--gray-600, #475569);
+  transform: translateY(-1px);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+
+  .header h1 {
+    font-size: 1.5rem;
+    text-align: center;
+  }
+
+  .distributionGrid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .modalContent {
+    margin: 0.5rem;
+    max-height: calc(100vh - 1rem);
+  }
+
+  .modalHeader {
+    padding: 1rem;
+  }
+
+  .modalHeader h2 {
+    font-size: 1.25rem;
+  }
+
+  .modalBody {
+    padding: 1rem;
+  }
+
+  .modalFooter {
+    padding: 1rem;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .modalFooter button {
+    width: 100%;
+    margin-bottom: 0.5rem;
+  }
+
+  .formRow {
+    grid-template-columns: 1fr;
+  }
+
+  .barangayGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .detailRow {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .detailLabel {
+    min-width: auto;
+    margin-right: 0;
+    font-weight: 600;
+  }
+
+  .barangayList {
+    justify-content: center;
+  }
+
+  .cardHeader {
+    flex-direction: column;
+    gap: 0.75rem;
+    align-items: flex-start;
+  }
+
+  .cardHeader h3 {
+    padding-right: 0;
+  }
+
+  .statusBadge {
+    align-self: flex-start;
+  }
+}
+
+@media (max-width: 480px) {
+  .adminRiceDistribution {
+    padding: 0.5rem;
+  }
+
+  .header h1 {
+    font-size: 1.25rem;
+  }
+
+  .createButton {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+  }
+
+  .modalContent {
+    border-radius: 0;
+    height: 100vh;
+    max-height: 100vh;
+    margin: 0;
+  }
+
+  .cardHeader,
+  .cardBody,
+  .cardFooter {
+    padding: 1rem;
+  }
+
+  .scheduleCard,
+  .viewScheduleCard {
+    padding: 1rem;
+  }
+
+  .section {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+  }
+}
