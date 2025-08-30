@@ -68,43 +68,17 @@ const riceDistributionRecordSchema = new mongoose.Schema({
       required: [true, 'Total kilos is required'],
       min: [1, 'Total kilos must be at least 1']
     },
-    typeOfRice: {
-      type: String,
-      required: [true, 'Type of rice is required'],
-      maxlength: [50, 'Type of rice cannot exceed 50 characters']
-    },
     kilosPerFamily: {
       type: Number,
       required: [true, 'Kilos per family is required'],
       min: [1, 'Kilos per family must be at least 1']
     },
-    source: {
-      type: String,
-      maxlength: [100, 'Rice source cannot exceed 100 characters']
-    }
-  },
-  
-  // SMS notification tracking
-  smsNotifications: {
-    sent: {
-      type: Boolean,
-      default: false
-    },
-    sentAt: Date,
-    recipientCount: {
-      type: Number,
-      default: 0
-    },
-    failedCount: {
-      type: Number,
-      default: 0
-    }
   },
   
   // Distribution status
   status: {
     type: String,
-    enum: ['planned', 'ongoing', 'completed', 'cancelled'],
+    enum: ['planned', 'completed'],
     default: 'planned'
   },
   
@@ -121,11 +95,7 @@ const riceDistributionRecordSchema = new mongoose.Schema({
   },
   
   // Completion tracking
-  completedAt: Date,
-  completionNotes: {
-    type: String,
-    maxlength: [500, 'Completion notes cannot exceed 500 characters']
-  }
+  completedAt: Date
 }, {
   timestamps: true
 });
@@ -149,26 +119,11 @@ riceDistributionRecordSchema.pre('save', function(next) {
 riceDistributionRecordSchema.methods.markCompleted = function(adminId, notes) {
   this.status = 'completed';
   this.completedAt = new Date();
-  this.completionNotes = notes;
   this.updatedBy = adminId;
   return this.save();
 };
 
-// Static methods
-riceDistributionRecordSchema.statics.getCurrentDistribution = function() {
-  const currentMonth = new Date().toISOString().slice(0, 7); // YYYY-MM format
-  return this.findOne({ 
-    distributionMonth: currentMonth,
-    status: { $in: ['planned', 'ongoing'] }
-  });
-};
 
-riceDistributionRecordSchema.statics.getDistributionsByBarangay = function(barangay) {
-  return this.find({ 
-    selectedBarangays: barangay,
-    status: { $ne: 'cancelled' }
-  }).sort({ createdAt: -1 });
-};
 
 const RiceDistributionRecord = mongoose.model('RiceDistributionRecord', riceDistributionRecordSchema);
 

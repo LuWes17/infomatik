@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router();
 const { protect, adminOnly } = require('../middleware/auth');
 const {
-  getCurrentDistribution,
   createDistribution,
   getAllDistributions,
   getDistributionById,
