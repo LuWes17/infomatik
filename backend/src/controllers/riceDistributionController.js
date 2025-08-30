@@ -139,3 +139,21 @@ exports.markDistributionComplete = asyncHandler(async (req, res) => {
     data: distribution
   });
 });
+
+exports.deleteDistribution = asyncHandler(async (req, res) => {
+  const distribution = await RiceDistributionRecord.findById(req.params.id);
+  
+  if (!distribution) {
+    return res.status(404).json({
+      success: false,
+      message: 'Distribution record not found'
+    });
+  }
+  
+  await RiceDistributionRecord.findByIdAndDelete(req.params.id);
+  
+  res.status(200).json({
+    success: true,
+    message: 'Distribution record deleted successfully'
+  });
+});

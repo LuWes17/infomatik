@@ -62,17 +62,6 @@ const localPolicySchema = new mongoose.Schema({
     ]
   },
   
-  // Publishing and access
-  isPublished: {
-    type: Boolean,
-    default: true
-  },
-  
-  isPubliclyVisible: {
-    type: Boolean,
-    default: true
-  },
-  
   // Admin tracking
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,
@@ -104,7 +93,6 @@ localPolicySchema.index({ policyNumber: 1 }, { unique: true });
 localPolicySchema.index({ type: 1 });
 localPolicySchema.index({ category: 1 });
 localPolicySchema.index({ status: 1 });
-localPolicySchema.index({ isPublished: 1, isPubliclyVisible: 1 });
 localPolicySchema.index({ implementationDate: -1 });
 localPolicySchema.index({ barangaysAffected: 1 });
 localPolicySchema.index({ tags: 1 });
