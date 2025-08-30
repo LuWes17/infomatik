@@ -64,27 +64,6 @@ const feedbackSchema = new mongoose.Schema({
     }
   },
   
-  // Follow-up responses (for edit/delete capability as per PRD)
-  followUpResponses: [{
-    message: {
-      type: String,
-      maxlength: [1000, 'Follow-up response cannot exceed 1000 characters']
-    },
-    respondedBy: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User'
-    },
-    respondedAt: {
-      type: Date,
-      default: Date.now
-    },
-    isEdited: {
-      type: Boolean,
-      default: false
-    },
-    editedAt: Date
-  }],
-  
   // Analytics and engagement
   views: {
     type: Number,
@@ -143,14 +122,6 @@ feedbackSchema.methods.addResponse = function(message, adminId, isPublic = true)
   return this.save();
 };
 
-feedbackSchema.methods.addFollowUpResponse = function(message, adminId) {
-  this.followUpResponses.push({
-    message,
-    respondedBy: adminId,
-    respondedAt: new Date()
-  });
-  return this.save();
-};
 
 feedbackSchema.methods.editFollowUpResponse = function(responseIndex, newMessage) {
   if (this.followUpResponses[responseIndex]) {
