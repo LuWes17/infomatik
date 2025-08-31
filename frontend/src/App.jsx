@@ -105,7 +105,7 @@ function App() {
 
             {/* Protected User Routes */}
             <Route 
-              path="/profile" 
+              path="/profile/*" 
               element={
                 <ProtectedRoute>
                   <Profile />
