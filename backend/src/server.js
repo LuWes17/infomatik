@@ -108,5 +108,5 @@ const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
   console.log(`🚀 Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
   console.log(`📱 SMS Service: ${process.env.SEMAPHORE_API_KEY ? 'Configured' : 'Not configured'}`);
-  console.log(`☁️  File Storage: ${process.env.NODE_ENV === 'production' && process.env.CLOUDINARY_CLOUD_NAME ? 'Cloudinary' : 'Local'}`);
+  console.log(`☁️  File Storage: Local`);
 });
