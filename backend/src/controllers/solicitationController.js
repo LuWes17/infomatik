@@ -11,7 +11,7 @@ exports.getApprovedSolicitations = asyncHandler(async (req, res) => {
   const solicitations = await SolicitationRequest.find({ 
     status: 'completed' 
   })
-    .populate('requestedBy', 'firstName lastName barangay')
+    .populate('submittedBy', 'firstName lastName barangay')
     .sort({ createdAt: -1 })
     .limit(limit * 1)
     .skip(skip);
@@ -32,7 +32,7 @@ exports.getApprovedSolicitations = asyncHandler(async (req, res) => {
 // Create solicitation request
 exports.createSolicitation = asyncHandler(async (req, res) => {
   try {
-    req.body.requestedBy = req.user.id;
+    req.body.submittedBy = req.user.id;
     
     // Handle solicitation letter upload to B2
     if (!req.file) {
@@ -87,7 +87,7 @@ exports.getMySolicitations = asyncHandler(async (req, res) => {
   const skip = (page - 1) * limit;
   
   const solicitations = await SolicitationRequest.find({ 
-    requestedBy: req.user.id 
+    submittedBy: req.user.id 
   })
     .populate('reviewedBy', 'firstName lastName')
     .sort({ createdAt: -1 })
@@ -95,7 +95,7 @@ exports.getMySolicitations = asyncHandler(async (req, res) => {
     .skip(skip);
     
   const total = await SolicitationRequest.countDocuments({ 
-    requestedBy: req.user.id 
+    submittedBy: req.user.id 
   });
   
   res.status(200).json({
@@ -118,8 +118,7 @@ exports.getAllSolicitations = asyncHandler(async (req, res) => {
   if (status) filter.status = status;
   
   const solicitations = await SolicitationRequest.find(filter)
-    .populate('requestedBy', 'firstName lastName barangay contactNumber')
-    .populate('reviewedBy', 'firstName lastName')
+    .populate('submittedBy', 'firstName lastName barangay contactNumber')
     .sort({ createdAt: -1 })
     .limit(limit * 1)
     .skip(skip);
@@ -140,7 +139,7 @@ exports.getAllSolicitations = asyncHandler(async (req, res) => {
 // Get solicitation by ID (Admin)
 exports.getSolicitationById = asyncHandler(async (req, res) => {
   const solicitation = await SolicitationRequest.findById(req.params.id)
-    .populate('requestedBy', 'firstName lastName barangay contactNumber')
+    .populate('submittedBy', 'firstName lastName barangay contactNumber')
     .populate('reviewedBy', 'firstName lastName');
     
   if (!solicitation) {
@@ -184,7 +183,7 @@ exports.updateSolicitationStatus = asyncHandler(async (req, res) => {
     await solicitation.save();
     
     // Populate for response
-    await solicitation.populate('requestedBy', 'firstName lastName barangay contactNumber');
+    await solicitation.populate('submittedBy', 'firstName lastName barangay contactNumber');
     await solicitation.populate('reviewedBy', 'firstName lastName');
     
     res.status(200).json({
