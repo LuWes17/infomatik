@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import styles from './Announcements.module.css'
-import { Megaphone, Search, Filter, Calendar, MapPin, Eye } from 'lucide-react';
+import { Megaphone, Search, Filter, Calendar, MapPin, Eye, ChevronLeft, ChevronRight, ChevronDown } from 'lucide-react';
 import megaphone from '../../assets/announcement/megaphone.png'
 const API_BASE = import.meta.env.VITE_API_URL; // e.g. http://localhost:4000/api
 
@@ -13,6 +13,13 @@ const PublicAnnouncements = () => {
   const [filteredAnnouncements, setFilteredAnnouncements] = useState([]);
   const [selectedFilter, setSelectedFilter] = useState('All');
   const [searchTerm, setSearchTerm] = useState('');
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [fullscreenImage, setFullscreenImage] = useState(null);
+  const dropdownRef = useRef(null);
+
+  // Categories for filtering
+  const categories = ['All', 'Update', 'Event'];
 
   // Fetch announcements from backend
   const fetchAnnouncements = async () => {
@@ -38,6 +45,20 @@ const PublicAnnouncements = () => {
     fetchAnnouncements();
   }, []);
 
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
   // Apply filters + search
   useEffect(() => {
     let filtered = announcements;
@@ -58,23 +79,32 @@ const PublicAnnouncements = () => {
 
   const openViewModal = (announcement) => {
     setSelectedAnnouncement(announcement);
+    setCurrentImageIndex(0);
     setShowViewModal(true);
-    incrementViews(announcement._id);
+    document.body.style.overflow = "hidden";
   };
 
   const closeViewModal = () => {
     setShowViewModal(false);
     setSelectedAnnouncement(null);
+    setCurrentImageIndex(0);
+    document.body.style.overflow = "auto";
   };
 
-  // Increment views
-  const incrementViews = async (id) => {
-    try {
-      await fetch(`${API_BASE}/announcements/${id}/views`, {
-        method: 'PATCH',
-      });
-    } catch (err) {
-      console.error('Failed to increment views:', err);
+  // Navigate through images in modal
+  const nextImage = () => {
+    if (selectedAnnouncement && selectedAnnouncement.photos) {
+      setCurrentImageIndex((prev) => 
+        prev === selectedAnnouncement.photos.length - 1 ? 0 : prev + 1
+      );
+    }
+  };
+
+  const prevImage = () => {
+    if (selectedAnnouncement && selectedAnnouncement.photos) {
+      setCurrentImageIndex((prev) => 
+        prev === 0 ? selectedAnnouncement.photos.length - 1 : prev - 1
+      );
     }
   };
 
@@ -82,12 +112,19 @@ const PublicAnnouncements = () => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'long',
-      day: 'numeric'
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
     });
   };
 
   const handleFilterChange = (filter) => {
     setSelectedFilter(filter);
+    setDropdownOpen(false);
+  };
+
+  const toggleDropdown = () => {
+    setDropdownOpen(!dropdownOpen);
   };
 
   if (loading) {
@@ -135,27 +172,27 @@ const PublicAnnouncements = () => {
             />
           </div>
 
-          {/* Filter Buttons */}
-          <div className={styles.filterButtons}>
+          {/* Filter Dropdown */}
+          <div className={styles.filterDropdown} ref={dropdownRef}>
             <Filter size={20} className={styles.filterIcon} />
             <button
-              onClick={() => handleFilterChange('All')}
-              className={`${styles.filterButton} ${selectedFilter === 'All' ? styles.active : ''}`}
+              onClick={toggleDropdown}
+              className={`${styles.dropdownButton} ${dropdownOpen ? styles.active : ''}`}
             >
-              All
+              <span>{selectedFilter}</span>
+              <ChevronDown size={16} className={`${styles.dropdownArrow} ${dropdownOpen ? styles.open : ''}`} />
             </button>
-            <button
-              onClick={() => handleFilterChange('Update')}
-              className={`${styles.filterButton} ${selectedFilter === 'Update' ? styles.active : ''}`}
-            >
-              Updates
-            </button>
-            <button
-              onClick={() => handleFilterChange('Event')}
-              className={`${styles.filterButton} ${selectedFilter === 'Event' ? styles.active : ''}`}
-            >
-              Events
-            </button>
+            <div className={`${styles.dropdownContent} ${dropdownOpen ? styles.show : ''}`}>
+              {categories.map(category => (
+                <button
+                  key={category}
+                  onClick={() => handleFilterChange(category)}
+                  className={`${styles.dropdownItem} ${selectedFilter === category ? styles.active : ''}`}
+                >
+                  {category}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </div>
@@ -183,32 +220,35 @@ const PublicAnnouncements = () => {
                       {announcement.category}
                     </span>
                   </div>
-                  <div className={styles.viewCount}>
-                    <Eye size={14} />
-                    <span>{announcement.views || 0}</span>
-                  </div>
                 </div>
 
-                {/* Card Image */}
-                {announcement.photos && announcement.photos.length > 0 && (
-                  <div className={styles.cardImage}>
-                    <img 
-                      src={announcement.photos[0].filePath} 
-                      alt={announcement.title}
-                      loading="lazy"
-                    />
-                    {announcement.photos.length > 1 && (
-                      <div className={styles.imageCount}>
-                        +{announcement.photos.length - 1} more
-                      </div>
-                    )}
-                  </div>
-                )}
+                {/* Card Image - Updated with placeholder */}
+                <div className={styles.cardImage}>
+                  {announcement.photos && announcement.photos.length > 0 ? (
+                    <>
+                      <img 
+                        src={announcement.photos[0].filePath.startsWith('http') ? 
+                             announcement.photos[0].filePath : 
+                             `${API_BASE.replace('/api', '')}/${announcement.photos[0].filePath}`} 
+                        alt={announcement.title}
+                        loading="lazy"
+                      />
+                      {announcement.photos.length > 1 && (
+                        <div className={styles.imageCount}>
+                          +{announcement.photos.length - 1} more
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <div className={styles.placeholderImage}>
+                      <Megaphone size={40} />
+                    </div>
+                  )}
+                </div>
 
                 {/* Card Content */}
                 <div className={styles.cardContent}>
                   <h3 className={styles.cardTitle}>{announcement.title}</h3>
-                  
                   <p className={styles.cardDescription}>
                     {announcement.details.length > 150 
                       ? `${announcement.details.substring(0, 150)}...` 
@@ -251,16 +291,16 @@ const PublicAnnouncements = () => {
         )}
       </div>
 
-      {/* View Modal */}
+      {/* Modal */}
       {showViewModal && selectedAnnouncement && (
         <div className={styles.modalOverlay} onClick={closeViewModal}>
           <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
             <div className={styles.modalHeader}>
               <div className={styles.modalTitle}>
+                <h2>{selectedAnnouncement.title}</h2>
                 <span className={`${styles.category} ${styles[selectedAnnouncement.category.toLowerCase()]}`}>
                   {selectedAnnouncement.category}
                 </span>
-                <h2>{selectedAnnouncement.title}</h2>
               </div>
               <button onClick={closeViewModal} className={styles.closeButton}>
                 ×
@@ -268,20 +308,67 @@ const PublicAnnouncements = () => {
             </div>
 
             <div className={styles.modalContent}>
-              {/* Photos Section */}
+              {/* Image Gallery */}
               {selectedAnnouncement.photos && selectedAnnouncement.photos.length > 0 && (
-                <div className={styles.modalPhotos}>
-                  <div className={styles.photoGrid}>
-                    {selectedAnnouncement.photos.map((photo, index) => (
-                      <div key={index} className={styles.photoContainer}>
-                        <img 
-                          src={photo.filePath} 
-                          alt={`${selectedAnnouncement.title} - Image ${index + 1}`}
-                          className={styles.modalPhoto}
-                        />
+                <div className={styles.imageGallery}>
+                  <div className={styles.mainImageContainer}>
+                    <img
+                      src={selectedAnnouncement.photos[currentImageIndex].filePath.startsWith('http') ? 
+                           selectedAnnouncement.photos[currentImageIndex].filePath : 
+                           `${API_BASE.replace('/api', '')}/${selectedAnnouncement.photos[currentImageIndex].filePath}`}
+                      alt={`${selectedAnnouncement.title} - Image ${currentImageIndex + 1}`}
+                      className={styles.mainImage}
+                      onClick={() => setFullscreenImage(
+                        selectedAnnouncement.photos[currentImageIndex].filePath.startsWith('http') 
+                          ? selectedAnnouncement.photos[currentImageIndex].filePath 
+                          : `${API_BASE.replace('/api', '')}/${selectedAnnouncement.photos[currentImageIndex].filePath}`
+                      )}
+                    />
+                    {fullscreenImage && (
+                      <div className={styles.fullscreenOverlay} onClick={() => setFullscreenImage(null)}>
+                        <img src={fullscreenImage} alt="Fullscreen View" className={styles.fullscreenImage} />
+                        <button className={styles.fullscreenClose} onClick={() => setFullscreenImage(null)}>×</button>
                       </div>
-                    ))}
+                    )}
+                    
+                    {selectedAnnouncement.photos.length > 1 && (
+                      <>
+                        <button
+                          className={`${styles.navButton} ${styles.prevButton}`}
+                          onClick={prevImage}
+                        >
+                          <ChevronLeft size={24} />
+                        </button>
+                        <button
+                          className={`${styles.navButton} ${styles.nextButton}`}
+                          onClick={nextImage}
+                        >
+                          <ChevronRight size={24} />
+                        </button>
+                      </>
+                    )}
+
+                    <div className={styles.imageIndicator}>
+                      {currentImageIndex + 1} / {selectedAnnouncement.photos.length}
+                    </div>
                   </div>
+
+                  {/* Thumbnail Navigation */}
+                  {selectedAnnouncement.photos.length > 1 && (
+                    <div className={styles.thumbnails}>
+                      {selectedAnnouncement.photos.map((photo, index) => (
+                        <img
+                          key={index}
+                          src={photo.filePath.startsWith('http') ? 
+                               photo.filePath : 
+                               `${API_BASE.replace('/api', '')}/${photo.filePath}`}
+                          alt={`Thumbnail ${index + 1}`}
+                          className={`${styles.thumbnail} ${currentImageIndex === index ? styles.activeThumbnail : ''}`}
+                          onClick={() => setCurrentImageIndex(index)}
+                        />
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -316,9 +403,6 @@ const PublicAnnouncements = () => {
                 <div className={styles.modalMetadata}>
                   <div className={styles.metaItem}>
                     <strong>Published:</strong> {formatDate(selectedAnnouncement.createdAt)}
-                  </div>
-                  <div className={styles.metaItem}>
-                    <strong>Views:</strong> {selectedAnnouncement.views || 0}
                   </div>
                   {selectedAnnouncement.updatedAt !== selectedAnnouncement.createdAt && (
                     <div className={styles.metaItem}>

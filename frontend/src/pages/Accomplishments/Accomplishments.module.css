@@ -213,7 +213,7 @@
   margin-bottom: 3rem;
 }
 
-/* Accomplishment Cards - Horizontal Layout */
+/* Accomplishment Cards - Horizontal Layout with text overflow fixes */
 .accomplishmentCard {
   background: white;
   border-radius: 16px;
@@ -236,6 +236,7 @@
   justify-content: space-between;
   align-items: flex-start;
   margin-bottom: 1rem;
+  min-width: 0; /* Important for text truncation */
 }
 
 .categoryBadge {
@@ -250,6 +251,7 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  white-space: nowrap; /* Prevent badge text from wrapping */
 }
 
 /* Project Type Colors */
@@ -331,53 +333,57 @@
   backdrop-filter: blur(4px);
 }
 
-/* Card Content - Fixed dimensions and spacing with header */
+/* Card Content - FIXED TEXT OVERFLOW */
 .cardContent {
   padding: 1.5rem;
   display: flex;
   flex-direction: column;
-  justify-content: space-between; /* Distribute space evenly */
+  justify-content: space-between;
   flex: 1;
-  min-width: 0;
-  height: 240px; /* Match card height */
-  overflow: hidden; /* Prevent content overflow */
+  min-width: 0; /* Critical for text truncation in flex containers */
+  height: 240px;
+  overflow: hidden;
 }
 
-/* Card Header with views */
-.cardHeader {
-  display: flex;
-  justify-content: space-between; /* Title left, category right */
-  align-items: flex-start;
-  margin-bottom: 0.75rem;
-}
-
+/* Card Title - FIXED with proper truncation */
 .cardTitle {
   font-size: 1.25rem;
   font-weight: 600;
   color: var(--gray-900);
   margin: 0;
   line-height: 1.3;
+  /* Text truncation with ellipsis - limit to 2 lines */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
-  flex: 1; /* Take remaining space */
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  flex: 1;
+  max-width: calc(100% - 120px); /* Account for category badge */
 }
 
 .cardCategory {
   margin-left: 1rem;
-  flex-shrink: 0; /* Prevent shrinking */
+  flex-shrink: 0;
 }
 
-
+/* Card Description - FIXED with line clamping */
 .cardDescription {
   color: var(--gray-600);
   line-height: 1.4;
   margin: 0;
   font-size: 0.9rem;
   flex: 1;
+  /* Text truncation with ellipsis - limit to 3 lines */
   display: -webkit-box;
+  -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 /* Card Footer - Bottom aligned */
@@ -393,11 +399,15 @@
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
+  min-width: 0; /* Allow shrinking */
+  flex: 1;
 }
 
 .publishDate {
   color: var(--gray-500);
-  font-size: 0.875rem;
+  font-size: 0.75rem;
+  overflow: hidden;
+  max-width: 200px;
 }
 
 .readMoreButton {
@@ -411,6 +421,8 @@
   cursor: pointer;
   transition: all 0.1s ease;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .readMoreButton:hover {
@@ -444,7 +456,7 @@
   font-size: 1rem;
 }
 
-/* Modal Styles */
+/* Modal Styles - Updated with proper text handling */
 .modalOverlay {
   position: fixed;
   top: 0;
@@ -468,6 +480,8 @@
   max-height: 90vh;
   overflow: hidden;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
 }
 
 .modalHeader {
@@ -476,14 +490,25 @@
   align-items: flex-start;
   padding: 2rem 2rem 1rem;
   border-bottom: 1px solid #e2e8f0;
+  flex-shrink: 0;
+}
+
+.modalTitle {
+  flex: 1;
+  min-width: 0; /* Allow title to shrink */
+  padding-right: 1rem;
 }
 
 .modalTitle h2 {
   font-size: 1.5rem;
   font-weight: 600;
   color: var(--gray-900);
+  margin: 0 0 0.5rem 0;
+  /* Allow title to wrap in modal */
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
 }
-
 
 .closeButton {
   background: none;
@@ -494,6 +519,7 @@
   padding: 0;
   line-height: 1;
   transition: color 0.3s ease;
+  flex-shrink: 0;
 }
 
 .closeButton:hover {
@@ -504,6 +530,29 @@
   padding: 0 2rem 2rem;
   overflow-y: auto;
   max-height: calc(90vh - 120px);
+  flex: 1;
+  /* Custom scrollbar for better visibility */
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 #f1f5f9;
+}
+
+/* Custom scrollbar for webkit browsers */
+.modalContent::-webkit-scrollbar {
+  width: 8px;
+}
+
+.modalContent::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 4px;
+}
+
+.modalContent::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+.modalContent::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
 }
 
 /* Image Gallery in Modal */
@@ -519,26 +568,28 @@
   overflow: hidden;
   background-color: #f1f5f9;
   display: flex;
-  justify-content: center; /* center image horizontally */
-  align-items: center;     /* center image vertically */
+  justify-content: center;
+  align-items: center;
+  cursor: zoom-in;
 }
 
 /* Main Image */
 .mainImage {
-  width: 100%;             /* fill container width */
-  max-width: 100%;         /* never exceed container */
-  height: auto;            /* keep aspect ratio */
+  width: 100%;
+  max-width: 100%;
+  height: auto;
   border-radius: 8px;
   display: block;
-  margin: 0 auto;          /* center horizontally */
-  object-fit: contain;     /* prevent cropping */
+  margin: 0 auto;
+  object-fit: contain;
+  cursor: zoom-in;
 }
 
 .navButton {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  background: transparent;;
+  background: transparent;
   border: none;
   padding: 0.75rem;
   border-radius: 50%;
@@ -549,10 +600,9 @@
 
 .navButton:hover {
   opacity: 1;
-  transform: translateY(-50%) scale(1.15); /* grow on hover */
-  filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.5)); /* glowing effect */
+  transform: translateY(-50%) scale(1.15);
+  filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.5));
 }
-
 
 .prevButton {
   left: 1rem;
@@ -601,7 +651,7 @@
   transform: scale(1.05);
 }
 
-/* Modal Details */
+/* Modal Details - FIXED TEXT WRAPPING */
 .modalDetails {
   line-height: 1.6;
 }
@@ -610,6 +660,11 @@
   font-size: 1rem;
   color: var(--gray-700);
   margin: 0 0 2rem 0;
+  /* Ensure long text wraps properly */
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: pre-wrap; /* Preserve formatting but allow wrapping */
+  hyphens: auto;
 }
 
 .fullscreenOverlay {
@@ -644,7 +699,6 @@
   cursor: pointer;
 }
 
-
 /* Modal Metadata */
 .modalMetadata {
   display: flex;
@@ -661,6 +715,9 @@
   flex-direction: column;
   gap: 0.25rem;
   font-size: 0.7rem;
+  /* Allow metadata to wrap if needed */
+  flex: 1;
+  min-width: 200px;
 }
 
 .metaItem strong {
@@ -755,18 +812,22 @@
 
   .accomplishmentCard {
     flex-direction: column;
-    height: auto; /* Allow height to adjust on mobile */
-    min-height: 350px; /* Minimum height for mobile */
+    height: auto;
+    min-height: 350px;
   }
 
   .cardImageContainer {
     width: 100%;
-    height: 200px; /* Fixed height for mobile images */
+    height: 200px;
   }
 
   .cardContent {
-    height: auto; /* Allow content to adjust on mobile */
+    height: auto;
     min-height: 150px;
+  }
+
+  .cardTitle {
+    max-width: 100%; /* Full width on mobile */
   }
 }
 
