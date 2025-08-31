@@ -13,7 +13,7 @@ const localStorage = multer.diskStorage({
       uploadPath += 'avatars/';
     } else if (file.fieldname === 'documents' || file.fieldname === 'fullDocument') {
       uploadPath += 'documents/';
-    } else if (file.fieldname === 'images') {
+    } else if (file.fieldname === 'images' || file.fieldname === 'photos') {
       uploadPath += 'images/';
     } else if (file.fieldname === 'cvFile') {
       uploadPath += 'cvs/';
@@ -47,7 +47,7 @@ const fileFilter = (req, file, cb) => {
   const mimeType = file.mimetype.toLowerCase();
   
   // Check for images
-  if (file.fieldname === 'avatar' || file.fieldname === 'images') {
+  if (file.fieldname === 'avatar' || file.fieldname === 'images' || file.fieldname === 'photos') {
     const isValidImage = allowedImageTypes.test(fileExtension.substring(1)) &&
                         mimeType.startsWith('image/');
     
@@ -87,4 +87,77 @@ const upload = () => {
   });
 };
 
-module.exports = { upload };
+// Helper function to generate file URL
+const getFileUrl = (file, req) => {
+  const protocol = req.protocol;
+  const host = req.get('host');
+  const baseUrl = `${protocol}://${host}`;
+  
+  // Remove 'uploads/' from the path if it exists since we'll add it in the URL
+  const filePath = file.path.replace(/\\/g, '/'); // Convert Windows backslashes to forward slashes
+  
+  return `${baseUrl}/${filePath}`;
+};
+
+// Helper function to delete files
+const deleteFile = (filePath, public_id = null) => {
+  try {
+    // Handle different path formats
+    let actualPath = filePath;
+    
+    // If filePath is a full URL, extract just the file path
+    if (filePath.includes('http')) {
+      const urlParts = filePath.split('/');
+      const uploadsIndex = urlParts.indexOf('uploads');
+      if (uploadsIndex !== -1) {
+        actualPath = urlParts.slice(uploadsIndex).join('/');
+      }
+    }
+    
+    // Ensure path is relative to project root
+    if (!actualPath.startsWith('uploads/')) {
+      actualPath = `uploads/${actualPath}`;
+    }
+    
+    // Check if file exists and delete it
+    if (fs.existsSync(actualPath)) {
+      fs.unlinkSync(actualPath);
+      console.log(`File deleted: ${actualPath}`);
+    } else {
+      console.log(`File not found (already deleted?): ${actualPath}`);
+    }
+  } catch (error) {
+    console.error(`Error deleting file ${filePath}:`, error.message);
+    // Don't throw error - file deletion failure shouldn't stop the main operation
+  }
+};
+
+// Function to clean up orphaned files (optional utility)
+const cleanupOrphanedFiles = (uploadsDir = 'uploads') => {
+  try {
+    const stats = fs.statSync(uploadsDir);
+    if (stats.isDirectory()) {
+      const files = fs.readdirSync(uploadsDir);
+      files.forEach(file => {
+        const filePath = path.join(uploadsDir, file);
+        const stats = fs.statSync(filePath);
+        
+        // Delete files older than 30 days that are not referenced
+        const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+        if (stats.isFile() && stats.mtime < thirtyDaysAgo) {
+          console.log(`Cleaning up old file: ${filePath}`);
+          fs.unlinkSync(filePath);
+        }
+      });
+    }
+  } catch (error) {
+    console.error('Error during cleanup:', error.message);
+  }
+};
+
+module.exports = { 
+  upload, 
+  getFileUrl, 
+  deleteFile, 
+  cleanupOrphanedFiles 
+};

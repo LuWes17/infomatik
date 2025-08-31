@@ -66,8 +66,15 @@ const AdminAccomplishments = () => {
     }));
   };
 
-  // Remove photo from form
+  // And update the removePhoto function to handle cleanup properly:
   const removePhoto = (index) => {
+    const photoToRemove = formData.photos[index];
+    
+    // If it's a File object (not a string URL), revoke the object URL to prevent memory leaks
+    if (typeof photoToRemove !== 'string') {
+      URL.revokeObjectURL(URL.createObjectURL(photoToRemove));
+    }
+    
     setFormData(prev => ({
       ...prev,
       photos: prev.photos.filter((_, i) => i !== index)
@@ -127,27 +134,41 @@ const AdminAccomplishments = () => {
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this accomplishment?')) return;
+  if (!window.confirm('Are you sure you want to delete this accomplishment?')) return;
 
-    try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:4000/api/accomplishments/${id}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to delete accomplishment');
+  try {
+    const token = localStorage.getItem('token');
+    const response = await fetch(`http://localhost:4000/api/accomplishments/${id}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
       }
+    });
 
-      await fetchAccomplishments();
-      closeModal();
-    } catch (err) {
-      setError(err.message);
+    // Get response data even if request failed
+    const data = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+      // Show specific server error if available
+      const errorMessage = data.message || `Server error: ${response.status} ${response.statusText}`;
+      throw new Error(errorMessage);
     }
-  };
+
+    // Success - refresh the list and close modal
+    await fetchAccomplishments();
+    closeModal();
+    
+    // Show success message
+    console.log('Accomplishment deleted successfully');
+    
+  } catch (err) {
+    console.error('Delete error:', err);
+    setError(`Failed to delete accomplishment: ${err.message}`);
+    
+    // Don't close modal on error so user can see the error message
+  }
+};
 
   const closeModal = () => {
     setShowCreateModal(false);
@@ -163,11 +184,24 @@ const AdminAccomplishments = () => {
   };
 
   const openEditModal = () => {
+    // Fix: Make sure photos are properly handled - convert photo objects to URLs if needed
+    const existingPhotos = selectedAccomplishment.photos || [];
+    
+    // Convert photo objects to URLs if they're in object format
+    const photoUrls = existingPhotos.map(photo => {
+      // If photo is an object with filePath property, use filePath
+      if (typeof photo === 'object' && photo.filePath) {
+        return photo.filePath;
+      }
+      // If photo is already a string URL, use it directly
+      return photo;
+    });
+
     setFormData({
       title: selectedAccomplishment.title,
       description: selectedAccomplishment.description,
       projectType: selectedAccomplishment.projectType || '',
-      photos: selectedAccomplishment.photos || []
+      photos: photoUrls // Use the processed URLs
     });
     setIsEditMode(true);
     setShowViewModal(false);
@@ -335,6 +369,7 @@ const AdminAccomplishments = () => {
                   <div className={styles.photosGrid}>
                     {formData.photos.map((photo, index) => (
                       <div key={index} className={styles.photoPreview}>
+                        {/* Fix: Check if photo is a string (URL) or File object */}
                         {typeof photo === 'string' ? (
                           <img 
                             src={photo} 
