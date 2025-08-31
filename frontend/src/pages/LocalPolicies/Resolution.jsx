@@ -279,7 +279,7 @@ const Ordinance = () => {
                   <div className={styles.documentLink}>
                     <FileText size={20} />
                     <a 
-                      href={selectedOrdinance.fullDocument} 
+                      href={selectedOrdinance.fullDocument.filePath} 
                       target="_blank" 
                       rel="noopener noreferrer"
                       className={styles.downloadLink}

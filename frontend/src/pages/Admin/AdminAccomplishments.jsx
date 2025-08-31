@@ -472,7 +472,7 @@ const AdminAccomplishments = () => {
                       {selectedAccomplishment.photos.map((photo, index) => (
                         <div key={index} className={styles.photoContainer}>
                           <img 
-                            src={photo} 
+                            src={photo.filePath} 
                             alt={`Accomplishment ${index + 1}`}
                             className={styles.photo}
                           />
