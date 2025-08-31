@@ -6,7 +6,7 @@ const smsService = require('../services/smsService');
 exports.getApprovedSolicitations = asyncHandler(async (req, res) => {
   const { category, page = 1, limit = 10 } = req.query;
   
-  const filter = { status: 'approved', isPubliclyVisible: true };
+  const filter = { status: 'completed', isPubliclyVisible: true };
   if (category) filter.publicCategory = category;
   
   const skip = (page - 1) * limit;
@@ -33,6 +33,11 @@ exports.getApprovedSolicitations = asyncHandler(async (req, res) => {
 // Create solicitation (User)
 exports.createSolicitation = asyncHandler(async (req, res) => {
   req.body.submittedBy = req.user.id;
+  
+  // Handle uploaded file
+  if (req.file) {
+    req.body.solicitationLetter = req.file.path;
+  }
   
   const solicitation = await SolicitationRequest.create(req.body);
   

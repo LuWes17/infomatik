@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { protect, adminOnly, optionalAuth } = require('../middleware/auth');
+const { upload } = require('../config/upload'); // Add this import
 const {
   getApprovedSolicitations,
   createSolicitation,
@@ -15,7 +16,7 @@ const {
 router.get('/approved', optionalAuth, getApprovedSolicitations);
 
 // Protected routes - User
-router.post('/', protect, createSolicitation);
+router.post('/', protect, upload().single('solicitationLetter'), createSolicitation); // Add upload middleware
 router.get('/my', protect, getMySolicitations);
 
 // Admin routes
