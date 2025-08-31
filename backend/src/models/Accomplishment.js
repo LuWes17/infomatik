@@ -15,17 +15,6 @@ const accomplishmentSchema = new mongoose.Schema({
     maxlength: [2500, 'Description cannot exceed 2500 characters']
   },
   
-  completionDate: {
-    type: Date,
-    required: [true, 'Completion date is required'],
-    validate: {
-      validator: function(v) {
-        return v <= new Date();
-      },
-      message: 'Completion date cannot be in the future'
-    }
-  },
-  
   // Project details
   projectType: {
     type: String,
@@ -84,7 +73,6 @@ accomplishmentSchema.pre('save', function(next) {
 // Indexes for performance
 accomplishmentSchema.index({ projectType: 1 });
 accomplishmentSchema.index({ isPublished: 1 });
-accomplishmentSchema.index({ isFeatured: -1, completionDate: -1 });
 accomplishmentSchema.index({ barangaysAffected: 1 });
 accomplishmentSchema.index({ completionDate: -1 });
 accomplishmentSchema.index({ title: 'text', description: 'text' });

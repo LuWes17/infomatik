@@ -12,7 +12,6 @@ exports.getAllAccomplishments = asyncHandler(async (req, res) => {
   
   const accomplishments = await Accomplishment.find(filter)
     .populate('createdBy', 'firstName lastName')
-    .sort({ isFeatured: -1, completionDate: -1 })
     .limit(limit * 1)
     .skip(skip);
     

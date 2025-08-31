@@ -14,7 +14,6 @@ const AdminAccomplishments = () => {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    completionDate: '',
     projectType: '',
     photos: []
   });
@@ -79,7 +78,6 @@ const AdminAccomplishments = () => {
     setFormData({
       title: '',
       description: '',
-      completionDate: '',
       projectType: '',
       photos: []
     });
@@ -168,8 +166,6 @@ const AdminAccomplishments = () => {
     setFormData({
       title: selectedAccomplishment.title,
       description: selectedAccomplishment.description,
-      completionDate: selectedAccomplishment.completionDate ? 
-        selectedAccomplishment.completionDate.split('T')[0] : '',
       projectType: selectedAccomplishment.projectType || '',
       photos: selectedAccomplishment.photos || []
     });
@@ -237,11 +233,6 @@ const AdminAccomplishments = () => {
                   ? `${accomplishment.description.substring(0, 150)}...` 
                   : accomplishment.description}
               </p>
-              {accomplishment.completionDate && (
-                <div className={styles.eventDetail}>
-                  <Calendar size={14} /> {formatDate(accomplishment.completionDate)}
-                </div>
-              )}
             </div>
 
             <div className={styles.cardFooter}>
@@ -323,19 +314,6 @@ const AdminAccomplishments = () => {
                   rows="6"
                   required
                 />
-              </div>
-
-              <div className={styles.formRow}>
-                <div className={styles.formGroup}>
-                  <label className={styles.label}>Completion Date</label>
-                  <input
-                    type="date"
-                    name="completionDate"
-                    value={formData.completionDate}
-                    onChange={handleInputChange}
-                    className={styles.input}
-                  />
-                </div>
               </div>
 
               <div className={styles.formGroup + ' ' + styles.fullWidth}>
@@ -451,14 +429,6 @@ const AdminAccomplishments = () => {
                   {selectedAccomplishment.description}
                 </div>
 
-                {selectedAccomplishment.completionDate && (
-                  <div className={styles.eventInfoFull}>
-                    <div className={styles.eventDetail}>
-                      <Calendar size={16} />
-                      <strong>Completed:</strong> {formatDate(selectedAccomplishment.completionDate)}
-                    </div>
-                  </div>
-                )}
 
                 {selectedAccomplishment.photos && selectedAccomplishment.photos.length > 0 && (
                   <div className={styles.photosSection}>
