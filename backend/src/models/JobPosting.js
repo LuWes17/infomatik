@@ -45,21 +45,6 @@ const jobPostingSchema = new mongoose.Schema({
     }
   },
   
-  salary: {
-    min: {
-      type: Number,
-      min: [0, 'Minimum salary cannot be negative']
-    },
-    max: {
-      type: Number,
-      min: [0, 'Maximum salary cannot be negative']
-    },
-    currency: {
-      type: String,
-      default: 'PHP'
-    }
-  },
-  
   employmentType: {
     type: String,
     enum: ['full-time', 'part-time', 'contract', 'temporary'],

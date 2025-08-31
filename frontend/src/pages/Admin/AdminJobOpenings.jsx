@@ -34,11 +34,6 @@ const AdminJobOpenings = () => {
     positionsAvailable: 1,
     status: 'open',
     applicationDeadline: '',
-    salary: {
-      min: '',
-      max: '',
-      currency: 'PHP'
-    },
     employmentType: 'full-time',
     location: ''
   });
@@ -249,11 +244,6 @@ const AdminJobOpenings = () => {
       positionsAvailable: 1,
       status: 'open',
       applicationDeadline: '',
-      salary: {
-        min: '',
-        max: '',
-        currency: 'PHP'
-      },
       employmentType: 'full-time',
       location: ''
     });
@@ -278,7 +268,6 @@ const AdminJobOpenings = () => {
       status: selectedJob.status,
       applicationDeadline: selectedJob.applicationDeadline ? 
         new Date(selectedJob.applicationDeadline).toISOString().split('T')[0] : '',
-      salary: selectedJob.salary || { min: '', max: '', currency: 'PHP' },
       employmentType: selectedJob.employmentType || 'full-time',
       location: selectedJob.location || ''
     });
@@ -474,37 +463,6 @@ const AdminJobOpenings = () => {
                     />
                   </div>
                   
-                  <div className="form-group">
-                    <label className="form-label">
-                      Minimum Salary (PHP)
-                    </label>
-                    <input
-                      type="number"
-                      value={formData.salary.min}
-                      onChange={(e) => setFormData({
-                        ...formData, 
-                        salary: {...formData.salary, min: e.target.value}
-                      })}
-                      className="form-input"
-                      placeholder="e.g. 20000"
-                    />
-                  </div>
-                  
-                  <div className="form-group">
-                    <label className="form-label">
-                      Maximum Salary (PHP)
-                    </label>
-                    <input
-                      type="number"
-                      value={formData.salary.max}
-                      onChange={(e) => setFormData({
-                        ...formData, 
-                        salary: {...formData.salary, max: e.target.value}
-                      })}
-                      className="form-input"
-                      placeholder="e.g. 30000"
-                    />
-                  </div>
                   
                   {editMode && (
                     <div className="form-group">
@@ -618,13 +576,6 @@ const AdminJobOpenings = () => {
                           <span className="info-label">Location:</span>
                           {selectedJob.location || 'Not specified'}
                         </div>
-                        {selectedJob.salary && (selectedJob.salary.min || selectedJob.salary.max) && (
-                          <div className="info-row">
-                            <DollarSign size={18} />
-                            <span className="info-label">Salary:</span>
-                            PHP {selectedJob.salary.min || '0'} - {selectedJob.salary.max || 'Negotiable'}
-                          </div>
-                        )}
                         {selectedJob.applicationDeadline && (
                           <div className="info-row">
                             <Calendar size={18} />
