@@ -1,29 +1,33 @@
-import React, { useState, useEffect } from 'react';
-import { Search, Filter, Calendar, MapPin, Eye, X, ChevronLeft, ChevronRight } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
 import styles from './Accomplishments.module.css';
+import { ClipboardCheck, Search, Filter, Calendar, MapPin, Eye, ChevronLeft, ChevronRight, ChevronDown } from 'lucide-react';
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
+const API_BASE = import.meta.env.VITE_API_URL; // e.g. http://localhost:4000/api
 
 const Accomplishments = () => {
   const [accomplishments, setAccomplishments] = useState([]);
-  const [filteredAccomplishments, setFilteredAccomplishments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [selectedFilter, setSelectedFilter] = useState('All');
-  const [searchTerm, setSearchTerm] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [selectedAccomplishment, setSelectedAccomplishment] = useState(null);
+  const [filteredAccomplishments, setFilteredAccomplishments] = useState([]);
+  const [selectedFilter, setSelectedFilter] = useState('All');
+  const [searchTerm, setSearchTerm] = useState('');
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
+  const [fullscreenImage, setFullscreenImage] = useState(null);
+
 
   // Project types for filtering
   const projectTypes = ['All', 'Infrastructure', 'Social Program', 'Health Initiative', 'Education', 'Environment', 'Economic Development', 'Other'];
 
-  // Fetch accomplishments from API
+  // Fetch accomplishments from backend
   const fetchAccomplishments = async () => {
     try {
       setLoading(true);
       const response = await fetch(`${API_BASE}/accomplishments`);
-      
+
       if (!response.ok) {
         throw new Error('Failed to fetch accomplishments');
       }
@@ -42,38 +46,60 @@ const Accomplishments = () => {
     fetchAccomplishments();
   }, []);
 
-  // Apply filters and search
+  // Close dropdown when clicking outside
   useEffect(() => {
-    let filtered = accomplishments;
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setDropdownOpen(false);
+      }
+    };
 
-    // Apply project type filter
-    if (selectedFilter !== 'All') {
-      filtered = filtered.filter(acc => acc.projectType === selectedFilter);
-    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
-    // Apply search filter
-    if (searchTerm.trim()) {
-      filtered = filtered.filter(acc => 
-        acc.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        acc.description.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
+  // Apply filters + search
+  useEffect(() => {
+  let filtered = accomplishments;
 
-    setFilteredAccomplishments(filtered);
-  }, [accomplishments, selectedFilter, searchTerm]);
+  if (selectedFilter !== 'All') {
+    // Directly filter using the full projectType
+    filtered = filtered.filter(a => a.projectType === selectedFilter);
+  }
 
-  // Open accomplishment modal
-  const handleCardClick = (accomplishment) => {
+  if (searchTerm.trim()) {
+    filtered = filtered.filter(a =>
+      a.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      a.description.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }
+
+  setFilteredAccomplishments(filtered);
+}, [accomplishments, selectedFilter, searchTerm]);
+
+
+  // Helper function to get CSS class name for project type
+  const getProjectTypeClass = (projectType) => {
+    if (!projectType) return 'general';
+    const lowerType = projectType.toLowerCase().replace(/\s+/g, ''); // remove spaces
+    return lowerType;
+  };
+
+
+  const openModal = (accomplishment) => {
     setSelectedAccomplishment(accomplishment);
     setCurrentImageIndex(0);
     setShowModal(true);
+    document.body.style.overflow = "hidden";
   };
 
-  // Close modal
   const closeModal = () => {
     setShowModal(false);
     setSelectedAccomplishment(null);
     setCurrentImageIndex(0);
+    document.body.style.overflow = "auto";
   };
 
   // Navigate through images in modal
@@ -93,16 +119,25 @@ const Accomplishments = () => {
     }
   };
 
-  // Format date
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'long',
-      day: 'numeric'
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
     });
   };
 
-  // Loading state
+  const handleFilterChange = (filter) => {
+    setSelectedFilter(filter);
+    setDropdownOpen(false);
+  };
+
+  const toggleDropdown = () => {
+    setDropdownOpen(!dropdownOpen);
+  };
+
   if (loading) {
     return (
       <div className={styles.loadingContainer}>
@@ -112,146 +147,161 @@ const Accomplishments = () => {
     );
   }
 
+  if (error) {
+    return (
+      <div className={styles.errorContainer}>
+        <p>Error: {error}</p>
+        <button onClick={fetchAccomplishments} className={styles.retryButton}>
+          Try Again
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className={styles.accomplishmentsPage}>
       {/* Header Section */}
       <div className={styles.header}>
-        <div className="container">
-          <h1 className={styles.title}>Our Accomplishments</h1>
-          <p className={styles.subtitle}>
-            Discover the progress and achievements we've made for our community
-          </p>
-        </div>
-      </div>
-
-      {/* Filters and Search */}
-      <div className={styles.filtersSection}>
-        <div className="container">
-          <div className={styles.filtersContainer}>
-            {/* Search Bar */}
-            <div className={styles.searchContainer}>
-              <Search className={styles.searchIcon} size={20} />
-              <input
-                type="text"
-                placeholder="Search accomplishments..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className={styles.searchInput}
-              />
-            </div>
-
-            {/* Project Type Filter */}
-            <div className={styles.filterContainer}>
-              <Filter className={styles.filterIcon} size={20} />
-              <select
-                value={selectedFilter}
-                onChange={(e) => setSelectedFilter(e.target.value)}
-                className={styles.filterSelect}
-              >
-                {projectTypes.map(type => (
-                  <option key={type} value={type}>{type}</option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          {/* Results Count */}
-          <div className={styles.resultsCount}>
-            Showing {filteredAccomplishments.length} accomplishment{filteredAccomplishments.length !== 1 ? 's' : ''}
-            {selectedFilter !== 'All' && ` in ${selectedFilter}`}
-            {searchTerm && ` for "${searchTerm}"`}
+        <div className={styles.headerText}>
+          <ClipboardCheck size={92} className={styles.icon} />
+          <div className={styles.headerContent}>
+            <h1>Our Accomplishments</h1>
+            <p>Mga natapos namin na proyekto at programa para sa aming komunidad. Tingnan ang aming mga tagumpay at patuloy na pag-unlad.</p>
           </div>
         </div>
-      </div>
-
-      {/* Error Message */}
-      {error && (
-        <div className="container">
-          <div className={styles.errorMessage}>
-            {error}
+        
+        <div className={styles.filterContainer}>
+          {/* Search Bar */}
+          <div className={styles.searchContainer}>
+            <Search size={20} className={styles.searchIcon} />
+            <input
+              type="text"
+              placeholder="Search accomplishments..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className={styles.searchInput}
+            />
           </div>
-        </div>
-      )}
 
-      {/* Accomplishments Grid */}
-      <div className={styles.contentSection}>
-        <div className="container">
-          {filteredAccomplishments.length === 0 ? (
-            <div className={styles.noResults}>
-              <p>No accomplishments found matching your criteria.</p>
-            </div>
-          ) : (
-            <div className={styles.accomplishmentsGrid}>
-              {filteredAccomplishments.map((accomplishment) => (
-                <div
-                  key={accomplishment._id}
-                  className={styles.accomplishmentCard}
-                  onClick={() => handleCardClick(accomplishment)}
+          {/* Filter Dropdown */}
+          <div className={styles.filterDropdown} ref={dropdownRef}>
+            <Filter size={20} className={styles.filterIcon} />
+            <button
+              onClick={toggleDropdown}
+              className={`${styles.dropdownButton} ${dropdownOpen ? styles.active : ''}`}
+            >
+              <span>{selectedFilter}</span>
+              <ChevronDown size={16} className={`${styles.dropdownArrow} ${dropdownOpen ? styles.open : ''}`} />
+            </button>
+            <div className={`${styles.dropdownContent} ${dropdownOpen ? styles.show : ''}`}>
+              {projectTypes.map(type => (
+                <button
+                  key={type}
+                  onClick={() => handleFilterChange(type)}
+                  className={`${styles.dropdownItem} ${selectedFilter === type ? styles.active : ''}`}
                 >
-                  {/* Card Image */}
-                  <div className={styles.cardImageContainer}>
-                    {accomplishment.photos && accomplishment.photos.length > 0 ? (
-                      <img
-                        src={accomplishment.photos[0].filePath}
-                        alt={accomplishment.title}
-                        className={styles.cardImage}
-                      />
-                    ) : (
-                      <div className={styles.placeholderImage}>
-                        <MapPin size={40} />
-                      </div>
-                    )}
-                    {accomplishment.photos && accomplishment.photos.length > 1 && (
-                      <div className={styles.imageCount}>
-                        +{accomplishment.photos.length - 1} more
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Card Content */}
-                  <div className={styles.cardContent}>
-                    <div className={styles.cardHeader}>
-                      <span className={`${styles.projectType} ${styles[accomplishment.projectType?.toLowerCase()]}`}>
-                        {accomplishment.projectType || 'General'}
-                      </span>
-                      <div className={styles.cardDate}>
-                        <Calendar size={14} />
-                        {formatDate(accomplishment.createdAt)}
-                      </div>
-                    </div>
-
-                    <h3 className={styles.cardTitle}>{accomplishment.title}</h3>
-                    
-                    <p className={styles.cardDescription}>
-                      {accomplishment.description.length > 120
-                        ? `${accomplishment.description.substring(0, 120)}...`
-                        : accomplishment.description
-                      }
-                    </p>
-
-                    <div className={styles.cardFooter}>
-                      <div className={styles.viewsCount}>
-                        <Eye size={16} />
-                        {accomplishment.views || 0} views
-                      </div>
-                      <span className={styles.clickHint}>Click to view details</span>
-                    </div>
-                  </div>
-                </div>
+                  {type}
+                </button>
               ))}
             </div>
-          )}
+          </div>
         </div>
       </div>
 
-      {/* Modal for Accomplishment Details */}
+      {/* Content Section */}
+      <div className={styles.content}>
+        {filteredAccomplishments.length === 0 ? (
+          <div className={styles.noResults}>
+            <ClipboardCheck size={80} className={styles.noResultsIcon} />
+            <h3>No accomplishments found</h3>
+            <p>
+              {searchTerm || selectedFilter !== 'All' 
+                ? 'Try adjusting your search or filter criteria' 
+                : 'Check back later for updates'}
+            </p>
+          </div>
+        ) : (
+          <div className={styles.accomplishmentsGrid}>
+            {filteredAccomplishments.map((accomplishment) => (
+              <div key={accomplishment._id} className={styles.accomplishmentCard}>
+                {/* Card Image */}
+                <div className={styles.cardImageContainer}>
+                  {accomplishment.photos && accomplishment.photos.length > 0 ? (
+                    <>
+                      <img 
+                        src={accomplishment.photos[0].filePath.startsWith('http') ? 
+                             accomplishment.photos[0].filePath : 
+                             `${API_BASE.replace('/api', '')}/${accomplishment.photos[0].filePath}`} 
+                        alt={accomplishment.title}
+                        className={styles.cardImage}
+                        loading="lazy"
+                      />
+                      {accomplishment.photos.length > 1 && (
+                        <div className={styles.imageCount}>
+                          +{accomplishment.photos.length - 1} more
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <div className={styles.placeholderImage}>
+                      <ClipboardCheck size={40} />
+                    </div>
+                  )}
+                </div>
+
+                {/* Card Content */}
+                <div className={styles.cardContent}>
+                  <div className={styles.cardHeader}>
+                    <h3 className={styles.cardTitle}>{accomplishment.title}</h3>
+                    <div className={styles.cardCategory}>
+                      <span className={`${styles.projectType} ${styles[getProjectTypeClass(accomplishment.projectType)]}`}>
+                        {accomplishment.projectType || 'General'}
+                      </span>
+                    </div>
+                  </div>
+                  
+                  {/* Description */}
+                  <p className={styles.cardDescription}>
+                    {accomplishment.description.length > 100 
+                      ? `${accomplishment.description.substring(0, 100)}...` 
+                      : accomplishment.description
+                    }
+                  </p>
+
+                  {/* Footer with date and button */}
+                  <div className={styles.cardFooter}>
+                    <div className={styles.cardMeta}>
+                      <span className={styles.publishDate}>
+                        {formatDate(accomplishment.createdAt)}
+                      </span>
+                    </div>
+                    <button 
+                      onClick={() => openModal(accomplishment)}
+                      className={styles.readMoreButton}
+                    >
+                      Read More
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Modal */}
       {showModal && selectedAccomplishment && (
         <div className={styles.modalOverlay} onClick={closeModal}>
           <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
             <div className={styles.modalHeader}>
-              <h2 className={styles.modalTitle}>{selectedAccomplishment.title}</h2>
-              <button className={styles.closeButton} onClick={closeModal}>
-                <X size={24} />
+              <div className={styles.modalTitle}>
+                <h2>{selectedAccomplishment.title}</h2>
+                <span className={`${styles.projectType} ${styles[getProjectTypeClass(selectedAccomplishment.projectType)]}`}>
+                  {selectedAccomplishment.projectType || 'General'}
+                </span>
+              </div>
+              <button onClick={closeModal} className={styles.closeButton}>
+                ×
               </button>
             </div>
 
@@ -261,10 +311,23 @@ const Accomplishments = () => {
                 <div className={styles.imageGallery}>
                   <div className={styles.mainImageContainer}>
                     <img
-                      src={selectedAccomplishment.photos[currentImageIndex].filePath}
+                      src={selectedAccomplishment.photos[currentImageIndex].filePath.startsWith('http') ? 
+                           selectedAccomplishment.photos[currentImageIndex].filePath : 
+                           `${API_BASE.replace('/api', '')}/${selectedAccomplishment.photos[currentImageIndex].filePath}`}
                       alt={`${selectedAccomplishment.title} - Image ${currentImageIndex + 1}`}
                       className={styles.mainImage}
+                      onClick={() => setFullscreenImage(
+                        selectedAccomplishment.photos[currentImageIndex].filePath.startsWith('http') 
+                          ? selectedAccomplishment.photos[currentImageIndex].filePath 
+                          : `${API_BASE.replace('/api', '')}/${selectedAccomplishment.photos[currentImageIndex].filePath}`
+                      )}
                     />
+                    {fullscreenImage && (
+                      <div className={styles.fullscreenOverlay} onClick={() => setFullscreenImage(null)}>
+                        <img src={fullscreenImage} alt="Fullscreen View" className={styles.fullscreenImage} />
+                        <button className={styles.fullscreenClose} onClick={() => setFullscreenImage(null)}>×</button>
+                      </div>
+                    )}
                     
                     {selectedAccomplishment.photos.length > 1 && (
                       <>
@@ -294,7 +357,9 @@ const Accomplishments = () => {
                       {selectedAccomplishment.photos.map((photo, index) => (
                         <img
                           key={index}
-                          src={photo.filePath}
+                          src={photo.filePath.startsWith('http') ? 
+                               photo.filePath : 
+                               `${API_BASE.replace('/api', '')}/${photo.filePath}`}
                           alt={`Thumbnail ${index + 1}`}
                           className={`${styles.thumbnail} ${currentImageIndex === index ? styles.activeThumbnail : ''}`}
                           onClick={() => setCurrentImageIndex(index)}
@@ -305,33 +370,21 @@ const Accomplishments = () => {
                 </div>
               )}
 
-              {/* Details Section */}
-              <div className={styles.detailsSection}>
-                <div className={styles.modalMeta}>
-                  <span className={`${styles.projectType} ${styles[selectedAccomplishment.projectType?.toLowerCase()]}`}>
-                    {selectedAccomplishment.projectType || 'General'}
-                  </span>
-                  <div className={styles.modalDate}>
-                    <Calendar size={16} />
-                    {formatDate(selectedAccomplishment.createdAt)}
-                  </div>
-                  <div className={styles.modalViews}>
-                    <Eye size={16} />
-                    {selectedAccomplishment.views || 0} views
-                  </div>
-                </div>
+              {/* Content Details */}
+              <div className={styles.modalDetails}>
+                <p className={styles.fullDetails}>{selectedAccomplishment.description}</p>
 
-                <div className={styles.description}>
-                  <h4>Description</h4>
-                  <p>{selectedAccomplishment.description}</p>
-                </div>
-
-                {selectedAccomplishment.createdBy && (
-                  <div className={styles.createdBy}>
-                    <h4>Published by</h4>
-                    <p>{selectedAccomplishment.createdBy.firstName} {selectedAccomplishment.createdBy.lastName}</p>
+                {/* Metadata */}
+                <div className={styles.modalMetadata}>
+                  <div className={styles.metaItem}>
+                    <strong>Published:</strong> {formatDate(selectedAccomplishment.createdAt)}
                   </div>
-                )}
+                  {selectedAccomplishment.updatedAt !== selectedAccomplishment.createdAt && (
+                    <div className={styles.metaItem}>
+                      <strong>Last Updated:</strong> {formatDate(selectedAccomplishment.updatedAt)}
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>
