@@ -8,11 +8,6 @@ exports.getAllPolicies = asyncHandler(async (req, res) => {
   // FIXED: For admin requests, don't filter by isPublished
   const filter = {};
   
-  // Only apply isPublished filter for non-admin requests
-  if (!admin || admin !== 'true') {
-    filter.isPublished = true;
-  }
-  
   if (type) filter.type = type;
   if (category) filter.category = category;
   
