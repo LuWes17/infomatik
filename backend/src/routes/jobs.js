@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { protect, adminOnly, optionalAuth } = require('../middleware/auth');
+const { upload } = require('../config/upload'); // Add upload middleware import
 const {
   getAllJobPostings,
   getJobPostingById,
@@ -21,7 +22,8 @@ router.get('/', optionalAuth, getAllJobPostings);
 router.get('/:id', optionalAuth, getJobPostingById);
 
 // Protected routes - User
-router.post('/:id/apply', protect, applyForJob);
+// Add multer middleware for CV file upload
+router.post('/:id/apply', protect, upload().single('cvFile'), applyForJob);
 router.get('/my/applications', protect, getMyApplications);
 
 // Admin only routes

@@ -124,40 +124,123 @@ exports.toggleJobStatus = asyncHandler(async (req, res) => {
 
 // Apply for job (User)
 exports.applyForJob = asyncHandler(async (req, res) => {
-  const jobPosting = await JobPosting.findById(req.params.id);
-  
-  if (!jobPosting) {
-    return res.status(404).json({
+  try {
+    const jobPosting = await JobPosting.findById(req.params.id);
+    
+    if (!jobPosting) {
+      return res.status(404).json({
+        success: false,
+        message: 'Job posting not found'
+      });
+    }
+    
+    // Check for existing application
+    const existingApplication = await JobApplication.findOne({
+      applicant: req.user.id,
+      jobPosting: req.params.id
+    });
+    
+    if (existingApplication) {
+      return res.status(400).json({
+        success: false,
+        message: 'You have already applied for this position'
+      });
+    }
+    
+    // Check if CV file was uploaded
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: 'CV file is required'
+      });
+    }
+    
+    // Validate file type
+    const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+    if (!allowedTypes.includes(req.file.mimetype)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Only PDF, DOC, and DOCX files are allowed'
+      });
+    }
+    
+    // Prepare application data
+    const applicationData = {
+      applicant: req.user.id,
+      jobPosting: req.params.id,
+      fullName: req.body.fullName || `${req.user.firstName} ${req.user.lastName}`,
+      birthday: req.body.birthday,
+      phone: req.body.phone || req.user.contactNumber,
+      address: req.body.address,
+      cvFile: req.file.path // Store the file path
+    };
+    
+    // Validate required fields
+    const requiredFields = ['fullName', 'birthday', 'phone', 'address'];
+    for (const field of requiredFields) {
+      if (!applicationData[field]) {
+        return res.status(400).json({
+          success: false,
+          message: `${field} is required`
+        });
+      }
+    }
+    
+    // Validate birthday
+    if (new Date(applicationData.birthday) > new Date()) {
+      return res.status(400).json({
+        success: false,
+        message: 'Birthday cannot be in the future'
+      });
+    }
+    
+    // Validate Philippine phone number format
+    const phoneRegex = /^(09|\+639)\d{9}$/;
+    if (!phoneRegex.test(applicationData.phone)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please enter a valid Philippine mobile number'
+      });
+    }
+    
+    const application = await JobApplication.create(applicationData);
+    
+    // Populate the created application for response
+    await application.populate('jobPosting', 'title');
+    
+    res.status(201).json({
+      success: true,
+      message: 'Application submitted successfully',
+      data: application
+    });
+    
+  } catch (error) {
+    console.error('Error in applyForJob:', error);
+    
+    // Handle validation errors
+    if (error.name === 'ValidationError') {
+      const errors = Object.values(error.errors).map(err => err.message);
+      return res.status(400).json({
+        success: false,
+        message: 'Validation failed',
+        errors
+      });
+    }
+    
+    // Handle duplicate application error (from schema index)
+    if (error.code === 11000) {
+      return res.status(400).json({
+        success: false,
+        message: 'You have already applied for this position'
+      });
+    }
+    
+    res.status(500).json({
       success: false,
-      message: 'Job posting not found'
+      message: 'Internal server error',
+      error: process.env.NODE_ENV === 'development' ? error.message : 'Something went wrong'
     });
   }
-  
-  // Check for existing application
-  const existingApplication = await JobApplication.findOne({
-    applicant: req.user.id,
-    jobPosting: req.params.id
-  });
-  
-  if (existingApplication) {
-    return res.status(400).json({
-      success: false,
-      message: 'You have already applied for this position'
-    });
-  }
-  
-  req.body.applicant = req.user.id;
-  req.body.jobPosting = req.params.id;
-  req.body.fullName = req.body.fullName || `${req.user.firstName} ${req.user.lastName}`;
-  req.body.phone = req.body.phone || req.user.contactNumber;
-  
-  const application = await JobApplication.create(req.body);
-  
-  res.status(201).json({
-    success: true,
-    message: 'Application submitted successfully',
-    data: application
-  });
 });
 
 // Get my applications (User)

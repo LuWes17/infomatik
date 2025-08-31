@@ -11,10 +11,12 @@ const localStorage = multer.diskStorage({
     // Create directories based on file type
     if (file.fieldname === 'avatar') {
       uploadPath += 'avatars/';
-    } else if (file.fieldname === 'documents') {
+    } else if (file.fieldname === 'documents' || file.fieldname === 'fullDocument') {
       uploadPath += 'documents/';
     } else if (file.fieldname === 'images') {
       uploadPath += 'images/';
+    } else if (file.fieldname === 'cvFile') {
+      uploadPath += 'cvs/';
     } else {
       uploadPath += 'misc/';
     }
@@ -56,8 +58,8 @@ const fileFilter = (req, file, cb) => {
     }
   }
   
-  // Check for documents
-  if (file.fieldname === 'documents') {
+  // Check for documents (including CV files)
+  if (file.fieldname === 'documents' || file.fieldname === 'fullDocument' || file.fieldname === 'cvFile') {
     const isValidDoc = allowedDocTypes.test(fileExtension.substring(1)) ||
                       ['application/pdf', 'application/msword', 
                        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
@@ -80,58 +82,9 @@ const upload = () => {
     storage: localStorage,
     fileFilter,
     limits: {
-      fileSize: 10 * 1024 * 1024, // 10MB limit
-      files: 5 // Maximum 5 files per request
+      fileSize: 10 * 1024 * 1024 // 10MB limit
     }
   });
 };
 
-// Delete file from local storage
-const deleteFile = async (filePath) => {
-  try {
-    if (fs.existsSync(filePath)) {
-      fs.unlinkSync(filePath);
-      console.log('Deleted local file:', filePath);
-      return { success: true };
-    }
-    
-    return { success: false, message: 'File not found' };
-  } catch (error) {
-    console.error('Delete file error:', error);
-    return { success: false, error: error.message };
-  }
-};
-
-// Helper function to get file URL
-const getFileUrl = (file, req) => {
-  // Local file URL
-  const baseUrl = `${req.protocol}://${req.get('host')}`;
-  return `${baseUrl}/${file.path.replace(/\\/g, '/')}`;
-};
-
-// Validate file size and type after upload
-const validateUploadedFiles = (files, maxSize = 10 * 1024 * 1024) => {
-  const errors = [];
-  
-  if (!files || files.length === 0) {
-    return { isValid: true, errors: [] };
-  }
-  
-  files.forEach((file, index) => {
-    if (file.size > maxSize) {
-      errors.push(`File ${index + 1} (${file.originalname}) exceeds maximum size of ${maxSize / (1024 * 1024)}MB`);
-    }
-  });
-  
-  return {
-    isValid: errors.length === 0,
-    errors
-  };
-};
-
-module.exports = {
-  upload,
-  deleteFile,
-  getFileUrl,
-  validateUploadedFiles
-};
+module.exports = { upload };
