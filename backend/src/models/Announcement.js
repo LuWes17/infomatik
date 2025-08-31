@@ -42,10 +42,11 @@ const announcementSchema = new mongoose.Schema({
     maxlength: [200, 'Event location cannot exceed 200 characters']
   },
   
-  // Media support (up to 4 photos as per PRD)
+  // Media support - Updated for B2
   photos: [{
     fileName: String,
     filePath: String,
+    fileId: String, // B2 file ID for deletion
     uploadedAt: {
       type: Date,
       default: Date.now

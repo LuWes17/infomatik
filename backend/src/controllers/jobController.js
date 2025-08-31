@@ -2,6 +2,7 @@ const JobPosting = require('../models/JobPosting');
 const JobApplication = require('../models/JobApplication');
 const asyncHandler = require('../middleware/async');
 const smsService = require('../services/smsService');
+const { uploadToB2, deleteFromB2 } = require('../config/upload');
 
 // Get all job postings
 exports.getAllJobPostings = asyncHandler(async (req, res) => {
@@ -122,32 +123,42 @@ exports.toggleJobStatus = asyncHandler(async (req, res) => {
   });
 });
 
-// Apply for job (User)
+// Apply for job with CV upload
 exports.applyForJob = asyncHandler(async (req, res) => {
   try {
-    const jobPosting = await JobPosting.findById(req.params.id);
+    const jobId = req.params.id;
+    const userId = req.user.id;
     
-    if (!jobPosting) {
+    // Check if job exists and is active
+    const job = await JobPosting.findById(jobId);
+    if (!job) {
       return res.status(404).json({
         success: false,
         message: 'Job posting not found'
       });
     }
     
-    // Check for existing application
+    if (!job.isActive) {
+      return res.status(400).json({
+        success: false,
+        message: 'This job posting is no longer active'
+      });
+    }
+    
+    // Check if user already applied
     const existingApplication = await JobApplication.findOne({
-      applicant: req.user.id,
-      jobPosting: req.params.id
+      jobPosting: jobId,
+      applicant: userId
     });
     
     if (existingApplication) {
       return res.status(400).json({
         success: false,
-        message: 'You have already applied for this position'
+        message: 'You have already applied for this job'
       });
     }
     
-    // Check if CV file was uploaded
+    // Handle CV file upload to B2
     if (!req.file) {
       return res.status(400).json({
         success: false,
@@ -155,119 +166,101 @@ exports.applyForJob = asyncHandler(async (req, res) => {
       });
     }
     
-    // Validate file type
-    const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
-    if (!allowedTypes.includes(req.file.mimetype)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Only PDF, DOC, and DOCX files are allowed'
-      });
-    }
+    console.log('Uploading CV to B2...');
     
-    // Prepare application data
-    const applicationData = {
-      applicant: req.user.id,
-      jobPosting: req.params.id,
-      fullName: req.body.fullName || `${req.user.firstName} ${req.user.lastName}`,
-      birthday: req.body.birthday,
-      phone: req.body.phone || req.user.contactNumber,
-      address: req.body.address,
-      cvFile: req.file.path // Store the file path
-    };
-    
-    // Validate required fields
-    const requiredFields = ['fullName', 'birthday', 'phone', 'address'];
-    for (const field of requiredFields) {
-      if (!applicationData[field]) {
-        return res.status(400).json({
-          success: false,
-          message: `${field} is required`
-        });
+    let cvFileInfo;
+    try {
+      const uploadResult = await uploadToB2(req.file, 'cvs');
+      
+      if (uploadResult.success) {
+        cvFileInfo = {
+          fileName: uploadResult.originalName,
+          filePath: uploadResult.fileUrl,
+          fileId: uploadResult.fileId, // Store B2 file ID for deletion
+          uploadedAt: new Date()
+        };
+        
+        console.log(`Successfully uploaded CV to B2: ${uploadResult.fileName}`);
+      } else {
+        throw new Error('Upload to B2 failed');
       }
-    }
-    
-    // Validate birthday
-    if (new Date(applicationData.birthday) > new Date()) {
-      return res.status(400).json({
+    } catch (uploadError) {
+      console.error('Error uploading CV to B2:', uploadError);
+      return res.status(500).json({
         success: false,
-        message: 'Birthday cannot be in the future'
+        message: 'Failed to upload CV to storage',
+        error: uploadError.message
       });
     }
     
-    // Validate Philippine phone number format
-    const phoneRegex = /^(09|\+639)\d{9}$/;
-    if (!phoneRegex.test(applicationData.phone)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Please enter a valid Philippine mobile number'
-      });
-    }
+    // Create job application
+    const applicationData = {
+      jobPosting: jobId,
+      applicant: userId,
+      cvFile: cvFileInfo.filePath,
+      cvFileId: cvFileInfo.fileId, // Store for deletion
+      coverLetter: req.body.coverLetter,
+      status: 'pending'
+    };
     
     const application = await JobApplication.create(applicationData);
     
-    // Populate the created application for response
-    await application.populate('jobPosting', 'title');
+    // Populate the application for response
+    await application.populate('jobPosting', 'title company');
+    await application.populate('applicant', 'firstName lastName contactNumber');
     
     res.status(201).json({
       success: true,
-      message: 'Application submitted successfully',
+      message: 'Job application submitted successfully',
       data: application
     });
-    
   } catch (error) {
-    console.error('Error in applyForJob:', error);
-    
-    // Handle validation errors
-    if (error.name === 'ValidationError') {
-      const errors = Object.values(error.errors).map(err => err.message);
-      return res.status(400).json({
-        success: false,
-        message: 'Validation failed',
-        errors
-      });
-    }
-    
-    // Handle duplicate application error (from schema index)
-    if (error.code === 11000) {
-      return res.status(400).json({
-        success: false,
-        message: 'You have already applied for this position'
-      });
-    }
-    
+    console.error('Error applying for job:', error);
     res.status(500).json({
       success: false,
-      message: 'Internal server error',
-      error: process.env.NODE_ENV === 'development' ? error.message : 'Something went wrong'
+      message: 'Failed to submit job application',
+      error: error.message
     });
   }
 });
 
-// Get my applications (User)
+
+// Get user's job applications
 exports.getMyApplications = asyncHandler(async (req, res) => {
+  const { page = 1, limit = 10 } = req.query;
+  const skip = (page - 1) * limit;
+  
   const applications = await JobApplication.find({ applicant: req.user.id })
     .populate('jobPosting', 'title status')
-    .sort({ createdAt: -1 });
+    .sort({ createdAt: -1 })
+    .limit(limit * 1)
+    .skip(skip);
     
+  const total = await JobApplication.countDocuments({ applicant: req.user.id });
+  
   res.status(200).json({
     success: true,
-    data: applications
+    data: applications,
+    pagination: {
+      current: page * 1,
+      pages: Math.ceil(total / limit),
+      total
+    }
   });
 });
 
-// Get all applications (Admin)
+// Get all job applications (Admin)
 exports.getAllApplications = asyncHandler(async (req, res) => {
-  const { status, jobId, page = 1, limit = 10 } = req.query;
+  const { status, jobId, page = 1, limit = 20 } = req.query;
+  const skip = (page - 1) * limit;
   
   const filter = {};
   if (status) filter.status = status;
   if (jobId) filter.jobPosting = jobId;
   
-  const skip = (page - 1) * limit;
-  
   const applications = await JobApplication.find(filter)
-    .populate('applicant', 'firstName lastName contactNumber')
     .populate('jobPosting', 'title')
+    .populate('applicant', 'firstName lastName contactNumber')
     .sort({ createdAt: -1 })
     .limit(limit * 1)
     .skip(skip);

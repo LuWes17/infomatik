@@ -2,42 +2,12 @@
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const b2Service = require('./b2');
 
-// Local storage configuration
-const localStorage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    let uploadPath = 'uploads/';
-    
-    // Create directories based on file type
-    if (file.fieldname === 'avatar') {
-      uploadPath += 'avatars/';
-    } else if (file.fieldname === 'documents' || file.fieldname === 'fullDocument') {
-      uploadPath += 'documents/';
-    } else if (file.fieldname === 'images' || file.fieldname === 'photos') {
-      uploadPath += 'images/';
-    } else if (file.fieldname === 'cvFile') {
-      uploadPath += 'cvs/';
-    } else {
-      uploadPath += 'misc/';
-    }
-    
-    // Create directory if it doesn't exist
-    if (!fs.existsSync(uploadPath)) {
-      fs.mkdirSync(uploadPath, { recursive: true });
-    }
-    
-    cb(null, uploadPath);
-  },
-  filename: (req, file, cb) => {
-    // Generate unique filename
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    const fileExtension = path.extname(file.originalname);
-    const fileName = file.fieldname + '-' + uniqueSuffix + fileExtension;
-    cb(null, fileName);
-  }
-});
+// Memory storage for temporary file handling
+const memoryStorage = multer.memoryStorage();
 
-// File filter function
+// File filter function (same as before)
 const fileFilter = (req, file, cb) => {
   // Define allowed file types
   const allowedImageTypes = /jpeg|jpg|png|gif|webp/;
@@ -59,7 +29,7 @@ const fileFilter = (req, file, cb) => {
   }
   
   // Check for documents (including CV files)
-  if (file.fieldname === 'documents' || file.fieldname === 'fullDocument' || file.fieldname === 'cvFile') {
+  if (file.fieldname === 'documents' || file.fieldname === 'fullDocument' || file.fieldname === 'cvFile' || file.fieldname === 'solicitationLetter') {
     const isValidDoc = allowedDocTypes.test(fileExtension.substring(1)) ||
                       ['application/pdf', 'application/msword', 
                        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
@@ -76,10 +46,10 @@ const fileFilter = (req, file, cb) => {
   cb(null, true);
 };
 
-// Multer configuration for local storage
+// Updated multer configuration for B2
 const upload = () => {
   return multer({
-    storage: localStorage,
+    storage: memoryStorage, // Use memory storage instead of disk storage
     fileFilter,
     limits: {
       fileSize: 10 * 1024 * 1024 // 10MB limit
@@ -87,20 +57,132 @@ const upload = () => {
   });
 };
 
-// Helper function to generate file URL
-const getFileUrl = (file, req) => {
-  const protocol = req.protocol;
-  const host = req.get('host');
-  const baseUrl = `${protocol}://${host}`;
-  
-  // Remove 'uploads/' from the path if it exists since we'll add it in the URL
-  const filePath = file.path.replace(/\\/g, '/'); // Convert Windows backslashes to forward slashes
-  
-  return `${baseUrl}/${filePath}`;
+/**
+ * Upload file to B2 and return file info
+ * @param {Object} file - Multer file object
+ * @param {string} folder - Optional folder path
+ * @returns {Promise<Object>} Upload result
+ */
+const uploadToB2 = async (file, folder = null) => {
+  try {
+    // Determine folder based on fieldname if not specified
+    if (!folder) {
+      if (file.fieldname === 'avatar') {
+        folder = 'avatars';
+      } else if (file.fieldname === 'documents' || file.fieldname === 'fullDocument') {
+        folder = 'documents';
+      } else if (file.fieldname === 'images' || file.fieldname === 'photos') {
+        folder = 'images';
+      } else if (file.fieldname === 'cvFile') {
+        folder = 'cvs';
+      } else if (file.fieldname === 'solicitationLetter') {
+        folder = 'solicitations';
+      } else {
+        folder = 'misc';
+      }
+    }
+
+    // Generate unique filename
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    const fileExtension = path.extname(file.originalname);
+    const fileName = `${file.fieldname}-${uniqueSuffix}${fileExtension}`;
+
+    // Upload to B2
+    const result = await b2Service.uploadFile(
+      file.buffer,
+      fileName,
+      file.mimetype,
+      folder
+    );
+
+    return {
+      success: true,
+      fileId: result.fileId,
+      fileName: result.fileName,
+      fileUrl: result.fileUrl,
+      originalName: file.originalname,
+      size: result.size,
+      folder: folder
+    };
+  } catch (error) {
+    console.error('Upload to B2 failed:', error);
+    throw error;
+  }
 };
 
-// Helper function to delete files
-const deleteFile = (filePath, public_id = null) => {
+/**
+ * Upload multiple files to B2 (sequentially to avoid token conflicts)
+ * @param {Array} files - Array of multer file objects
+ * @param {string} folder - Optional folder path
+ * @returns {Promise<Array>} Array of upload results
+ */
+const uploadMultipleToB2 = async (files, folder = null) => {
+  try {
+    const results = [];
+    
+    // Upload files sequentially to avoid B2 token conflicts
+    for (const file of files) {
+      const result = await uploadToB2(file, folder);
+      results.push(result);
+    }
+    
+    return results;
+  } catch (error) {
+    console.error('Multiple upload to B2 failed:', error);
+    throw error;
+  }
+};
+
+/**
+ * Delete file from B2
+ * @param {string} fileId - B2 file ID
+ * @param {string} fileName - File name
+ * @returns {Promise<Object>} Delete result
+ */
+const deleteFromB2 = async (fileId, fileName) => {
+  try {
+    const result = await b2Service.deleteFile(fileId, fileName);
+    return result;
+  } catch (error) {
+    console.error('Delete from B2 failed:', error);
+    // Don't throw error - file deletion failure shouldn't stop the main operation
+    return { success: false, error: error.message };
+  }
+};
+
+/**
+ * Get file URL from B2 (for backward compatibility)
+ * @param {Object} file - File object with B2 info
+ * @returns {string} File URL
+ */
+const getFileUrl = (file) => {
+  // If it's already a B2 URL, return as is
+  if (typeof file === 'string' && file.includes('backblazeb2.com')) {
+    return file;
+  }
+  
+  // If it's a file object with fileUrl, return that
+  if (file && file.fileUrl) {
+    return file.fileUrl;
+  }
+  
+  // For backward compatibility with old local files
+  if (file && file.path) {
+    const protocol = 'http'; // You might need to adjust this
+    const host = 'localhost:5000'; // You might need to adjust this
+    const baseUrl = `${protocol}://${host}`;
+    const filePath = file.path.replace(/\\/g, '/');
+    return `${baseUrl}/${filePath}`;
+  }
+  
+  return null;
+};
+
+/**
+ * Clean up local files (for migration purposes)
+ * @param {string} filePath - Local file path
+ */
+const deleteFile = (filePath) => {
   try {
     // Handle different path formats
     let actualPath = filePath;
@@ -122,19 +204,27 @@ const deleteFile = (filePath, public_id = null) => {
     // Check if file exists and delete it
     if (fs.existsSync(actualPath)) {
       fs.unlinkSync(actualPath);
-      console.log(`File deleted: ${actualPath}`);
+      console.log(`Local file deleted: ${actualPath}`);
     } else {
-      console.log(`File not found (already deleted?): ${actualPath}`);
+      console.log(`Local file not found (already deleted?): ${actualPath}`);
     }
   } catch (error) {
-    console.error(`Error deleting file ${filePath}:`, error.message);
+    console.error(`Error deleting local file ${filePath}:`, error.message);
     // Don't throw error - file deletion failure shouldn't stop the main operation
   }
 };
 
-// Function to clean up orphaned files (optional utility)
+/**
+ * Function to clean up orphaned files (optional utility)
+ * @param {string} uploadsDir - Local uploads directory
+ */
 const cleanupOrphanedFiles = (uploadsDir = 'uploads') => {
   try {
+    if (!fs.existsSync(uploadsDir)) {
+      console.log('No local uploads directory found - already cleaned up or using B2 only');
+      return;
+    }
+    
     const stats = fs.statSync(uploadsDir);
     if (stats.isDirectory()) {
       const files = fs.readdirSync(uploadsDir);
@@ -145,19 +235,23 @@ const cleanupOrphanedFiles = (uploadsDir = 'uploads') => {
         // Delete files older than 30 days that are not referenced
         const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
         if (stats.isFile() && stats.mtime < thirtyDaysAgo) {
-          console.log(`Cleaning up old file: ${filePath}`);
+          console.log(`Cleaning up old local file: ${filePath}`);
           fs.unlinkSync(filePath);
         }
       });
     }
   } catch (error) {
-    console.error('Error during cleanup:', error.message);
+    console.error('Error during local cleanup:', error.message);
   }
 };
 
 module.exports = { 
   upload, 
+  uploadToB2,
+  uploadMultipleToB2,
+  deleteFromB2,
   getFileUrl, 
   deleteFile, 
-  cleanupOrphanedFiles 
+  cleanupOrphanedFiles,
+  b2Service // Export B2 service for direct access
 };

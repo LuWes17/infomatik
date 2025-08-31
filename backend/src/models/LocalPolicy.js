@@ -39,12 +39,11 @@ const localPolicySchema = new mongoose.Schema({
     maxlength: [1000, 'Summary cannot exceed 1000 characters']
   },
   
+  // Document storage - Updated for B2
   fullDocument: {
     fileName: String,
-    filePath: {
-      type: String,
-      required: [true, 'Full document file is required']
-    },
+    filePath: String,
+    fileId: String, // B2 file ID for deletion
     uploadedAt: {
       type: Date,
       default: Date.now

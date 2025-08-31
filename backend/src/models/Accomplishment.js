@@ -22,10 +22,11 @@ const accomplishmentSchema = new mongoose.Schema({
     required: true
   },
   
-  // Media documentation
+  // Media documentation - Updated for B2
   photos: [{
     fileName: String,
     filePath: String,
+    fileId: String, // B2 file ID for deletion
     uploadedAt: {
       type: Date,
       default: Date.now

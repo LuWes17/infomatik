@@ -45,10 +45,14 @@ const jobApplicationSchema = new mongoose.Schema({
     maxlength: [300, 'Address cannot exceed 300 characters']
   },
   
-  // CV upload
+    // CV Upload - Updated for B2
   cvFile: {
-    type: String, // File path or URL
+    type: String, // File URL
     required: [true, 'CV file is required']
+  },
+  
+  cvFileId: {
+    type: String // B2 file ID for deletion
   },
   
   // Application status

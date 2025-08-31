@@ -1,7 +1,7 @@
 // backend/src/controllers/announcementController.js
 const Announcement = require('../models/Announcement');
 const asyncHandler = require('../middleware/async');
-const { getFileUrl, deleteFile } = require('../config/upload');
+const { uploadMultipleToB2, deleteFromB2, getFileUrl } = require('../config/upload');
 
 exports.getAllAnnouncements = asyncHandler(async (req, res) => {
   const { category, page = 1, limit = 50 } = req.query;
@@ -59,18 +59,34 @@ exports.createAnnouncement = asyncHandler(async (req, res) => {
     // Set the creator
     req.body.createdBy = req.user.id;
     
-    // Handle file uploads
+    // Handle file uploads to B2
     const photos = [];
     if (req.files && req.files.length > 0) {
-      req.files.forEach(file => {
-        const fileUrl = getFileUrl(file, req);
-        console.log('Generated file URL:', fileUrl); // Debug log
-        photos.push({
-          fileName: file.originalname,
-          filePath: fileUrl,
-          uploadedAt: new Date()
+      console.log(`Uploading ${req.files.length} files to B2...`);
+      
+      try {
+        const uploadResults = await uploadMultipleToB2(req.files, 'images');
+        
+        uploadResults.forEach(result => {
+          if (result.success) {
+            photos.push({
+              fileName: result.originalName,
+              filePath: result.fileUrl,
+              fileId: result.fileId, // Store B2 file ID for deletion
+              uploadedAt: new Date()
+            });
+          }
         });
-      });
+        
+        console.log(`Successfully uploaded ${photos.length} files to B2`);
+      } catch (uploadError) {
+        console.error('Error uploading files to B2:', uploadError);
+        return res.status(500).json({
+          success: false,
+          message: 'Failed to upload files to storage',
+          error: uploadError.message
+        });
+      }
     }
     
     // Add photos to the request body
@@ -84,18 +100,7 @@ exports.createAnnouncement = asyncHandler(async (req, res) => {
       });
     }
     
-    // Validate event-specific fields
-    if (req.body.category === 'Event' && !req.body.eventDate) {
-      return res.status(400).json({
-        success: false,
-        message: 'Event date is required for Event category'
-      });
-    }
-    
     const announcement = await Announcement.create(req.body);
-    
-    // Populate the creator info for response
-    await announcement.populate('createdBy', 'firstName lastName');
     
     res.status(201).json({
       success: true,
@@ -103,18 +108,11 @@ exports.createAnnouncement = asyncHandler(async (req, res) => {
       data: announcement
     });
   } catch (error) {
-    console.error('Create announcement error:', error);
-    
-    // Delete uploaded files if announcement creation fails
-    if (req.files && req.files.length > 0) {
-      req.files.forEach(file => {
-        deleteFile(file.path, file.public_id);
-      });
-    }
-    
+    console.error('Error creating announcement:', error);
     res.status(500).json({
       success: false,
-      message: error.message || 'Failed to create announcement'
+      message: 'Failed to create announcement',
+      error: error.message
     });
   }
 });
@@ -130,46 +128,64 @@ exports.updateAnnouncement = asyncHandler(async (req, res) => {
       });
     }
     
-    // Set the updater
-    req.body.updatedBy = req.user.id;
+    // Store old photos for potential cleanup
+    const oldPhotos = [...announcement.photos];
     
-    // Handle new file uploads
-    const newPhotos = [];
+    // Handle new file uploads to B2
+    let newPhotos = [];
     if (req.files && req.files.length > 0) {
-      req.files.forEach(file => {
-        newPhotos.push({
-          fileName: file.originalname,
-          filePath: getFileUrl(file, req),
-          uploadedAt: new Date()
-        });
-      });
+      console.log(`Uploading ${req.files.length} new files to B2...`);
       
-      // Combine existing photos with new photos (max 4 total)
-      const existingPhotos = announcement.photos || [];
-      const totalPhotos = existingPhotos.length + newPhotos.length;
-      
-      if (totalPhotos > 4) {
-        // Delete uploaded files if they exceed limit
-        req.files.forEach(file => {
-          deleteFile(file.path, file.public_id);
+      try {
+        const uploadResults = await uploadMultipleToB2(req.files, 'images');
+        
+        uploadResults.forEach(result => {
+          if (result.success) {
+            newPhotos.push({
+              fileName: result.originalName,
+              filePath: result.fileUrl,
+              fileId: result.fileId, // Store B2 file ID for deletion
+              uploadedAt: new Date()
+            });
+          }
         });
         
-        return res.status(400).json({
+        console.log(`Successfully uploaded ${newPhotos.length} new files to B2`);
+      } catch (uploadError) {
+        console.error('Error uploading new files to B2:', uploadError);
+        return res.status(500).json({
           success: false,
-          message: 'Maximum 4 photos allowed per announcement'
+          message: 'Failed to upload new files to storage',
+          error: uploadError.message
         });
       }
-      
-      req.body.photos = [...existingPhotos, ...newPhotos];
     }
     
-    // Validate event-specific fields
-    if (req.body.category === 'Event' && !req.body.eventDate) {
-      return res.status(400).json({
-        success: false,
-        message: 'Event date is required for Event category'
-      });
+    // Handle photo updates (replace existing with new ones if provided)
+    if (newPhotos.length > 0) {
+      req.body.photos = newPhotos;
+      
+      // Clean up old photos from B2 (asynchronously, don't block response)
+      if (oldPhotos.length > 0) {
+        setImmediate(async () => {
+          for (const photo of oldPhotos) {
+            if (photo.fileId) {
+              try {
+                await deleteFromB2(photo.fileId, photo.filePath.split('/').pop());
+                console.log(`Deleted old photo from B2: ${photo.fileName}`);
+              } catch (error) {
+                console.error(`Failed to delete old photo from B2: ${photo.fileName}`, error);
+              }
+            }
+          }
+        });
+      }
+    } else {
+      // Keep existing photos if no new ones uploaded
+      req.body.photos = oldPhotos;
     }
+    
+    req.body.updatedBy = req.user.id;
     
     const updatedAnnouncement = await Announcement.findByIdAndUpdate(
       req.params.id,
@@ -183,43 +199,54 @@ exports.updateAnnouncement = asyncHandler(async (req, res) => {
       data: updatedAnnouncement
     });
   } catch (error) {
-    console.error('Update announcement error:', error);
-    
-    // Delete uploaded files if update fails
-    if (req.files && req.files.length > 0) {
-      req.files.forEach(file => {
-        deleteFile(file.path, file.public_id);
-      });
-    }
-    
+    console.error('Error updating announcement:', error);
     res.status(500).json({
       success: false,
-      message: error.message || 'Failed to update announcement'
+      message: 'Failed to update announcement',
+      error: error.message
     });
   }
 });
 
 exports.deleteAnnouncement = asyncHandler(async (req, res) => {
-  const announcement = await Announcement.findById(req.params.id);
-  
-  if (!announcement) {
-    return res.status(404).json({
+  try {
+    const announcement = await Announcement.findById(req.params.id);
+    
+    if (!announcement) {
+      return res.status(404).json({
+        success: false,
+        message: 'Announcement not found'
+      });
+    }
+    
+    // Clean up associated files from B2 (asynchronously, don't block response)
+    if (announcement.photos && announcement.photos.length > 0) {
+      setImmediate(async () => {
+        for (const photo of announcement.photos) {
+          if (photo.fileId) {
+            try {
+              await deleteFromB2(photo.fileId, photo.filePath.split('/').pop());
+              console.log(`Deleted photo from B2: ${photo.fileName}`);
+            } catch (error) {
+              console.error(`Failed to delete photo from B2: ${photo.fileName}`, error);
+            }
+          }
+        }
+      });
+    }
+    
+    await Announcement.findByIdAndDelete(req.params.id);
+    
+    res.status(200).json({
+      success: true,
+      message: 'Announcement deleted successfully'
+    });
+  } catch (error) {
+    console.error('Error deleting announcement:', error);
+    res.status(500).json({
       success: false,
-      message: 'Announcement not found'
+      message: 'Failed to delete announcement',
+      error: error.message
     });
   }
-  
-  // Delete associated files
-  if (announcement.photos && announcement.photos.length > 0) {
-    announcement.photos.forEach(photo => {
-      deleteFile(photo.filePath, photo.public_id);
-    });
-  }
-  
-  await Announcement.findByIdAndDelete(req.params.id);
-  
-  res.status(200).json({
-    success: true,
-    message: 'Announcement deleted successfully'
-  });
 });

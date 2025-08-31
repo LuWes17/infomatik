@@ -193,7 +193,7 @@ const PublicAnnouncements = () => {
                 {announcement.photos && announcement.photos.length > 0 && (
                   <div className={styles.cardImage}>
                     <img 
-                      src={`${API_BASE.replace('/api', '')}/${announcement.photos[0].filePath}`} 
+                      src={announcement.photos[0].filePath} 
                       alt={announcement.title}
                       loading="lazy"
                     />
@@ -275,7 +275,7 @@ const PublicAnnouncements = () => {
                     {selectedAnnouncement.photos.map((photo, index) => (
                       <div key={index} className={styles.photoContainer}>
                         <img 
-                          src={`${API_BASE.replace('/api', '')}/${photo.filePath}`} 
+                          src={photo.filePath} 
                           alt={`${selectedAnnouncement.title} - Image ${index + 1}`}
                           className={styles.modalPhoto}
                         />

@@ -87,16 +87,21 @@ const solicitationRequestSchema = new mongoose.Schema({
     maxlength: [1000, 'Additional details cannot exceed 1000 characters']
   },
   
-  // Document Upload
+  // Document Upload - Updated for B2
   solicitationLetter: {
-    type: String, // File path or URL
+    type: String, // File URL
     required: [true, 'Solicitation letter is required']
   },
   
-  // Supporting documents (optional)
+  solicitationLetterFileId: {
+    type: String // B2 file ID for deletion
+  },
+  
+  // Supporting documents (optional) - Updated for B2
   supportingDocuments: [{
     fileName: String,
     filePath: String,
+    fileId: String, // B2 file ID for deletion
     uploadedAt: {
       type: Date,
       default: Date.now
