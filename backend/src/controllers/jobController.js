@@ -138,13 +138,6 @@ exports.applyForJob = asyncHandler(async (req, res) => {
       });
     }
     
-    if (!job.isActive) {
-      return res.status(400).json({
-        success: false,
-        message: 'This job posting is no longer active'
-      });
-    }
-    
     // Check if user already applied
     const existingApplication = await JobApplication.findOne({
       jobPosting: jobId,
@@ -197,9 +190,12 @@ exports.applyForJob = asyncHandler(async (req, res) => {
     const applicationData = {
       jobPosting: jobId,
       applicant: userId,
+      fullName: req.body.fullName,
+      birthday: req.body.birthday,
+      phone: req.body.phone,
+      address: req.body.address,
       cvFile: cvFileInfo.filePath,
       cvFileId: cvFileInfo.fileId, // Store for deletion
-      coverLetter: req.body.coverLetter,
       status: 'pending'
     };
     
