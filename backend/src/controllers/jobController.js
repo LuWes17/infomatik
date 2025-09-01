@@ -227,7 +227,7 @@ exports.getMyApplications = asyncHandler(async (req, res) => {
   const skip = (page - 1) * limit;
   
   const applications = await JobApplication.find({ applicant: req.user.id })
-    .populate('jobPosting', 'title status')
+    .populate('jobPosting', 'title description requirements location employmentType positionsAvailable applicationDeadline status')
     .sort({ createdAt: -1 })
     .limit(limit * 1)
     .skip(skip);

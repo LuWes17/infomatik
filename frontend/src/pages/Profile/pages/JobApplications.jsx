@@ -1,3 +1,4 @@
+// frontend/src/pages/Profile/pages/JobApplications.jsx
 import React, { useState, useEffect } from 'react';
 import { 
   FileText, 
@@ -9,7 +10,8 @@ import {
   Clock, 
   Eye,
   X,
-  Download
+  Download,
+  Users
 } from 'lucide-react';
 import styles from './JobApplications.module.css';
 
@@ -117,18 +119,19 @@ const JobApplications = () => {
         return {
           icon: <Clock size={20} />,
           className: styles.statusPending,
-          text: 'Pending Review'
+          text: 'Under Review'
         };
     }
   };
 
-  // Format date
+  // Format date function
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
+    const options = { 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    };
+    return new Date(dateString).toLocaleDateString(undefined, options);
   };
 
   useEffect(() => {
@@ -140,6 +143,7 @@ const JobApplications = () => {
       <div className={styles.container}>
         <div className={styles.header}>
           <h2>My Job Applications</h2>
+          <p className={styles.subtitle}>Track your application progress</p>
         </div>
         <div className={styles.loadingContainer}>
           <div className={styles.spinner}></div>
@@ -154,13 +158,11 @@ const JobApplications = () => {
       <div className={styles.container}>
         <div className={styles.header}>
           <h2>My Job Applications</h2>
+          <p className={styles.subtitle}>Track your application progress</p>
         </div>
         <div className={styles.errorContainer}>
           <p className={styles.errorMessage}>{error}</p>
-          <button 
-            className={styles.retryButton}
-            onClick={fetchApplications}
-          >
+          <button onClick={fetchApplications} className={styles.retryButton}>
             Try Again
           </button>
         </div>
@@ -172,9 +174,7 @@ const JobApplications = () => {
     <div className={styles.container}>
       <div className={styles.header}>
         <h2>My Job Applications</h2>
-        <p className={styles.subtitle}>
-          Track the status of your job applications
-        </p>
+        <p className={styles.subtitle}>Track your application progress</p>
       </div>
 
       {applications.length === 0 ? (
@@ -289,7 +289,7 @@ const JobApplications = () => {
                       {selectedApplication.jobPosting.location && (
                         <div className={styles.metaItem}>
                           <MapPin size={16} />
-                          <span>{selectedApplication.jobPosting.description}</span>
+                          <span>{selectedApplication.jobPosting.location}</span>
                         </div>
                       )}
                       {selectedApplication.jobPosting.employmentType && (
@@ -302,9 +302,16 @@ const JobApplications = () => {
                       )}
                       {selectedApplication.jobPosting.positionsAvailable && (
                         <div className={styles.metaItem}>
+                          <Users size={16} />
                           <span className={styles.positions}>
                             {selectedApplication.jobPosting.positionsAvailable} position(s) available
                           </span>
+                        </div>
+                      )}
+                      {selectedApplication.jobPosting.applicationDeadline && (
+                        <div className={styles.metaItem}>
+                          <Calendar size={16} />
+                          <span>Deadline: {formatDate(selectedApplication.jobPosting.applicationDeadline)}</span>
                         </div>
                       )}
                     </div>
@@ -330,14 +337,36 @@ const JobApplications = () => {
               <div className={styles.applicationDetailsSection}>
                 <h3>Your Application</h3>
                 
-                {selectedApplication.coverLetter && (
-                  <div className={styles.coverLetterSection}>
-                    <h4>Cover Letter</h4>
-                    <div className={styles.coverLetterContent}>
-                      <p>{selectedApplication.coverLetter}</p>
-                    </div>
+                <div className={styles.applicantInfo}>
+                  <h4>Personal Information</h4>
+                  <div className={styles.infoGrid}>
+                    {selectedApplication.fullName && (
+                      <div className={styles.infoItem}>
+                        <span className={styles.infoLabel}>Full Name:</span>
+                        <span>{selectedApplication.fullName}</span>
+                      </div>
+                    )}
+                    {selectedApplication.phone && (
+                      <div className={styles.infoItem}>
+                        <span className={styles.infoLabel}>Phone:</span>
+                        <span>{selectedApplication.phone}</span>
+                      </div>
+                    )}
+                    {selectedApplication.birthday && (
+                      <div className={styles.infoItem}>
+                        <span className={styles.infoLabel}>Birthday:</span>
+                        <span>{formatDate(selectedApplication.birthday)}</span>
+                      </div>
+                    )}
+                    {selectedApplication.address && (
+                      <div className={styles.infoItem}>
+                        <span className={styles.infoLabel}>Address:</span>
+                        <span>{selectedApplication.address}</span>
+                      </div>
+                    )}
                   </div>
-                )}
+                </div>
+                
 
                 {selectedApplication.cvFile && (
                   <div className={styles.cvSection}>
