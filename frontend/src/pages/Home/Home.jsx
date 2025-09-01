@@ -7,6 +7,7 @@ import { CircleChevronRight, CircleChevronLeft, CalendarDays, BellRing, Briefcas
 import FeedbackSection from './FeedbackSection'; 
 import LatestUpdates from './LatestUpdates';
 import LatestAccomplishments from './LatestAccomplishments';
+import { Link, useNavigate } from 'react-router-dom';
 
 const Home = () => {
   const slides = [konsiroy, withkonsi, konsiCommunity];
@@ -126,30 +127,30 @@ const Home = () => {
       {/* Quick Links Section */}
       <div className={styles.quickLinks}>
         <div className={styles.quickLinksContainer}>
-          <div className={styles.quickLinkCard}>
+          <Link to="/announcements" className={styles.quickLinkCard}>
             <CalendarDays size={48} />
             <h3>Events</h3>
-          </div>
+          </Link>
           
-          <div className={styles.quickLinkCard}>
+          <Link to="/announcements" className={styles.quickLinkCard}>
             <BellRing size={48} />
             <h3>Updates</h3>
-          </div>
+          </Link>
           
-          <div className={styles.quickLinkCard}>
+          <Link to="/services/job-openings" className={styles.quickLinkCard}>
             <BriefcaseBusiness size={48} />
             <h3>Job Openings</h3>
-          </div>
+          </Link>
           
-          <div className={styles.quickLinkCard}>
+          <Link to="/services/solicitation-requests" className={styles.quickLinkCard}>
             <Mail size={48} />
             <h3>Solicitation</h3>
-          </div>
+          </Link>
           
-          <div className={styles.quickLinkCard}>
+          <Link to="/policies/ordinance" className={styles.quickLinkCard}>
             <ScrollText size={48} />
             <h3>Ordinance</h3>
-          </div>
+          </Link>
         </div>
       </div>
 
