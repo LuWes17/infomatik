@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Search, Filter, Calendar, FileText, Eye, X } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Search, Filter, Calendar, FileText, Eye, X, ScrollText, ChevronDown } from 'lucide-react';
 import styles from './Ordinance.module.css';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
@@ -13,6 +13,8 @@ const Ordinance = () => {
   const [categoryFilter, setCategoryFilter] = useState('All');
   const [showModal, setShowModal] = useState(false);
   const [selectedOrdinance, setSelectedOrdinance] = useState(null);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
 
   // Ordinance categories for filtering
   const categories = [
@@ -54,6 +56,20 @@ const Ordinance = () => {
     fetchOrdinances();
   }, []);
 
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
   // Apply filters and search
   useEffect(() => {
     let filtered = ordinances;
@@ -79,12 +95,14 @@ const Ordinance = () => {
   const handleCardClick = (ordinance) => {
     setSelectedOrdinance(ordinance);
     setShowModal(true);
+    document.body.style.overflow = "hidden";
   };
 
   // Close modal
   const closeModal = () => {
     setShowModal(false);
     setSelectedOrdinance(null);
+    document.body.style.overflow = "auto";
   };
 
   // Format date
@@ -94,6 +112,22 @@ const Ordinance = () => {
       month: 'long',
       day: 'numeric'
     });
+  };
+
+  const handleFilterChange = (category) => {
+    setCategoryFilter(category);
+    setDropdownOpen(false);
+  };
+
+  const toggleDropdown = () => {
+    setDropdownOpen(!dropdownOpen);
+  };
+
+  // Helper function to get CSS class name for category
+  const getCategoryClass = (category) => {
+    if (!category) return 'general';
+    const lowerCategory = category.toLowerCase().replace(/\s+/g, '').replace(/&/g, 'and');
+    return lowerCategory;
   };
 
   // Loading component
@@ -124,110 +158,123 @@ const Ordinance = () => {
 
   return (
     <div className={styles.container}>
-      {/* Header Section */}
+      {/* Header Section - Updated to horizontal layout */}
       <div className={styles.header}>
-        <div className={styles.headerContent}>
-          <h1 className={styles.title}>Local Ordinances</h1>
-          <p className={styles.subtitle}>
-            Browse and view our local government ordinances and policies
-          </p>
-        </div>
-      </div>
-
-      {/* Filters Section */}
-      <div className={styles.filtersContainer}>
-        <div className={styles.searchContainer}>
-          <div className={styles.searchBox}>
-            <Search size={20} className={styles.searchIcon} />
-            <input
-              type="text"
-              placeholder="Search ordinances by title, number, or summary..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className={styles.searchInput}
-            />
+        <div className={styles.headerText}>
+          <ScrollText size={92} className={styles.icon} />
+          <div className={styles.headerContent}>
+            <h1 className={styles.title}>Local Ordinances</h1>
+            <p className={styles.subtitle}>
+              Mga lokal na ordinansa at patakaran ng aming pamunuan. Alamin ang mga batas na umiiral sa aming komunidad.
+            </p>
           </div>
         </div>
+        
+        <div className={styles.filtersContainer}>
+          {/* Search Bar */}
+          <div className={styles.searchContainer}>
+            <div className={styles.searchBox}>
+              <Search size={20} className={styles.searchIcon} />
+              <input
+                type="text"
+                placeholder="Search ordinances..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className={styles.searchInput}
+              />
+            </div>
+          </div>
 
-        <div className={styles.filterContainer}>
-          <Filter size={20} className={styles.filterIcon} />
-          <select
-            value={categoryFilter}
-            onChange={(e) => setCategoryFilter(e.target.value)}
-            className={styles.filterSelect}
-          >
-            {categories.map(category => (
-              <option key={category} value={category}>
-                {category}
-              </option>
-            ))}
-          </select>
+          {/* Filter Dropdown */}
+          <div className={styles.filterDropdown} ref={dropdownRef}>
+            <Filter size={20} className={styles.filterIcon} />
+            <button
+              onClick={toggleDropdown}
+              className={`${styles.dropdownButton} ${dropdownOpen ? styles.active : ''}`}
+            >
+              <span>{categoryFilter}</span>
+              <ChevronDown size={16} className={`${styles.dropdownArrow} ${dropdownOpen ? styles.open : ''}`} />
+            </button>
+            <div className={`${styles.dropdownContent} ${dropdownOpen ? styles.show : ''}`}>
+              {categories.map(category => (
+                <button
+                  key={category}
+                  onClick={() => handleFilterChange(category)}
+                  className={`${styles.dropdownItem} ${categoryFilter === category ? styles.active : ''}`}
+                >
+                  {category}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Results Count */}
-      <div className={styles.resultsCount}>
-        {filteredOrdinances.length > 0 ? (
-          <p>
-            Showing {filteredOrdinances.length} of {ordinances.length} ordinances
-            {categoryFilter !== 'All' && ` in "${categoryFilter}"`}
-          </p>
+      {/* Content Section */}
+      <div className={styles.content}>
+        {filteredOrdinances.length === 0 ? (
+          <div className={styles.emptyState}>
+            <FileText size={80} className={styles.emptyIcon} />
+            <h3>No ordinances found</h3>
+            <p>
+              {searchTerm || categoryFilter !== 'All' 
+                ? 'Try adjusting your search or filter criteria' 
+                : 'Check back later for updates'}
+            </p>
+          </div>
         ) : (
-          <p>No ordinances found matching your criteria</p>
-        )}
-      </div>
+          <div className={styles.ordinancesGrid}>
+            {filteredOrdinances.map((ordinance) => (
+              <div
+                key={ordinance._id}
+                className={styles.ordinanceCard}
+                onClick={() => handleCardClick(ordinance)}
+              >
+                {/* Card Icon - Document placeholder */}
+                <div className={styles.cardIconContainer}>
+                  <FileText size={80} className={styles.cardIcon} />
+                </div>
 
-      {/* Ordinances Grid */}
-      <div className={styles.ordinancesGrid}>
-        {filteredOrdinances.map((ordinance) => (
-          <div
-            key={ordinance._id}
-            className={styles.ordinanceCard}
-            onClick={() => handleCardClick(ordinance)}
-          >
-            <div className={styles.cardHeader}>
-              <div className={styles.cardTitle}>
-                <FileText size={20} className={styles.titleIcon} />
-                <h3>{ordinance.title}</h3>
-              </div>
-              <span className={styles.categoryBadge}>
-                {ordinance.category}
-              </span>
-            </div>
+                {/* Card Content */}
+                <div className={styles.cardContent}>
+                  <div className={styles.cardHeader}>
+                    <div className={styles.cardTitle}>
+                      <h3>{ordinance.title}</h3>
+                    </div>
+                    <div className={`${styles.categoryBadge} ${styles[getCategoryClass(ordinance.category)]}`}>
+                      {ordinance.category || 'General'}
+                    </div>
+                  </div>
 
-            <div className={styles.cardContent}>
-              <div className={styles.ordinanceNumber}>
-                <strong>Ordinance No. {ordinance.policyNumber}</strong>
-              </div>
-              
-              <p className={styles.summary}>{ordinance.summary}</p>
-              
-              <div className={styles.cardMeta}>
-                <div className={styles.metaItem}>
-                  <Calendar size={16} />
-                  <span>Implemented: {formatDate(ordinance.implementationDate)}</span>
+                  <div className={styles.ordinanceNumber}>
+                    <strong>Ordinance No. {ordinance.policyNumber}</strong>
+                  </div>
+                  
+                  <p className={styles.summary}>
+                    {ordinance.summary.length > 150 
+                      ? `${ordinance.summary.substring(0, 150)}...` 
+                      : ordinance.summary
+                    }
+                  </p>
+                  
+                  {/* Footer with date and button */}
+                  <div className={styles.cardFooter}>
+                    <div className={styles.cardMeta}>
+                      <div className={styles.metaItem}>
+                        <Calendar size={16} />
+                        <span>Implemented: {formatDate(ordinance.implementationDate)}</span>
+                      </div>
+                    </div>
+                    <div className={styles.readMoreButton}>
+                      Read More
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-
-            <div className={styles.cardFooter}>
-              <span className={styles.clickHint}>
-                <Eye size={16} />
-                Click to view details
-              </span>
-            </div>
+            ))}
           </div>
-        ))}
+        )}
       </div>
-
-      {/* Empty State */}
-      {filteredOrdinances.length === 0 && !loading && (
-        <div className={styles.emptyState}>
-          <FileText size={48} className={styles.emptyIcon} />
-          <h3>No ordinances found</h3>
-          <p>Try adjusting your search criteria or filter selection</p>
-        </div>
-      )}
 
       {/* Modal for Ordinance Details */}
       {showModal && selectedOrdinance && (
@@ -236,7 +283,7 @@ const Ordinance = () => {
             <div className={styles.modalHeader}>
               <h2 className={styles.modalTitle}>{selectedOrdinance.title}</h2>
               <button onClick={closeModal} className={styles.closeButton}>
-                <X size={24} />
+                ×
               </button>
             </div>
 
@@ -249,7 +296,7 @@ const Ordinance = () => {
                   </div>
                   <div className={styles.infoItem}>
                     <span className={styles.infoLabel}>Category:</span>
-                    <span className={`${styles.infoValue} ${styles.categoryTag}`}>
+                    <span className={`${styles.categoryTag} ${styles[getCategoryClass(selectedOrdinance.category)]}`}>
                       {selectedOrdinance.category}
                     </span>
                   </div>
@@ -269,18 +316,17 @@ const Ordinance = () => {
 
               {selectedOrdinance.fullDocument && (
                 <div className={styles.documentSection}>
-                  <h4>Full Document</h4>
-                  <div className={styles.documentLink}>
+                  <a 
+                    href={selectedOrdinance.fullDocument.filePath} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className={styles.documentLink}
+                  >
                     <FileText size={20} />
-                    <a 
-                      href={selectedOrdinance.fullDocument} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className={styles.downloadLink}
-                    >
+                    <span className={styles.downloadLink}>
                       View Full Ordinance Document
-                    </a>
-                  </div>
+                    </span>
+                  </a>
                 </div>
               )}
             </div>

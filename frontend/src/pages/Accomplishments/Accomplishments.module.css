@@ -149,7 +149,7 @@
 
 .dropdownContent {
   position: absolute;
-  top: 100%;
+  top: 110%;
   left: 0;
   right: 0;
   background: white;
@@ -160,7 +160,7 @@
   visibility: hidden;
   transform: translateY(-10px);
   transition: all 0.3s ease;
-  z-index: 1001;
+  z-index: 100;
   border: 1px solid #e2e8f0;
 }
 
@@ -178,7 +178,7 @@
   font-weight: 400;
   transition: background-color 0.2s ease;
   white-space: nowrap;
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   cursor: pointer;
   border: none;
   background: none;
@@ -431,29 +431,6 @@
   border: 2px solid var(--primary-color);
   transform: translateY(-1px);
   box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
-}
-
-/* No Results */
-.noResults {
-  text-align: center;
-  padding: 4rem 2rem;
-  color: var(--gray-500);
-}
-
-.noResultsIcon {
-  opacity: 0.3;
-  margin-bottom: 1rem;
-}
-
-.noResults h3 {
-  font-size: 1.5rem;
-  margin: 0 0 0.5rem 0;
-  color: #334155;
-}
-
-.noResults p {
-  margin: 0;
-  font-size: 1rem;
 }
 
 /* Modal Styles - Updated with proper text handling */
