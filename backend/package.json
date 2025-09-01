@@ -24,7 +24,9 @@
     "jsonwebtoken": "^9.0.2",
     "mongodb": "^6.18.0",
     "mongoose": "^8.18.0",
-    "multer": "^2.0.2"
+    "multer": "^2.0.2",
+    "react-toastify": "^11.0.5",
+    "toast": "^0.5.4"
   },
   "devDependencies": {
     "concurrently": "^9.2.0",
