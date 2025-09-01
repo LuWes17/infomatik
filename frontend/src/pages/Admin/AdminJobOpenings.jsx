@@ -79,6 +79,22 @@ const AdminJobOpenings = () => {
     fetchJobOpenings();
   }, []);
 
+  // Handle CV view - opens CV in new tab
+  const handleViewCV = (cvUrl, applicantName) => {
+    if (!cvUrl) {
+      alert('CV file not available');
+      return;
+    }
+    
+    try {
+      // Open CV in new tab
+      window.open(cvUrl, '_blank');
+    } catch (error) {
+      console.error('Error opening CV:', error);
+      alert('Unable to open CV file');
+    }
+  };
+
   // Handle form submission for create/update
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -105,12 +121,11 @@ const AdminJobOpenings = () => {
         alert(editMode ? 'Job updated successfully!' : 'Job created successfully!');
       }
     } catch (error) {
-      console.error('Error saving job:', error);
-      alert('Error saving job opening');
+      console.error('Error submitting form:', error);
     }
   };
 
-  // Delete job opening
+  // Handle delete
   const handleDelete = async (jobId) => {
     if (!window.confirm('Are you sure you want to delete this job opening?')) return;
     
@@ -130,7 +145,6 @@ const AdminJobOpenings = () => {
       }
     } catch (error) {
       console.error('Error deleting job:', error);
-      alert('Error deleting job');
     }
   };
 
@@ -147,10 +161,7 @@ const AdminJobOpenings = () => {
       const data = await response.json();
       if (data.success) {
         fetchJobOpenings();
-        if (selectedJob?._id === jobId) {
-          setSelectedJob(data.data);
-        }
-        alert('Job status updated!');
+        setSelectedJob(data.data);
       }
     } catch (error) {
       console.error('Error toggling job status:', error);
@@ -159,7 +170,7 @@ const AdminJobOpenings = () => {
 
   // Accept application
   const acceptApplication = async (applicationId, applicant) => {
-    if (!window.confirm(`Accept application from ${applicant.fullName}? They will be notified via SMS.`)) return;
+    if (!window.confirm(`Accept application from ${applicant.fullName}? This will send an SMS notification.`)) return;
     
     try {
       const response = await fetch(`http://localhost:4000/api/jobs/applications/${applicationId}/status`, {
@@ -170,6 +181,7 @@ const AdminJobOpenings = () => {
         },
         body: JSON.stringify({
           status: 'accepted',
+          sendSMS: true,
           adminNotes: 'Application accepted'
         })
       });
@@ -177,7 +189,7 @@ const AdminJobOpenings = () => {
       const data = await response.json();
       if (data.success) {
         fetchApplications(selectedJob._id);
-        alert('Application accepted! SMS notification sent to applicant.');
+        alert('Application accepted and SMS notification sent to applicant.');
       }
     } catch (error) {
       console.error('Error accepting application:', error);
@@ -211,7 +223,6 @@ const AdminJobOpenings = () => {
       console.error('Error rejecting application:', error);
     }
   };
-
 
   // Reset form
   const resetForm = () => {
@@ -353,52 +364,52 @@ const AdminJobOpenings = () => {
                       value={formData.title}
                       onChange={(e) => setFormData({...formData, title: e.target.value})}
                       className="form-input"
-                      placeholder="e.g. Software Developer"
+                      placeholder="e.g. Administrative Assistant"
                     />
                   </div>
-                  
+
                   <div className="form-group form-group-full">
                     <label className="form-label">
                       Description *
                     </label>
                     <textarea
                       required
-                      rows={4}
                       value={formData.description}
                       onChange={(e) => setFormData({...formData, description: e.target.value})}
                       className="form-textarea"
-                      placeholder="Describe the job role and responsibilities..."
+                      rows={4}
+                      placeholder="Describe the job responsibilities and overview..."
                     />
                   </div>
-                  
+
                   <div className="form-group form-group-full">
                     <label className="form-label">
                       Requirements *
                     </label>
                     <textarea
                       required
-                      rows={4}
                       value={formData.requirements}
                       onChange={(e) => setFormData({...formData, requirements: e.target.value})}
                       className="form-textarea"
-                      placeholder="List the job requirements and qualifications..."
+                      rows={4}
+                      placeholder="List the qualifications and requirements..."
                     />
                   </div>
-                  
+
                   <div className="form-group">
                     <label className="form-label">
                       Positions Available *
                     </label>
                     <input
                       type="number"
-                      required
                       min="1"
+                      required
                       value={formData.positionsAvailable}
                       onChange={(e) => setFormData({...formData, positionsAvailable: parseInt(e.target.value)})}
                       className="form-input"
                     />
                   </div>
-                  
+
                   <div className="form-group">
                     <label className="form-label">
                       Employment Type
@@ -406,7 +417,7 @@ const AdminJobOpenings = () => {
                     <select
                       value={formData.employmentType}
                       onChange={(e) => setFormData({...formData, employmentType: e.target.value})}
-                      className="form-select"
+                      className="form-input"
                     >
                       <option value="full-time">Full-time</option>
                       <option value="part-time">Part-time</option>
@@ -414,7 +425,7 @@ const AdminJobOpenings = () => {
                       <option value="temporary">Temporary</option>
                     </select>
                   </div>
-                  
+
                   <div className="form-group">
                     <label className="form-label">
                       Location
@@ -424,10 +435,10 @@ const AdminJobOpenings = () => {
                       value={formData.location}
                       onChange={(e) => setFormData({...formData, location: e.target.value})}
                       className="form-input"
-                      placeholder="e.g. Manila, Philippines"
+                      placeholder="e.g. Barangay Hall, City Center"
                     />
                   </div>
-                  
+
                   <div className="form-group">
                     <label className="form-label">
                       Application Deadline
@@ -436,29 +447,11 @@ const AdminJobOpenings = () => {
                       type="date"
                       value={formData.applicationDeadline}
                       onChange={(e) => setFormData({...formData, applicationDeadline: e.target.value})}
-                      min={new Date().toISOString().split('T')[0]}
                       className="form-input"
                     />
                   </div>
-                  
-                  
-                  {editMode && (
-                    <div className="form-group">
-                      <label className="form-label">
-                        Status
-                      </label>
-                      <select
-                        value={formData.status}
-                        onChange={(e) => setFormData({...formData, status: e.target.value})}
-                        className="form-select"
-                      >
-                        <option value="open">Open</option>
-                        <option value="closed">Closed</option>
-                      </select>
-                    </div>
-                  )}
                 </div>
-                
+
                 <div className="form-actions">
                   <button
                     type="button"
@@ -482,16 +475,9 @@ const AdminJobOpenings = () => {
         {/* Job Details Modal */}
         {showJobDetails && selectedJob && (
           <div className="modal-overlay">
-            <div className="modal-content modal-content-large">
+            <div className="modal-content modal-content-wide">
               <div className="modal-header">
-                <div>
-                  <h2 className="modal-title">{selectedJob.title}</h2>
-                  <span className={`job-status-badge ${
-                    selectedJob.status === 'open' ? 'job-status-open' : 'job-status-closed'
-                  }`}>
-                    {selectedJob.status === 'open' ? 'Open' : 'Closed'}
-                  </span>
-                </div>
+                <h2 className="modal-title">{selectedJob.title}</h2>
                 <button
                   onClick={() => setShowJobDetails(false)}
                   className="modal-close-btn"
@@ -499,20 +485,21 @@ const AdminJobOpenings = () => {
                   <X size={24} />
                 </button>
               </div>
-              
+
               <div className="job-details-content">
                 <div className="job-details-actions">
                   <button
                     onClick={startEdit}
-                    className="btn btn-primary"
+                    className="btn btn-secondary"
                   >
                     <Edit size={16} />
                     Edit
                   </button>
                   <button
                     onClick={() => toggleJobStatus(selectedJob._id)}
-                    className="btn btn-warning"
+                    className={`btn ${selectedJob.status === 'open' ? 'btn-warning' : 'btn-primary'}`}
                   >
+                    <Clock size={16} />
                     {selectedJob.status === 'open' ? 'Close Job' : 'Open Job'}
                   </button>
                   <button
@@ -615,8 +602,15 @@ const AdminJobOpenings = () => {
                                 </span>
                               </td>
                               <td className="table-cell">
-                                {application.resume ? (
+                                {(application.cvFile || application.resume) ? (
                                   <div className="cv-actions">
+                                    <button
+                                      onClick={() => handleViewCV(application.cvFile || application.resume, application.fullName)}
+                                      className="cv-btn cv-btn-view"
+                                      title={`View ${application.fullName}'s CV`}
+                                    >
+                                      <Eye size={16} />
+                                    </button>
                                   </div>
                                 ) : (
                                   <span className="no-cv">No CV</span>

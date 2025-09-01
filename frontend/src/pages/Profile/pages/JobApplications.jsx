@@ -99,6 +99,22 @@ const JobApplications = () => {
     setSelectedApplication(null);
   };
 
+  // Handle CV view - opens CV in new tab
+  const handleViewCV = (cvUrl, applicantName) => {
+    if (!cvUrl) {
+      alert('CV file not available');
+      return;
+    }
+    
+    try {
+      // Open CV in new tab
+      window.open(cvUrl, '_blank');
+    } catch (error) {
+      console.error('Error opening CV:', error);
+      alert('Unable to open CV file');
+    }
+  };
+
   // Get status icon and color
   const getStatusDisplay = (status) => {
     switch (status) {
@@ -373,8 +389,13 @@ const JobApplications = () => {
                     <h4>Resume/CV</h4>
                     <div className={styles.fileInfo}>
                       <FileText size={20} />
-                      <span>CV File Uploaded</span>
-                      {/* Note: Download functionality would require backend endpoint */}
+                      <button
+                        onClick={() => handleViewCV(selectedApplication.cvFile)}
+                        className="cv-btn cv-btn-view"
+                        title={`View ${selectedApplication.fullName}'s CV`}
+                      >
+                        View CV
+                      </button>
                     </div>
                   </div>
                 )}
