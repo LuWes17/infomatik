@@ -22,6 +22,7 @@ const AdminFeedback = () => {
   const [newStatus, setNewStatus] = useState('');
   const [resolutionNotes, setResolutionNotes] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [editingResponse, setEditingResponse] = useState(false);
 
   const categories = [
     'General Feedback', 
@@ -93,9 +94,11 @@ const AdminFeedback = () => {
 
   const handleCardClick = (feedback) => {
     setSelectedFeedback(feedback);
-    setResponseMessage('');
+    setResponseMessage(feedback.adminResponse?.message || '');
+    setResponsePublic(feedback.adminResponse?.isPublic || true);
     setNewStatus(feedback.status);
     setResolutionNotes('');
+    setEditingResponse(false);
     setShowModal(true);
   };
 
@@ -130,12 +133,92 @@ const AdminFeedback = () => {
         f._id === selectedFeedback._id ? data.data : f
       ));
       
-      setResponseMessage('');
+      setEditingResponse(false);
       toast.success('Response added successfully');
       fetchStatistics();
     } catch (error) {
       toast.error('Failed to add response');
       console.error('Add response error:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleEditResponse = async () => {
+    if (!responseMessage.trim()) {
+      toast.error('Please enter a response message');
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      const token = localStorage.getItem('token');
+      const response = await fetch(`/api/feedback/${selectedFeedback._id}/response`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          message: responseMessage,
+          isPublic: responsePublic
+        })
+      });
+
+      if (!response.ok) throw new Error('Failed to update response');
+
+      const data = await response.json();
+      
+      // Update the selected feedback and feedbacks list
+      setSelectedFeedback(data.data);
+      setFeedbacks(feedbacks.map(f => 
+        f._id === selectedFeedback._id ? data.data : f
+      ));
+      
+      setEditingResponse(false);
+      toast.success('Response updated successfully');
+      fetchStatistics();
+    } catch (error) {
+      toast.error('Failed to update response');
+      console.error('Edit response error:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleDeleteResponse = async () => {
+    if (!window.confirm('Are you sure you want to delete this response?')) {
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      const token = localStorage.getItem('token');
+      const response = await fetch(`/api/feedback/${selectedFeedback._id}/response`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!response.ok) throw new Error('Failed to delete response');
+
+      const data = await response.json();
+      
+      // Update the selected feedback and feedbacks list
+      setSelectedFeedback(data.data);
+      setFeedbacks(feedbacks.map(f => 
+        f._id === selectedFeedback._id ? data.data : f
+      ));
+      
+      setResponseMessage('');
+      setResponsePublic(true);
+      setEditingResponse(false);
+      toast.success('Response deleted successfully');
+      fetchStatistics();
+    } catch (error) {
+      toast.error('Failed to delete response');
+      console.error('Delete response error:', error);
     } finally {
       setIsSubmitting(false);
     }
@@ -214,50 +297,55 @@ const AdminFeedback = () => {
     return matchesStatus && matchesCategory && matchesSearch;
   });
 
-  const closeModal = () => {
-    setShowModal(false);
-    setSelectedFeedback(null);
-  };
-
   if (loading) {
     return (
-      <div className={styles.container}>
-        <div className={styles.loading}>Loading feedback...</div>
+      <div className={styles.loadingContainer}>
+        <div className={styles.spinner}></div>
+        <p>Loading feedback...</p>
       </div>
     );
   }
 
   return (
     <div className={styles.container}>
-      {/* Header */}
       <div className={styles.header}>
-        <div className={styles.headerLeft}>
-          <h1 className={styles.title}>Feedback Management</h1>
-          <p className={styles.subtitle}>Manage community feedback and responses</p>
-        </div>
+        <h1 className={styles.title}>Feedback Management</h1>
+        <p className={styles.subtitle}>
+          Manage community feedback and responses
+        </p>
       </div>
 
-      {/* Statistics */}
-      {statistics && (
-        <div className={styles.statsBar}>
-          <div className={styles.statCard}>
+      {/* Statistics Cards */}
+      <div className={styles.statsGrid}>
+        <div className={styles.statCard}>
+          <div className={styles.statIcon}>📊</div>
+          <div className={styles.statContent}>
             <div className={styles.statValue}>{statistics.total || 0}</div>
             <div className={styles.statLabel}>Total Feedback</div>
           </div>
-          <div className={styles.statCard}>
+        </div>
+        <div className={styles.statCard}>
+          <div className={styles.statIcon}>⏳</div>
+          <div className={styles.statContent}>
             <div className={styles.statValue}>{statistics.pending || 0}</div>
             <div className={styles.statLabel}>Pending</div>
           </div>
-          <div className={styles.statCard}>
+        </div>
+        <div className={styles.statCard}>
+          <div className={styles.statIcon}>✅</div>
+          <div className={styles.statContent}>
             <div className={styles.statValue}>{statistics.acknowledged || 0}</div>
             <div className={styles.statLabel}>Acknowledged</div>
           </div>
-          <div className={styles.statCard}>
+        </div>
+        <div className={styles.statCard}>
+          <div className={styles.statIcon}>🎯</div>
+          <div className={styles.statContent}>
             <div className={styles.statValue}>{statistics.resolved || 0}</div>
             <div className={styles.statLabel}>Resolved</div>
           </div>
         </div>
-      )}
+      </div>
 
       {/* Filters */}
       <div className={styles.filters}>
@@ -291,68 +379,57 @@ const AdminFeedback = () => {
         >
           <option value="all">All Categories</option>
           {categories.map(category => (
-            <option key={category} value={category}>{category}</option>
+            <option key={category} value={category}>
+              {category}
+            </option>
           ))}
         </select>
-
-        <button 
-          onClick={fetchFeedbacks}
-          className={styles.refreshButton}
-        >
-          Refresh
-        </button>
       </div>
 
       {/* Feedback Grid */}
       <div className={styles.feedbackGrid}>
         {filteredFeedbacks.length === 0 ? (
-          <div className={styles.emptyState}>
-            No feedback found matching your filters.
+          <div className={styles.noResults}>
+            <p>No feedback found matching your filters.</p>
           </div>
         ) : (
           filteredFeedbacks.map(feedback => (
-            <div
-              key={feedback._id}
+            <div 
+              key={feedback._id} 
               className={styles.feedbackCard}
               onClick={() => handleCardClick(feedback)}
             >
               <div className={styles.cardHeader}>
-                <div className={styles.cardHeaderLeft}>
-                  <span className={`${styles.statusBadge} ${getStatusBadgeClass(feedback.status)}`}>
-                    {feedback.status}
-                  </span>
-                  <span className={styles.category}>{feedback.category}</span>
-                </div>
-                <div className={styles.cardDate}>
-                  {formatDate(feedback.createdAt)}
-                </div>
+                <h3 className={styles.cardTitle}>{feedback.subject}</h3>
+                <span className={`${styles.statusBadge} ${getStatusBadgeClass(feedback.status)}`}>
+                  {feedback.status}
+                </span>
               </div>
-
-              <div className={styles.cardBody}>
-                <h3 className={styles.feedbackSubject}>{feedback.subject}</h3>
-                <p className={styles.feedbackMessage}>
+              
+              <div className={styles.cardContent}>
+                <p className={styles.cardMessage}>
                   {feedback.message.length > 150 
                     ? `${feedback.message.substring(0, 150)}...`
                     : feedback.message
                   }
                 </p>
                 
-                <div className={styles.submitterInfo}>
-                  <strong>From: </strong>
-                  {feedback.submittedBy?.firstName} {feedback.submittedBy?.lastName}
-                  <span className={styles.barangay}>({feedback.submittedBy?.barangay})</span>
-                </div>
-              </div>
-
-              <div className={styles.cardFooter}>
-                <div className={styles.responseCount}>
-                  {feedback.adminResponse?.message ? '1 Response' : 'No Response'}
-                  {feedback.followUpResponses?.length > 0 && 
-                    ` + ${feedback.followUpResponses.length} Follow-ups`
-                  }
-                </div>
-                <div className={styles.views}>
-                  👁 {feedback.views || 0} views
+                <div className={styles.cardMeta}>
+                  <div className={styles.metaItem}>
+                    <strong>From:</strong> 
+                    {feedback.submittedBy?.firstName} {feedback.submittedBy?.lastName}
+                  </div>
+                  <div className={styles.metaItem}>
+                    <strong>Category:</strong> {feedback.category}
+                  </div>
+                  <div className={styles.metaItem}>
+                    <strong>Date:</strong> {formatDate(feedback.createdAt)}
+                  </div>
+                  {feedback.adminResponse?.message && (
+                    <div className={styles.responseIndicator}>
+                      ✅ Has Response
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -362,21 +439,18 @@ const AdminFeedback = () => {
 
       {/* Modal */}
       {showModal && selectedFeedback && (
-        <div className={styles.modal} onClick={closeModal}>
-          <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+        <div className={styles.modalOverlay} onClick={() => setShowModal(false)}>
+          <div className={styles.modalContent} onClick={e => e.stopPropagation()}>
             <div className={styles.modalHeader}>
-              <div className={styles.modalHeaderLeft}>
-                <h2>{selectedFeedback.subject}</h2>
-                <span className={`${styles.statusBadge} ${getStatusBadgeClass(selectedFeedback.status)}`}>
-                  {selectedFeedback.status}
-                </span>
-                <span className={styles.modalCategory}>{selectedFeedback.category}</span>
-              </div>
-              <button onClick={closeModal} className={styles.closeButton}>
-                ✕
+              <h2>{selectedFeedback.subject}</h2>
+              <button 
+                onClick={() => setShowModal(false)}
+                className={styles.closeButton}
+              >
+                ×
               </button>
             </div>
-
+            
             <div className={styles.modalBody}>
               {/* Feedback Details */}
               <div className={styles.feedbackSection}>
@@ -384,9 +458,7 @@ const AdminFeedback = () => {
                 <div className={styles.detailGrid}>
                   <div className={styles.detailItem}>
                     <strong>Submitted By:</strong>
-                    <span>
-                      {selectedFeedback.submittedBy?.firstName} {selectedFeedback.submittedBy?.lastName}
-                    </span>
+                    <span>{selectedFeedback.submittedBy?.firstName} {selectedFeedback.submittedBy?.lastName}</span>
                   </div>
                   <div className={styles.detailItem}>
                     <strong>Contact:</strong>
@@ -397,7 +469,17 @@ const AdminFeedback = () => {
                     <span>{selectedFeedback.submittedBy?.barangay}</span>
                   </div>
                   <div className={styles.detailItem}>
-                    <strong>Submitted:</strong>
+                    <strong>Category:</strong>
+                    <span>{selectedFeedback.category}</span>
+                  </div>
+                  <div className={styles.detailItem}>
+                    <strong>Status:</strong>
+                    <span className={`${styles.statusBadge} ${getStatusBadgeClass(selectedFeedback.status)}`}>
+                      {selectedFeedback.status}
+                    </span>
+                  </div>
+                  <div className={styles.detailItem}>
+                    <strong>Date:</strong>
                     <span>{formatDate(selectedFeedback.createdAt)}</span>
                   </div>
                   <div className={styles.detailItem}>
@@ -416,54 +498,87 @@ const AdminFeedback = () => {
                 </div>
               </div>
 
-              {/* Existing Admin Response */}
-              {selectedFeedback.adminResponse?.message && (
-                <div className={styles.responseSection}>
+              {/* Admin Response Section */}
+              <div className={styles.responseSection}>
+                <div className={styles.responseSectionHeader}>
                   <h3>Admin Response</h3>
+                  {selectedFeedback.adminResponse?.message && !editingResponse && (
+                    <div className={styles.responseActions}>
+                      <button 
+                        onClick={() => setEditingResponse(true)}
+                        className={styles.editButton}
+                        disabled={isSubmitting}
+                      >
+                        Edit
+                      </button>
+                      <button 
+                        onClick={handleDeleteResponse}
+                        className={styles.deleteButton}
+                        disabled={isSubmitting}
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {/* Existing Response Display */}
+                {selectedFeedback.adminResponse?.message && !editingResponse && (
                   <div className={styles.existingResponse}>
                     <p>{selectedFeedback.adminResponse.message}</p>
                     <div className={styles.responseInfo}>
                       <span>By: {selectedFeedback.adminResponse.respondedBy?.firstName} {selectedFeedback.adminResponse.respondedBy?.lastName}</span>
                       <span>{formatDate(selectedFeedback.adminResponse.respondedAt)}</span>
                       <span>{selectedFeedback.adminResponse.isPublic ? 'Public' : 'Private'}</span>
+                      {selectedFeedback.adminResponse.isEdited && (
+                        <span className={styles.editedIndicator}>Edited</span>
+                      )}
                     </div>
                   </div>
-                </div>
-              )}
+                )}
 
-
-              {/* Edit Response */}
-              <div className={styles.responseSection}>
-                <h3>Edit Response</h3>
-                <div className={styles.responseForm}>
-                  <textarea
-                    value={responseMessage}
-                    onChange={(e) => setResponseMessage(e.target.value)}
-                    placeholder="Enter your response..."
-                    className={styles.responseTextarea}
-                    maxLength={1500}
-                  />
-                  <div className={styles.responseOptions}>
-                    <label className={styles.checkboxLabel}>
-                      <input
-                        type="checkbox"
-                        checked={responsePublic}
-                        onChange={(e) => setResponsePublic(e.target.checked)}
-                      />
-                      Make response public
-                    </label>
-                    <div className={styles.characterCount}>
-                      {responseMessage.length}/1500
+                {/* Response Form */}
+                {(!selectedFeedback.adminResponse?.message || editingResponse) && (
+                  <div className={styles.responseForm}>
+                    <textarea
+                      value={responseMessage}
+                      onChange={(e) => setResponseMessage(e.target.value)}
+                      placeholder="Enter your response..."
+                      className={styles.responseTextarea}
+                      maxLength={1500}
+                    />
+                    <div className={styles.responseOptions}>
+                      <div className={styles.characterCount}>
+                        {responseMessage.length}/1500
+                      </div>
+                    </div>
+                    <div className={styles.responseFormActions}>
+                      <button
+                        onClick={editingResponse ? handleEditResponse : handleAddResponse}
+                        disabled={isSubmitting || !responseMessage.trim()}
+                        className={styles.submitButton}
+                      >
+                        {isSubmitting 
+                          ? (editingResponse ? 'Updating...' : 'Adding...') 
+                          : (editingResponse ? 'Update Response' : 'Add Response')
+                        }
+                      </button>
+                      {editingResponse && (
+                        <button
+                          onClick={() => {
+                            setEditingResponse(false);
+                            setResponseMessage(selectedFeedback.adminResponse?.message || '');
+                            setResponsePublic(selectedFeedback.adminResponse?.isPublic || true);
+                          }}
+                          className={styles.cancelButton}
+                          disabled={isSubmitting}
+                        >
+                          Cancel
+                        </button>
+                      )}
                     </div>
                   </div>
-                  <button
-                    onClick={handleAddResponse}
-                    disabled={isSubmitting || !responseMessage.trim()}
-                    className={styles.submitButton}
-                  >
-                    {isSubmitting ? 'Adding...' : 'Add Response'}
-                  </button>
-                </div>
+                )}
               </div>
 
               {/* Update Status */}

@@ -120,9 +120,91 @@ exports.addAdminResponse = asyncHandler(async (req, res) => {
   
   await feedback.addResponse(message, req.user.id, isPublic);
   
+  // Populate the response data before sending back
+  await feedback.populate('submittedBy', 'firstName lastName contactNumber barangay');
+  await feedback.populate('adminResponse.respondedBy', 'firstName lastName');
+  
   res.status(200).json({
     success: true,
     message: 'Response added successfully',
+    data: feedback
+  });
+});
+
+// Edit admin response (Admin)
+exports.editAdminResponse = asyncHandler(async (req, res) => {
+  const { message, isPublic } = req.body;
+  
+  const feedback = await Feedback.findById(req.params.id);
+  
+  if (!feedback) {
+    return res.status(404).json({
+      success: false,
+      message: 'Feedback not found'
+    });
+  }
+  
+  if (!feedback.adminResponse || !feedback.adminResponse.message) {
+    return res.status(404).json({
+      success: false,
+      message: 'No admin response found to edit'
+    });
+  }
+  
+  // Update the admin response
+  feedback.adminResponse.message = message;
+  feedback.adminResponse.isPublic = isPublic;
+  feedback.adminResponse.isEdited = true;
+  feedback.adminResponse.editedAt = new Date();
+  feedback.adminResponse.editedBy = req.user.id;
+  
+  await feedback.save();
+  
+  // Populate the response data before sending back
+  await feedback.populate('submittedBy', 'firstName lastName contactNumber barangay');
+  await feedback.populate('adminResponse.respondedBy', 'firstName lastName');
+  
+  res.status(200).json({
+    success: true,
+    message: 'Response updated successfully',
+    data: feedback
+  });
+});
+
+// Delete admin response (Admin)
+exports.deleteAdminResponse = asyncHandler(async (req, res) => {
+  const feedback = await Feedback.findById(req.params.id);
+  
+  if (!feedback) {
+    return res.status(404).json({
+      success: false,
+      message: 'Feedback not found'
+    });
+  }
+  
+  if (!feedback.adminResponse || !feedback.adminResponse.message) {
+    return res.status(404).json({
+      success: false,
+      message: 'No admin response found to delete'
+    });
+  }
+  
+  // Remove the admin response
+  feedback.adminResponse = undefined;
+  
+  // If status was acknowledged due to response, revert to pending
+  if (feedback.status === 'acknowledged') {
+    feedback.status = 'pending';
+  }
+  
+  await feedback.save();
+  
+  // Populate the response data before sending back
+  await feedback.populate('submittedBy', 'firstName lastName contactNumber barangay');
+  
+  res.status(200).json({
+    success: true,
+    message: 'Response deleted successfully',
     data: feedback
   });
 });
@@ -146,6 +228,10 @@ exports.updateFeedbackStatus = asyncHandler(async (req, res) => {
   }
   
   await feedback.save();
+  
+  // Populate the response data before sending back
+  await feedback.populate('submittedBy', 'firstName lastName contactNumber barangay');
+  await feedback.populate('adminResponse.respondedBy', 'firstName lastName');
   
   res.status(200).json({
     success: true,

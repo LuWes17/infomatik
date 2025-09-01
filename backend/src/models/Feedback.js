@@ -47,7 +47,7 @@ const feedbackSchema = new mongoose.Schema({
     default: 'pending'
   },
   
-  // Admin response system
+  // Admin response system with edit tracking
   adminResponse: {
     message: {
       type: String,
@@ -61,6 +61,16 @@ const feedbackSchema = new mongoose.Schema({
     isPublic: {
       type: Boolean,
       default: true
+    },
+    // Edit tracking fields
+    isEdited: {
+      type: Boolean,
+      default: false
+    },
+    editedAt: Date,
+    editedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
     }
   },
   
@@ -88,6 +98,10 @@ const feedbackSchema = new mongoose.Schema({
     ref: 'User'
   },
   
+  resolutionNotes: {
+    type: String,
+    maxlength: [500, 'Resolution notes cannot exceed 500 characters']
+  }
   
 }, {
   timestamps: true
@@ -97,7 +111,6 @@ const feedbackSchema = new mongoose.Schema({
 feedbackSchema.index({ submittedBy: 1 });
 feedbackSchema.index({ isPublic: 1, status: 1 });
 feedbackSchema.index({ category: 1 });
-feedbackSchema.index({ priority: 1 });
 feedbackSchema.index({ createdAt: -1 });
 feedbackSchema.index({ status: 1, createdAt: -1 });
 feedbackSchema.index({ subject: 'text', message: 'text' });
@@ -106,7 +119,6 @@ feedbackSchema.index({ subject: 'text', message: 'text' });
 feedbackSchema.virtual('responseCount').get(function() {
   let count = 0;
   if (this.adminResponse && this.adminResponse.message) count++;
-  if (this.followUpResponses) count += this.followUpResponses.length;
   return count;
 });
 
@@ -116,29 +128,11 @@ feedbackSchema.methods.addResponse = function(message, adminId, isPublic = true)
     message,
     respondedBy: adminId,
     respondedAt: new Date(),
-    isPublic
+    isPublic,
+    isEdited: false
   };
   this.status = 'acknowledged';
   return this.save();
-};
-
-
-feedbackSchema.methods.editFollowUpResponse = function(responseIndex, newMessage) {
-  if (this.followUpResponses[responseIndex]) {
-    this.followUpResponses[responseIndex].message = newMessage;
-    this.followUpResponses[responseIndex].isEdited = true;
-    this.followUpResponses[responseIndex].editedAt = new Date();
-    return this.save();
-  }
-  throw new Error('Follow-up response not found');
-};
-
-feedbackSchema.methods.deleteFollowUpResponse = function(responseIndex) {
-  if (this.followUpResponses[responseIndex]) {
-    this.followUpResponses.splice(responseIndex, 1);
-    return this.save();
-  }
-  throw new Error('Follow-up response not found');
 };
 
 feedbackSchema.methods.resolve = function(adminId, notes) {
@@ -157,7 +151,6 @@ feedbackSchema.statics.getPublicFeedback = function(category = null) {
   return this.find(query)
     .populate('submittedBy', 'firstName lastName barangay')
     .populate('adminResponse.respondedBy', 'firstName lastName role')
-    .populate('followUpResponses.respondedBy', 'firstName lastName role')
     .sort({ createdAt: -1 });
 };
 
