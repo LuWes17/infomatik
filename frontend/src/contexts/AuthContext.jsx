@@ -20,6 +20,9 @@ const AUTH_ACTIONS = {
   REGISTER_START: 'REGISTER_START',
   REGISTER_SUCCESS: 'REGISTER_SUCCESS',
   REGISTER_FAILURE: 'REGISTER_FAILURE',
+  OTP_START: 'OTP_START',
+  OTP_SUCCESS: 'OTP_SUCCESS',
+  OTP_FAILURE: 'OTP_FAILURE',
   LOGOUT: 'LOGOUT',
   LOAD_USER: 'LOAD_USER',
   CLEAR_ERROR: 'CLEAR_ERROR',
@@ -32,6 +35,7 @@ const authReducer = (state, action) => {
   switch (action.type) {
     case AUTH_ACTIONS.LOGIN_START:
     case AUTH_ACTIONS.REGISTER_START:
+    case AUTH_ACTIONS.OTP_START:
       return {
         ...state,
         isLoading: true,
@@ -40,6 +44,7 @@ const authReducer = (state, action) => {
 
     case AUTH_ACTIONS.LOGIN_SUCCESS:
     case AUTH_ACTIONS.REGISTER_SUCCESS:
+    case AUTH_ACTIONS.OTP_SUCCESS:
       // Store tokens in localStorage
       localStorage.setItem('token', action.payload.token);
       localStorage.setItem('refreshToken', action.payload.refreshToken);
@@ -55,6 +60,7 @@ const authReducer = (state, action) => {
 
     case AUTH_ACTIONS.LOGIN_FAILURE:
     case AUTH_ACTIONS.REGISTER_FAILURE:
+    case AUTH_ACTIONS.OTP_FAILURE:
       return {
         ...state,
         user: null,
@@ -168,52 +174,127 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  /// Enhanced register function with detailed error logging
-const register = async (userData) => {
-  dispatch({ type: AUTH_ACTIONS.REGISTER_START });
-  
-  console.log('AuthContext: Sending registration data:', userData);
-  
-  try {
-    const response = await api.post('/auth/register', userData);
+  // Enhanced register function with detailed error logging (kept for fallback)
+  const register = async (userData) => {
+    dispatch({ type: AUTH_ACTIONS.REGISTER_START });
     
-    dispatch({
-      type: AUTH_ACTIONS.REGISTER_SUCCESS,
-      payload: {
-        user: response.data.user,
-        token: response.data.token,
-        refreshToken: response.data.refreshToken
-      }
-    });
-
-    return { success: true, data: response.data };
-  } catch (error) {
-    console.log('=== BACKEND ERROR DETAILS ===');
-    console.log('Status:', error.response?.status);
-    console.log('Response data:', error.response?.data);
+    console.log('AuthContext: Sending registration data:', userData);
     
-    // Log detailed validation errors if available
-    if (error.response?.data?.errors) {
-      console.log('Specific validation errors:');
-      error.response.data.errors.forEach((err, index) => {
-        console.log(`${index + 1}. Field: "${err.field}", Message: "${err.message}", Value: "${err.value}"`);
+    try {
+      const response = await api.post('/auth/register', userData);
+      
+      dispatch({
+        type: AUTH_ACTIONS.REGISTER_SUCCESS,
+        payload: {
+          user: response.data.user,
+          token: response.data.token,
+          refreshToken: response.data.refreshToken
+        }
       });
-    }
-    
-    const errorMessage = error.response?.data?.message || 'Registration failed';
-    
-    dispatch({
-      type: AUTH_ACTIONS.REGISTER_FAILURE,
-      payload: errorMessage
-    });
 
-    return { 
-      success: false, 
-      error: errorMessage,
-      validationErrors: error.response?.data?.errors || []
-    };
-  }
-};
+      return { success: true, data: response.data };
+    } catch (error) {
+      console.log('=== BACKEND ERROR DETAILS ===');
+      console.log('Status:', error.response?.status);
+      console.log('Response data:', error.response?.data);
+      
+      // Log detailed validation errors if available
+      if (error.response?.data?.errors) {
+        console.log('Specific validation errors:');
+        error.response.data.errors.forEach((err, index) => {
+          console.log(`${index + 1}. Field: "${err.field}", Message: "${err.message}", Value: "${err.value}"`);
+        });
+      }
+      
+      const errorMessage = error.response?.data?.message || 'Registration failed';
+      
+      dispatch({
+        type: AUTH_ACTIONS.REGISTER_FAILURE,
+        payload: errorMessage
+      });
+
+      return { 
+        success: false, 
+        error: errorMessage,
+        validationErrors: error.response?.data?.errors || []
+      };
+    }
+  };
+
+  // Send OTP function
+  const sendOTP = async (userData) => {
+    dispatch({ type: AUTH_ACTIONS.OTP_START });
+    
+    try {
+      const response = await api.post('/auth/send-otp', userData);
+      
+      // Don't dispatch success here as user isn't registered yet
+      dispatch({ type: AUTH_ACTIONS.CLEAR_ERROR });
+
+      return { 
+        success: true, 
+        data: response.data.data,
+        message: response.data.message 
+      };
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || 'Failed to send OTP';
+      
+      dispatch({
+        type: AUTH_ACTIONS.OTP_FAILURE,
+        payload: errorMessage
+      });
+
+      return { success: false, error: errorMessage };
+    }
+  };
+
+  // Verify OTP function
+  const verifyOTP = async (contactNumber, otp) => {
+    dispatch({ type: AUTH_ACTIONS.OTP_START });
+    
+    try {
+      const response = await api.post('/auth/verify-otp', {
+        contactNumber,
+        otp
+      });
+      
+      dispatch({
+        type: AUTH_ACTIONS.OTP_SUCCESS,
+        payload: {
+          user: response.data.user,
+          token: response.data.token,
+          refreshToken: response.data.refreshToken
+        }
+      });
+
+      return { success: true, data: response.data };
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || 'OTP verification failed';
+      
+      dispatch({
+        type: AUTH_ACTIONS.OTP_FAILURE,
+        payload: errorMessage
+      });
+
+      return { success: false, error: errorMessage };
+    }
+  };
+
+  // Resend OTP function
+  const resendOTP = async (contactNumber) => {
+    try {
+      const response = await api.post('/auth/resend-otp', { contactNumber });
+      
+      return { 
+        success: true, 
+        data: response.data.data,
+        message: response.data.message 
+      };
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || 'Failed to resend OTP';
+      return { success: false, error: errorMessage };
+    }
+  };
 
   // Logout function
   const logout = async () => {
@@ -315,6 +396,9 @@ const register = async (userData) => {
     // Actions
     login,
     register,
+    sendOTP,
+    verifyOTP,
+    resendOTP,
     logout,
     updateProfile,
     changePassword,

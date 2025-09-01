@@ -2,8 +2,185 @@
 const User = require('../models/User');
 const { createTokenResponse, verifyRefreshToken, generateToken } = require('../utils/auth');
 const asyncHandler = require('../middleware/async');
+const otpService = require('../services/otpService');
 
-// @desc    Register user
+// @desc    Send OTP for registration
+// @route   POST /api/auth/send-otp
+// @access  Public
+exports.sendOTP = asyncHandler(async (req, res) => {
+  const { firstName, lastName, contactNumber, password, barangay } = req.body;
+
+  try {
+    // Validate required fields
+    if (!firstName || !lastName || !contactNumber || !password || !barangay) {
+      return res.status(400).json({
+        success: false,
+        message: 'All fields are required'
+      });
+    }
+
+    // Check if user already exists
+    const existingUser = await User.findOne({ contactNumber });
+    if (existingUser) {
+      return res.status(400).json({
+        success: false,
+        message: 'Contact number is already registered'
+      });
+    }
+
+    // Validate barangay
+    const validBarangays = User.getBarangays();
+    if (!validBarangays.includes(barangay.toLowerCase())) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid barangay selected'
+      });
+    }
+
+    // Prepare user data for OTP storage
+    const userData = {
+      firstName: firstName.trim(),
+      lastName: lastName.trim(),
+      contactNumber: contactNumber.trim(),
+      password, // Will be hashed when user is actually created
+      barangay: barangay.toLowerCase().trim()
+    };
+
+    // Send OTP
+    const otpResult = await otpService.sendOTP(contactNumber, userData);
+
+    if (!otpResult.success) {
+      return res.status(500).json({
+        success: false,
+        message: otpResult.error
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'OTP sent successfully',
+      data: {
+        maskedNumber: otpResult.maskedNumber,
+        expiresIn: 300 // 5 minutes in seconds
+      }
+    });
+
+  } catch (error) {
+    console.error('Send OTP error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to send OTP'
+    });
+  }
+});
+
+// @desc    Verify OTP and register user
+// @route   POST /api/auth/verify-otp
+// @access  Public
+exports.verifyOTP = asyncHandler(async (req, res) => {
+  const { contactNumber, otp } = req.body;
+
+  try {
+    if (!contactNumber || !otp) {
+      return res.status(400).json({
+        success: false,
+        message: 'Contact number and OTP are required'
+      });
+    }
+
+    // Verify OTP
+    const verification = otpService.verifyOTP(contactNumber, otp);
+
+    if (!verification.success) {
+      return res.status(400).json({
+        success: false,
+        message: verification.error
+      });
+    }
+
+    // Create user with verified data
+    const user = await User.create({
+      firstName: verification.userData.firstName,
+      lastName: verification.userData.lastName,
+      contactNumber: verification.userData.contactNumber,
+      password: verification.userData.password,
+      barangay: verification.userData.barangay,
+      isVerified: true // Mark as verified since they completed OTP
+    });
+
+    // Clean up OTP data
+    otpService.cleanupOTP(contactNumber);
+
+    // Send welcome SMS (optional, since we're testing)
+    // await smsService.sendWelcomeSMS(user);
+
+    // Send token response
+    createTokenResponse(user, 201, res, 'Registration completed successfully');
+    
+    // Log registration
+    console.log(`New user registered with OTP verification: ${user.contactNumber} - ${user.fullName}`);
+    
+  } catch (error) {
+    console.error('OTP verification error:', error);
+    
+    // Handle duplicate key error (in case of race condition)
+    if (error.code === 11000) {
+      return res.status(400).json({
+        success: false,
+        message: 'Contact number is already registered'
+      });
+    }
+    
+    res.status(500).json({
+      success: false,
+      message: 'Registration verification failed',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
+
+// @desc    Resend OTP
+// @route   POST /api/auth/resend-otp
+// @access  Public
+exports.resendOTP = asyncHandler(async (req, res) => {
+  const { contactNumber } = req.body;
+
+  try {
+    if (!contactNumber) {
+      return res.status(400).json({
+        success: false,
+        message: 'Contact number is required'
+      });
+    }
+
+    const result = await otpService.resendOTP(contactNumber);
+
+    if (!result.success) {
+      return res.status(400).json({
+        success: false,
+        message: result.error
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: result.message,
+      data: {
+        maskedNumber: result.maskedNumber,
+        expiresIn: 300 // 5 minutes in seconds
+      }
+    });
+
+  } catch (error) {
+    console.error('Resend OTP error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to resend OTP'
+    });
+  }
+});
+
+// @desc    Register user (OLD - keep for fallback)
 // @route   POST /api/auth/register
 // @access  Public
 exports.register = asyncHandler(async (req, res) => {
@@ -161,9 +338,19 @@ exports.updateProfile = asyncHandler(async (req, res) => {
       message: 'Profile updated successfully',
       data: user
     });
-    
+
   } catch (error) {
     console.error('Profile update error:', error);
+    
+    if (error.name === 'ValidationError') {
+      const errors = Object.values(error.errors).map(err => err.message);
+      return res.status(400).json({
+        success: false,
+        message: 'Validation error',
+        errors
+      });
+    }
+    
     res.status(500).json({
       success: false,
       message: 'Profile update failed'
@@ -183,7 +370,7 @@ exports.changePassword = asyncHandler(async (req, res) => {
 
     // Check current password
     const isCurrentPasswordValid = await user.comparePassword(currentPassword);
-    
+
     if (!isCurrentPasswordValid) {
       return res.status(400).json({
         success: false,
@@ -199,7 +386,7 @@ exports.changePassword = asyncHandler(async (req, res) => {
       success: true,
       message: 'Password changed successfully'
     });
-    
+
   } catch (error) {
     console.error('Password change error:', error);
     res.status(500).json({
@@ -215,20 +402,20 @@ exports.changePassword = asyncHandler(async (req, res) => {
 exports.refreshToken = asyncHandler(async (req, res) => {
   const { refreshToken } = req.body;
 
-  if (!refreshToken) {
-    return res.status(401).json({
-      success: false,
-      message: 'Refresh token is required'
-    });
-  }
-
   try {
+    if (!refreshToken) {
+      return res.status(401).json({
+        success: false,
+        message: 'Refresh token is required'
+      });
+    }
+
     // Verify refresh token
     const decoded = verifyRefreshToken(refreshToken);
     
-    // Get user
-    const user = await User.findById(decoded.id);
-    
+    // Find user
+    const user = await User.findById(decoded.userId);
+
     if (!user || !user.isActive) {
       return res.status(401).json({
         success: false,

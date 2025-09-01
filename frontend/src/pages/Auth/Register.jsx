@@ -3,7 +3,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import styles from './Auth.module.css';
 import infomatiklogo from '../../assets/infomatik-logo.png';
-import { UserRound, Phone, Lock, Eye, EyeOff, MapPin } from 'lucide-react';
+import { UserRound, Phone, Lock, Eye, EyeOff, MapPin, CheckCircle } from 'lucide-react';
+import OTPVerificationPopup from '../../components/OTP/OTPVerificationPopup';
 
 const Register = () => {
   const navigate = useNavigate();
@@ -13,6 +14,11 @@ const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [activeTab, setActiveTab] = useState('signup');
+  const [showOTPPopup, setShowOTPPopup] = useState(false);
+  const [otpLoading, setOtpLoading] = useState(false);
+  const [otpError, setOtpError] = useState('');
+  const [maskedNumber, setMaskedNumber] = useState('');
+  const [registrationSuccess, setRegistrationSuccess] = useState(false);
   
   // Form data state
   const [formData, setFormData] = useState({
@@ -57,12 +63,14 @@ const Register = () => {
     }
   }, [isAuthenticated, navigate]);
 
-  // Clear error when form data changes
   useEffect(() => {
-    if (error) {
-      clearError();
-    }
-  }, [formData, clearError, error]);
+  if (error) {
+    clearError();
+  }
+  if (otpError) {
+    setOtpError('');
+  }
+}, [formData, clearError, error]);
 
   // Tab change handler
   const handleTabChange = (tab) => {
@@ -74,17 +82,18 @@ const Register = () => {
 
   // Phone number formatting
   const formatPhoneNumber = (value) => {
-    const digits = value.replace(/\D/g, '');
-    const limitedDigits = digits.substring(0, 10);
-    
-    if (limitedDigits.length <= 3) {
-      return limitedDigits;
-    } else if (limitedDigits.length <= 6) {
-      return `${limitedDigits.substring(0, 3)} ${limitedDigits.substring(3)}`;
-    } else {
-      return `${limitedDigits.substring(0, 3)} ${limitedDigits.substring(3, 6)} ${limitedDigits.substring(6)}`;
-    }
-  };
+  const digits = value.replace(/\D/g, '');
+  // Limit to exactly 10 digits (will become 11 with '09' prefix)
+  const limitedDigits = digits.substring(0, 10);
+  
+  if (limitedDigits.length <= 3) {
+    return limitedDigits;
+  } else if (limitedDigits.length <= 6) {
+    return `${limitedDigits.substring(0, 3)} ${limitedDigits.substring(3)}`;
+  } else {
+    return `${limitedDigits.substring(0, 3)} ${limitedDigits.substring(3, 6)} ${limitedDigits.substring(6)}`;
+  }
+};
 
   // Field validation - CORRECTED VERSION
   const validateField = (name, value) => {
@@ -124,27 +133,23 @@ const Register = () => {
 
     if (name === 'contactNumber') {
       const digits = value.replace(/\D/g, '');
+      const limitedDigits = digits.substring(0, 10);
+      const formattedValue = formatPhoneNumber(limitedDigits);
       
-      if (digits.length <= 10) {
-        setFormData({
-          ...formData,
-          [name]: digits
-        });
-        setDisplayPhoneNumber(formatPhoneNumber(digits));
-      }
+      setDisplayPhoneNumber(formattedValue);
+      setFormData(prev => ({
+        ...prev,
+        [name]: limitedDigits // Store only 10 digits
+      }));
     } else {
-      setFormData({
-        ...formData,
+      setFormData(prev => ({
+        ...prev,
         [name]: value
-      });
+      }));
     }
-
-    if (!touched[name]) {
-      setTouched({
-        ...touched,
-        [name]: true
-      });
-    }
+    
+    clearError();
+    setOtpError('');
   };
 
   const handlePhoneFocus = () => {
@@ -169,16 +174,9 @@ const Register = () => {
     });
   };
 
-  // ENHANCED SUBMIT HANDLER WITH DEBUGGING
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    
-    // Debug logging
-    console.log('=== REGISTRATION ATTEMPT ===');
-    console.log('Current form data:', formData);
-    
-    // Mark all fields as touched
-    const allTouched = {
+
+   const validateForm = () => {
+    const newTouched = {
       firstName: true,
       lastName: true,
       contactNumber: true,
@@ -186,65 +184,163 @@ const Register = () => {
       confirmPassword: true,
       barangay: true
     };
-    setTouched(allTouched);
+    setTouched(newTouched);
 
-    // Check if all fields are valid
-    const isFormValid = Object.keys(formData).every(field => 
-      validateField(field, formData[field])
+    return Object.keys(formData).every(key => 
+      validateField(key, formData[key])
     );
+  };
 
-    console.log('Frontend validation result:', isFormValid);
-
-    // Log individual field validations
-    console.log('Field validations:', {
-      firstName: validateField('firstName', formData.firstName),
-      lastName: validateField('lastName', formData.lastName),
-      contactNumber: validateField('contactNumber', formData.contactNumber),
-      password: validateField('password', formData.password),
-      confirmPassword: validateField('confirmPassword', formData.confirmPassword),
-      barangay: validateField('barangay', formData.barangay)
-    });
-
-    if (!isFormValid) {
-      console.log('Frontend validation failed, not submitting');
+  const handleSendOTP = async (e) => {
+    e.preventDefault();
+    
+    if (!validateForm()) {
       return;
     }
 
-    // Prepare registration data
-    const fullPhoneNumber = `+63${formData.contactNumber}`;
-    const registrationData = {
-      firstName: formData.firstName.trim(),
-      lastName: formData.lastName.trim(),
-      contactNumber: fullPhoneNumber,
-      password: formData.password,
-      confirmPassword: formData.password, // ✅ ADDED THIS LINE
-      barangay: formData.barangay.toLowerCase()
-    };
-    console.log('Sending registration data:', registrationData);
+    setOtpLoading(true);
+    setOtpError('');
 
-    // Validate the prepared data against backend requirements
-    console.log('Backend validation checks:', {
-      firstNameValid: registrationData.firstName.length >= 2 && 
-                     registrationData.firstName.length <= 50 &&
-                     /^[a-zA-Z\s]+$/.test(registrationData.firstName),
-      lastNameValid: registrationData.lastName.length >= 2 && 
-                    registrationData.lastName.length <= 50 &&
-                    /^[a-zA-Z\s]+$/.test(registrationData.lastName),
-      contactValid: /^(\+639)\d{9}$/.test(registrationData.contactNumber),
-      // UPDATED: Only check for minimum length
-      passwordValid: registrationData.password.length >= 8,
-      barangayValid: barangays.includes(registrationData.barangay)
-    });
+    try {
 
-    // Call register function from context
-    const result = await register(registrationData);
-    
-    if (result.success) {
-      console.log('Registration successful');
-    } else {
-      console.log('Registration failed:', result.error);
+      const phoneNumber = formData.contactNumber.length === 10 ? 
+      `09${formData.contactNumber}` : formData.contactNumber;
+      
+      console.log('Sending phone number:', phoneNumber); // Debug log
+      const response = await fetch('/api/auth/send-otp', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          firstName: formData.firstName.trim(),
+          lastName: formData.lastName.trim(),
+          contactNumber: phoneNumber,
+          password: formData.password,
+          barangay: formData.barangay
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setMaskedNumber(data.data.maskedNumber);
+        setShowOTPPopup(true);
+      } else {
+        setOtpError(data.message || 'Failed to send OTP');
+      }
+    } catch (error) {
+      console.error('Send OTP error:', error);
+      setOtpError('Network error. Please try again.');
+    } finally {
+      setOtpLoading(false);
     }
   };
+
+  const handleVerifyOTP = async (otp) => {
+  setOtpLoading(true);
+  setOtpError('');
+
+  try {
+
+     const phoneNumber = formData.contactNumber.length === 10 ? 
+    `09${formData.contactNumber}` : formData.contactNumber;
+    
+    console.log('Verifying with phone number:', phoneNumber);
+
+    const response = await fetch('/api/auth/verify-otp', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        contactNumber: phoneNumber,
+        otp: otp
+      }),
+    });
+
+    const data = await response.json();
+
+    if (data.success) {
+      setShowOTPPopup(false);
+      setRegistrationSuccess(true);
+      
+      // Store auth tokens
+      if (data.token && data.refreshToken) {
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('refreshToken', data.refreshToken);
+      }
+
+      // Redirect after showing success message
+      setTimeout(() => {
+        navigate('/profile', { replace: true });
+      }, 2000);
+    } else {
+      setOtpError(data.message || 'Invalid OTP');
+    }
+  } catch (error) {
+    console.error('Verify OTP error:', error);
+    setOtpError('Network error. Please try again.');
+  } finally {
+    setOtpLoading(false);
+  }
+};
+
+// NEW FUNCTION - Resend OTP handler
+const handleResendOTP = async () => {
+  setOtpLoading(true);
+  setOtpError('');
+
+  try {
+    const response = await fetch('/api/auth/resend-otp', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        contactNumber: `09${formData.contactNumber}`
+      }),
+    });
+
+    const data = await response.json();
+
+    if (data.success) {
+      setMaskedNumber(data.data.maskedNumber);
+    } else {
+      setOtpError(data.message || 'Failed to resend OTP');
+    }
+  } catch (error) {
+    console.error('Resend OTP error:', error);
+    setOtpError('Network error. Please try again.');
+  } finally {
+    setOtpLoading(false);
+  }
+};
+
+// NEW FUNCTION - Close OTP popup
+  const handleCloseOTPPopup = () => {
+    setShowOTPPopup(false);
+    setOtpError('');
+  };
+
+  if (registrationSuccess) {
+  return (
+    <div className={styles.container}>
+      <div className={styles.authWrapper}>
+        <div className={styles.successContainer}>
+          <div className={styles.successContent}>
+            <CheckCircle className={styles.successIcon} />
+            <h2 className={styles.successTitle}>Account Created Successfully!</h2>
+            <p className={styles.successMessage}>
+              Your account has been verified and created. You will be redirected to your profile shortly.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 
   return (
     <div className={styles.authContainer}>
@@ -282,14 +378,14 @@ const Register = () => {
             </div>
 
             {/* Error Display */}
-            {error && (
+            {(error || otpError) && (
               <div className={styles.errorMessage}>
-                {error}
+                {error || otpError}
               </div>
             )}
 
             {/* Form */}
-            <form onSubmit={handleSubmit} className={styles.form}>
+            <form onSubmit={handleSendOTP} className={styles.form}>
               <div className={styles.inputWrapper}>
                 <UserRound className={styles.inputIcon}/>
                 <input
@@ -413,10 +509,10 @@ const Register = () => {
 
               <button 
                 type="submit" 
-                className={`${styles.submitButton} ${isLoading ? styles.submitButtonLoading : ''}`}
-                disabled={isLoading}
+                className={`${styles.submitButton} ${(isLoading || otpLoading) ? styles.submitButtonLoading : ''}`}
+                disabled={isLoading || otpLoading}
               >
-                {isLoading ? 'Creating account...' : 'Sign up'}
+                {otpLoading ? 'Sending OTP...' : 'Send Verification Code'}
               </button>
 
               <p className={styles.authPrompt}>
@@ -426,6 +522,16 @@ const Register = () => {
           </div>
         </div>
       </div>
+
+      <OTPVerificationPopup
+        isOpen={showOTPPopup}
+        onClose={handleCloseOTPPopup}
+        onVerify={handleVerifyOTP}
+        onResend={handleResendOTP}
+        maskedNumber={maskedNumber}
+        isLoading={otpLoading}
+        error={otpError}
+      />
     </div>
   );
 };
