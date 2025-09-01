@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import { useAuth } from '../../contexts/AuthContext';
 import styles from './Feedback.module.css';
+import { useLocation } from 'react-router-dom';
 
 const Feedback = () => {
   const { isAuthenticated, user } = useAuth();
@@ -10,6 +11,7 @@ const Feedback = () => {
   const [filteredFeedbacks, setFilteredFeedbacks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const location = useLocation();
   
   // Modal states
   const [showSubmitModal, setShowSubmitModal] = useState(false);
@@ -40,6 +42,14 @@ const Feedback = () => {
   useEffect(() => {
     fetchFeedback();
   }, []);
+
+  useEffect(() => {
+  if (location.state?.openForm && isAuthenticated) {
+    setShowSubmitModal(true);
+  } else if (location.state?.openForm && !isAuthenticated) {
+    setShowLoginPrompt(true);
+  }
+}, [location.state, isAuthenticated]);
 
   // Filter feedbacks when category changes
   useEffect(() => {
@@ -360,18 +370,7 @@ const Feedback = () => {
                   {formData.message.length}/2000 characters
                 </small>
               </div>
-
-              <div className={styles.formGroup}>
-                <label className={styles.checkboxLabel}>
-                  <input
-                    type="checkbox"
-                    checked={formData.isPublic}
-                    onChange={(e) => setFormData(prev => ({ ...prev, isPublic: e.target.checked }))}
-                  />
-                  Make this feedback public (visible to all users)
-                </label>
-              </div>
-
+              
               <div className={styles.formActions}>
                 <button
                   type="button"

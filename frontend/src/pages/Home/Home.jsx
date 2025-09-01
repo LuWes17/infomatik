@@ -4,6 +4,7 @@ import konsiroy from '../../assets/home slides/konsi-roy.jpg';
 import withkonsi from '../../assets/home slides/withkonsi.jpg';
 import konsiCommunity from '../../assets/home slides/konsi-community.jpg';
 import { CircleChevronRight, CircleChevronLeft, CalendarDays, BellRing, BriefcaseBusiness, Mail, ScrollText } from "lucide-react";
+import FeedbackSection from './FeedbackSection'; 
 
 const Home = () => {
   const slides = [konsiroy, withkonsi, konsiCommunity];
@@ -149,6 +150,8 @@ const Home = () => {
           </div>
         </div>
       </div>
+
+      <FeedbackSection />
     </div>
   );
 };
