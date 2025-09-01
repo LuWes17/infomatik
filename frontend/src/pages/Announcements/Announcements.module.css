@@ -467,13 +467,16 @@
 .modalHeader {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: center; /* Changed from flex-start to center */
   padding: 2rem 2rem 1rem;
   border-bottom: 1px solid #e2e8f0;
   flex-shrink: 0;
 }
 
 .modalTitle {
+  display: flex; /* Changed to flex to align title and category horizontally */
+  align-items: center; /* Center align title and category */
+  gap: 1rem; /* Space between title and category */
   flex: 1;
   min-width: 0; /* Allow title to shrink */
   padding-right: 1rem;
@@ -483,11 +486,18 @@
   font-size: 1.5rem;
   font-weight: 600;
   color: var(--gray-900);
-  margin: 0 0 0.5rem 0;
-  /* Allow title to wrap in modal */
+  margin: 0; /* Removed bottom margin */
+  flex: 1; /* Take available space */
+  min-width: 0; /* Allow wrapping if needed */
   word-wrap: break-word;
   overflow-wrap: break-word;
   hyphens: auto;
+}
+
+.modalTitle .category {
+  flex-shrink: 0; /* Prevent category from shrinking */
+  white-space: nowrap; /* Keep category text on one line */
+  font-size: .85rem;
 }
 
 .closeButton {
