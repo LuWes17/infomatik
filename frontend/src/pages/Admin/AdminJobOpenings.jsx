@@ -212,28 +212,6 @@ const AdminJobOpenings = () => {
     }
   };
 
-  // View/Download CV
-  const handleCV = async (cvUrl, action) => {
-    try {
-      if (action === 'view') {
-        window.open(cvUrl, '_blank');
-      } else {
-        const response = await fetch(cvUrl);
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = cvUrl.split('/').pop();
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        window.URL.revokeObjectURL(url);
-      }
-    } catch (error) {
-      console.error('Error handling CV:', error);
-      alert('Error accessing CV file');
-    }
-  };
 
   // Reset form
   const resetForm = () => {
@@ -639,20 +617,6 @@ const AdminJobOpenings = () => {
                               <td className="table-cell">
                                 {application.resume ? (
                                   <div className="cv-actions">
-                                    <button
-                                      onClick={() => handleCV(application.resume, 'view')}
-                                      className="cv-btn cv-btn-view"
-                                      title="View CV"
-                                    >
-                                      <Eye size={18} />
-                                    </button>
-                                    <button
-                                      onClick={() => handleCV(application.resume, 'download')}
-                                      className="cv-btn cv-btn-download"
-                                      title="Download CV"
-                                    >
-                                      <Download size={18} />
-                                    </button>
                                   </div>
                                 ) : (
                                   <span className="no-cv">No CV</span>

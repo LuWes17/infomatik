@@ -222,16 +222,6 @@ const AdminSolicitationRequests = () => {
     });
   };
 
-  // Download PDF
-  const handleDownloadPDF = (pdfPath, fileName) => {
-    const link = document.createElement('a');
-    link.href = pdfPath;
-    link.download = fileName || 'solicitation_letter.pdf';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
   return (
     <div className="adminSolicitationRequests">
       <div className="header">
@@ -469,45 +459,8 @@ const AdminSolicitationRequests = () => {
                       >
                         View PDF
                       </button>
-                      <button
-                        className="downloadButton"
-                        onClick={() => handleDownloadPDF(
-                          selectedRequest.solicitationLetter,
-                          `solicitation_${selectedRequest._id}.pdf`
-                        )}
-                      >
-                        Download
-                      </button>
                     </div>
                   </div>
-                  
-                  {selectedRequest.supportingDocuments?.length > 0 && (
-                    <>
-                      <h4>Supporting Documents</h4>
-                      {selectedRequest.supportingDocuments.map((doc, index) => (
-                        <div key={index} className="documentItem">
-                          <div className="documentInfo">
-                            <i className="icon-file"></i>
-                            <span>{doc.fileName}</span>
-                          </div>
-                          <div className="documentActions">
-                            <button
-                              className="viewButton"
-                              onClick={() => window.open(doc.filePath, '_blank')}
-                            >
-                              View
-                            </button>
-                            <button
-                              className="downloadButton"
-                              onClick={() => handleDownloadPDF(doc.filePath, doc.fileName)}
-                            >
-                              Download
-                            </button>
-                          </div>
-                        </div>
-                      ))}
-                    </>
-                  )}
                 </div>
               </div>
 

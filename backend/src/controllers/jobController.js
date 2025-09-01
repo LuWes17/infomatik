@@ -200,10 +200,7 @@ exports.applyForJob = asyncHandler(async (req, res) => {
     };
     
     const application = await JobApplication.create(applicationData);
-    
-    // Populate the application for response
-    await application.populate('jobPosting', 'title company');
-    await application.populate('applicant', 'firstName lastName contactNumber');
+
     
     res.status(201).json({
       success: true,
@@ -254,14 +251,26 @@ exports.getAllApplications = asyncHandler(async (req, res) => {
   if (status) filter.status = status;
   if (jobId) filter.jobPosting = jobId;
   
+  console.log('Fetching applications with filter:', filter); // Debug log
+  
   const applications = await JobApplication.find(filter)
-    .populate('jobPosting', 'title')
-    .populate('applicant', 'firstName lastName contactNumber')
+    .populate('jobPosting', 'title company')
+    .populate('applicant', 'firstName lastName contactNumber') // Make sure this includes the fields you need
     .sort({ createdAt: -1 })
     .limit(limit * 1)
     .skip(skip);
     
   const total = await JobApplication.countDocuments(filter);
+  
+  // Debug log to check what fields are being returned
+  console.log('Sample application data:', applications[0] ? {
+    id: applications[0]._id,
+    fullName: applications[0].fullName,
+    cvFile: applications[0].cvFile,
+    phone: applications[0].phone,
+    status: applications[0].status,
+    applicant: applications[0].applicant
+  } : 'No applications found');
   
   res.status(200).json({
     success: true,
@@ -273,7 +282,6 @@ exports.getAllApplications = asyncHandler(async (req, res) => {
     }
   });
 });
-
 // Get application by ID (Admin)
 exports.getApplicationById = asyncHandler(async (req, res) => {
   const application = await JobApplication.findById(req.params.id)
