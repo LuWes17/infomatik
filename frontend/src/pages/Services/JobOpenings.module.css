@@ -600,7 +600,6 @@
   margin-bottom: 2rem;
 }
 
-
 .detailItem {
   display: flex;
   gap: 0.5rem;
@@ -662,15 +661,15 @@
   border-radius: 60px;
 }
 
-/* Application Form */
+/* Application Form - Updated to match registration form style */
 .applicationForm {
   width: 100%;
 }
 
 .formGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
   margin-bottom: 2rem;
 }
 
@@ -689,36 +688,118 @@
   font-size: 0.875rem;
 }
 
-.formGroup label svg {
-  color: var(--primary-color);
-  flex-shrink: 0;
+/* Input wrapper for icons */
+.inputWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
 }
 
+.inputIcon {
+  position: absolute;
+  left: 1rem;
+  color: var(--primary-color);
+  z-index: 1;
+  pointer-events: none;
+  height: 1.15rem;
+}
+
+.inputWithIcon {
+  padding-left: 2.5rem !important;
+  width: 100%;
+}
+
+/* Phone input specific styling */
+.phoneInputWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.phonePrefix {
+  position: absolute;
+  left: 3rem;
+  color: #999;
+  z-index: 1;
+  pointer-events: none;
+  font-size: 0.9rem;
+}
+
+.phoneInputWithIcon {
+  padding-left: 5rem !important;
+  width: 100%;
+}
+
+/* Updated input styling to match registration form */
 .formGroup input,
-.formGroup textarea {
-  padding: 0.75rem;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  font-size: 1rem;
+.formGroup textarea,
+.formGroup select {
+  padding: 0.8rem 1rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 1rem;
+  font-size: 0.9rem;
   font-family: inherit;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
   background: white;
+  outline: none;
+}
+
+.formGroup input::placeholder,
+.formGroup textarea::placeholder {
+  color: #999;
 }
 
 .formGroup input:focus,
-.formGroup textarea:focus {
+.formGroup textarea:focus,
+.formGroup select:focus {
   outline: none;
   border-color: var(--primary-color);
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  box-shadow: 0 0 0 0.2rem rgba(28, 98, 187, 0.25);
+}
+
+.formGroup select {
+  cursor: pointer;
+}
+
+/* Select placeholder styling */
+.selectPlaceholder {
+  color: #999 !important;
+}
+
+.formGroup select option {
+  padding: 0.5rem;
+  background-color: white;
+  color: #333;
+}
+
+.formGroup select option:hover {
+  background-color: #f8f9fa;
+}
+
+/* Style for select placeholder option */
+.formGroup select option[value=""] {
+  color: #999;
+}
+
+.formGroup select option:not([value=""]) {
+  color: #000;
+}
+
+/* For the select element itself when no option is selected */
+.formGroup select:invalid {
+  color: #999;
 }
 
 .formGroup textarea {
   resize: vertical;
   min-height: 120px;
   line-height: 1.5;
+  border-radius: 0.75rem;
 }
 
-/* File Upload */
+/* File Upload - Updated styling */
 .fileUpload {
   position: relative;
   display: flex;
@@ -740,11 +821,11 @@
   gap: 0.75rem;
   padding: 1rem;
   border: 2px dashed #e2e8f0;
-  border-radius: 8px;
+  border-radius: 0.75rem;
   background: #f8fafc;
   color: var(--gray-700);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
   font-size: 0.875rem;
   font-weight: 500;
   text-align: center;
@@ -781,6 +862,7 @@
   color: white;
 }
 
+/* Form Actions - Updated styling */
 .formActions {
   display: flex;
   justify-content: flex-end;
@@ -790,14 +872,15 @@
 }
 
 .cancelBtn {
-  padding: 0.75rem 1.5rem;
-  border: 1px solid #e2e8f0;
+  padding: 0.8rem 1.5rem;
+  border: 2px solid #e2e8f0;
   background: white;
   color: var(--gray-700);
-  border-radius: 8px;
+  border-radius: 1rem;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
+  font-size: 0.9rem;
 }
 
 .cancelBtn:hover {
@@ -811,25 +894,35 @@
 }
 
 .submitBtn {
-  padding: 0.75rem 1.5rem;
+  padding: 0.8rem 1.5rem;
   background: var(--primary-color);
   color: white;
   border: none;
-  border-radius: 8px;
+  border-radius: 1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
   min-width: 150px;
+  font-size: 0.9rem;
 }
 
 .submitBtn:hover {
-  background: var(--primary-dark);
+  background: #1557a6;
 }
 
 .submitBtn:disabled {
   opacity: 0.7;
   cursor: not-allowed;
   background: var(--gray-400);
+}
+
+/* Validation states */
+.inputValid {
+  border-color: #28a745 !important;
+}
+
+.inputInvalid {
+  border-color: #dc3545 !important;
 }
 
 /* Auth Prompt */
@@ -1022,12 +1115,44 @@
   }
 
   .formGrid {
-    grid-template-columns: 1fr;
     gap: 1rem;
+  }
+
+  .formGroup input,
+  .formGroup textarea,
+  .formGroup select {
+    padding: 1rem;
+    font-size: 1rem;
+    border-radius: 0.75rem;
+  }
+
+  .inputWithIcon {
+    padding-left: 3rem !important;
+  }
+
+  .phoneInputWithIcon {
+    padding-left: 6rem !important;
+  }
+
+  .phonePrefix {
+    left: 3.5rem;
+    font-size: 1rem;
+  }
+
+  .inputIcon {
+    left: 1.2rem;
+    height: 1.2rem;
   }
 
   .formActions {
     flex-direction: column-reverse;
+  }
+
+  .cancelBtn,
+  .submitBtn {
+    padding: 1rem 2rem;
+    font-size: 1rem;
+    border-radius: 0.75rem;
   }
 
   .authActions {
@@ -1086,5 +1211,30 @@
   .modalHeader,
   .modalBody {
     padding: 1rem;
+  }
+
+  .formGroup input,
+  .formGroup textarea,
+  .formGroup select {
+    padding: 0.9rem;
+    font-size: 0.95rem;
+  }
+
+  .inputWithIcon {
+    padding-left: 2.8rem !important;
+  }
+
+  .phoneInputWithIcon {
+    padding-left: 5.5rem !important;
+  }
+
+  .phonePrefix {
+    left: 3.2rem;
+    font-size: 0.95rem;
+  }
+
+  .inputIcon {
+    left: 1rem;
+    height: 1.1rem;
   }
 }

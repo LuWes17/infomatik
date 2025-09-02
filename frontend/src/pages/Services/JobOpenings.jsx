@@ -21,7 +21,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import styles from './JobOpenings.module.css';
 
 const JobOpenings = () => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const [jobs, setJobs] = useState([]);
   const [filteredJobs, setFilteredJobs] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -35,13 +35,30 @@ const JobOpenings = () => {
   // Added search and dropdown states
   const [searchTerm, setSearchTerm] = useState('');
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [barangayDropdownOpen, setBarangayDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
+  const barangayDropdownRef = useRef(null);
+  
+  // Barangays list for dropdown
+  const barangays = [
+    'agnas', 'bacolod', 'bangkilingan', 'bantayan', 'baranghawon', 'basagan', 
+    'basud', 'bognabong', 'bombon', 'bonot', 'san isidro', 'buang', 'buhian', 
+    'cabagnan', 'cobo', 'comon', 'cormidal', 'divino rostro', 'fatima', 
+    'guinobat', 'hacienda', 'magapo', 'mariroc', 'matagbac', 'oras', 'oson', 
+    'panal', 'pawa', 'pinagbobong', 'quinale cabasan', 'quinastillojan', 'rawis', 
+    'sagurong', 'salvacion', 'san antonio', 'san carlos', 'san juan', 'san lorenzo', 
+    'san ramon', 'san roque', 'san vicente', 'santo cristo', 'sua-igot', 'tabiguian', 
+    'tagas', 'tayhi', 'visita'
+  ];
   
   const [applicationData, setApplicationData] = useState({
-    fullName: '',
+    firstName: '',
+    lastName: '',
     birthday: '',
     phone: '',
-    address: '',
+    street: '',
+    barangay: '',
+    city: '',
     cvFile: null
   });
 
@@ -75,6 +92,9 @@ const JobOpenings = () => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setDropdownOpen(false);
       }
+      if (barangayDropdownRef.current && !barangayDropdownRef.current.contains(event.target)) {
+        setBarangayDropdownOpen(false);
+      }
     };
 
     document.addEventListener('mousedown', handleClickOutside);
@@ -104,6 +124,20 @@ const JobOpenings = () => {
 
     setFilteredJobs(filtered);
   }, [jobs, filterStatus, searchTerm]);
+
+  // Auto-populate form with user data when application form opens
+  useEffect(() => {
+    if (showApplicationForm && isAuthenticated && user) {
+      setApplicationData(prev => ({
+        ...prev,
+        firstName: user.firstName || '',
+        lastName: user.lastName || '',
+        phone: user.contactNumber || '',
+        barangay: user.barangay || '',
+        city: 'General Trias' // Default city based on your location
+      }));
+    }
+  }, [showApplicationForm, isAuthenticated, user]);
 
   // Format date
   const formatDate = (dateString) => {
@@ -154,10 +188,10 @@ const JobOpenings = () => {
       
       // Create FormData for file upload
       const formData = new FormData();
-      formData.append('fullName', applicationData.fullName);
+      formData.append('fullName', `${applicationData.firstName} ${applicationData.lastName}`);
       formData.append('birthday', applicationData.birthday);
       formData.append('phone', applicationData.phone);
-      formData.append('address', applicationData.address);
+      formData.append('address', `${applicationData.street}, ${applicationData.barangay}, ${applicationData.city}`);
       formData.append('cvFile', applicationData.cvFile);
       
       const response = await fetch(`http://localhost:4000/api/jobs/${selectedJob._id}/apply`, {
@@ -174,10 +208,13 @@ const JobOpenings = () => {
         alert('Application submitted successfully!');
         setShowApplicationForm(false);
         setApplicationData({
-          fullName: '',
+          firstName: '',
+          lastName: '',
           birthday: '',
           phone: '',
-          address: '',
+          street: '',
+          barangay: '',
+          city: '',
           cvFile: null
         });
       } else {
@@ -208,6 +245,15 @@ const JobOpenings = () => {
 
   const toggleDropdown = () => {
     setDropdownOpen(!dropdownOpen);
+  };
+
+  const toggleBarangayDropdown = () => {
+    setBarangayDropdownOpen(!barangayDropdownOpen);
+  };
+
+  const handleBarangaySelect = (barangay) => {
+    setApplicationData({...applicationData, barangay: barangay});
+    setBarangayDropdownOpen(false);
   };
 
   if (loading) {
@@ -442,12 +488,14 @@ const JobOpenings = () => {
         </div>
       )}
 
-      {/* Application Form Modal */}
+      {/* Application Form Modal - UPDATED WITH REGISTRATION FORM STYLING */}
       {showApplicationForm && selectedJob && (
         <div className={styles.modal} onClick={closeAllModals}>
           <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
             <div className={styles.modalHeader}>
-              <h2>Apply for {selectedJob.title}</h2>
+              <div className={styles.modalTitle}>
+                <h2>Apply for {selectedJob.title}</h2>
+              </div>
               <button className={styles.closeBtn} onClick={closeAllModals}>
                 ×
               </button>
@@ -456,69 +504,174 @@ const JobOpenings = () => {
             <div className={styles.modalBody}>
               <form onSubmit={handleApplicationSubmit} className={styles.applicationForm}>
                 <div className={styles.formGrid}>
+                  {/* First Name Input */}
                   <div className={styles.formGroup}>
                     <label>
-                      <User size={16} />
-                      Full Name *
+                      First Name <span className={styles.required}>*</span>
                     </label>
-                    <input
-                      type="text"
-                      value={applicationData.fullName}
-                      onChange={(e) => setApplicationData({...applicationData, fullName: e.target.value})}
-                      required
-                      placeholder="Enter your full name"
-                    />
+                    <div className={styles.inputWrapper}>
+                      <User size={16} className={styles.inputIcon} />
+                      <input
+                        type="text"
+                        value={applicationData.firstName}
+                        onChange={(e) => setApplicationData({...applicationData, firstName: e.target.value})}
+                        required
+                        placeholder="First Name"
+                        className={styles.inputWithIcon}
+                        maxLength={50}
+                      />
+                    </div>
                   </div>
 
+                  {/* Last Name Input */}
                   <div className={styles.formGroup}>
                     <label>
-                      <CalendarIcon size={16} />
-                      Birthday *
+                      Last Name <span className={styles.required}>*</span>
                     </label>
-                    <input
-                      type="date"
-                      value={applicationData.birthday}
-                      onChange={(e) => setApplicationData({...applicationData, birthday: e.target.value})}
-                      required
-                      max={new Date().toISOString().split('T')[0]}
-                    />
+                    <div className={styles.inputWrapper}>
+                      <User size={16} className={styles.inputIcon} />
+                      <input
+                        type="text"
+                        value={applicationData.lastName}
+                        onChange={(e) => setApplicationData({...applicationData, lastName: e.target.value})}
+                        required
+                        placeholder="Last Name"
+                        className={styles.inputWithIcon}
+                        maxLength={50}
+                      />
+                    </div>
                   </div>
 
+                  {/* Birthday Input */}
                   <div className={styles.formGroup}>
                     <label>
-                      <Phone size={16} />
-                      Phone Number *
+                      Birthday <span className={styles.required}>*</span>
                     </label>
-                    <input
-                      type="tel"
-                      value={applicationData.phone}
-                      onChange={(e) => setApplicationData({...applicationData, phone: e.target.value})}
-                      required
-                      placeholder="09XXXXXXXXX or +639XXXXXXXXX"
-                      pattern="^(09|\+639)\d{9}$"
-                      title="Please enter a valid Philippine mobile number"
-                    />
+                    <div className={styles.inputWrapper}>
+                      <CalendarIcon size={16} className={styles.inputIcon} />
+                      <input
+                        type="date"
+                        value={applicationData.birthday}
+                        onChange={(e) => setApplicationData({...applicationData, birthday: e.target.value})}
+                        required
+                        max={new Date().toISOString().split('T')[0]}
+                        className={styles.inputWithIcon}
+                      />
+                    </div>
                   </div>
 
+                  {/* Phone Number Input */}
                   <div className={styles.formGroup}>
                     <label>
-                      <LocationIcon size={16} />
-                      Complete Address *
+                      Phone Number <span className={styles.required}>*</span>
                     </label>
-                    <textarea
-                      value={applicationData.address}
-                      onChange={(e) => setApplicationData({...applicationData, address: e.target.value})}
-                      required
-                      rows={3}
-                      placeholder="Enter your complete address"
-                      maxLength={300}
-                    />
+                    <div className={styles.phoneInputWrapper}>
+                      <Phone size={16} className={styles.inputIcon} />
+                      <span className={styles.phonePrefix}>+63</span>
+                      <input
+                        type="tel"
+                        value={applicationData.phone.replace(/^(\+63|63)/, '').replace(/^09/, '9')}
+                        onChange={(e) => {
+                          let value = e.target.value.replace(/\D/g, '');
+                          // Ensure it starts with 9 if user types numbers
+                          if (value && !value.startsWith('9')) {
+                            value = '9' + value.substring(1);
+                          }
+                          // Limit to 10 digits (9xxxxxxxxx)
+                          value = value.substring(0, 10);
+                          setApplicationData({...applicationData, phone: `09${value.substring(1)}`});
+                        }}
+                        required
+                        placeholder="9XX XXX XXXX"
+                        pattern="^9\d{9}$"
+                        title="Please enter a valid Philippine mobile number (9XXXXXXXXX)"
+                        className={styles.phoneInputWithIcon}
+                        maxLength={10}
+                      />
+                    </div>
                   </div>
 
+                  {/* Street Address Input */}
                   <div className={styles.formGroup}>
                     <label>
-                      <Upload size={16} />
-                      Upload CV/Resume *
+                      Street Address <span className={styles.required}>*</span>
+                    </label>
+                    <div className={styles.inputWrapper}>
+                      <LocationIcon size={16} className={styles.inputIcon} />
+                      <input
+                        type="text"
+                        value={applicationData.street}
+                        onChange={(e) => setApplicationData({...applicationData, street: e.target.value})}
+                        required
+                        placeholder="House/Unit No., Street Name"
+                        maxLength={200}
+                        className={styles.inputWithIcon}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Barangay Custom Dropdown */}
+                  <div className={styles.formGroup}>
+                    <label>
+                      Barangay <span className={styles.required}>*</span>
+                    </label>
+                    <div className={styles.barangayFilterDropdown} ref={barangayDropdownRef}>
+                      <MapPin size={16} className={styles.barangayFilterIcon} />
+                      <button
+                        type="button"
+                        onClick={toggleBarangayDropdown}
+                        className={`${styles.barangayDropdownButton} ${barangayDropdownOpen ? styles.active : ''}`}
+                      >
+                        <span className={!applicationData.barangay ? styles.placeholder : ''}>
+                          {applicationData.barangay ? 
+                            applicationData.barangay.split(' ').map(word => 
+                              word.charAt(0).toUpperCase() + word.slice(1)
+                            ).join(' ') 
+                            : 'Select Barangay'
+                          }
+                        </span>
+                        <ChevronDown size={16} className={`${styles.barangayDropdownArrow} ${barangayDropdownOpen ? styles.open : ''}`} />
+                      </button>
+                      <div className={`${styles.barangayDropdownContent} ${barangayDropdownOpen ? styles.show : ''}`}>
+                        {barangays.map((barangay) => (
+                          <button
+                            key={barangay}
+                            type="button"
+                            onClick={() => handleBarangaySelect(barangay)}
+                            className={`${styles.barangayDropdownItem} ${applicationData.barangay === barangay ? styles.active : ''}`}
+                          >
+                            {barangay.split(' ').map(word => 
+                              word.charAt(0).toUpperCase() + word.slice(1)
+                            ).join(' ')}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* City Input (Pre-filled and readonly) */}
+                  <div className={styles.formGroup}>
+                    <label>
+                      City <span className={styles.required}>*</span>
+                    </label>
+                    <div className={styles.inputWrapper}>
+                      <LocationIcon size={16} className={styles.inputIcon} />
+                      <input
+                        type="text"
+                        value={applicationData.city}
+                        onChange={(e) => setApplicationData({...applicationData, city: e.target.value})}
+                        required
+                        placeholder="City"
+                        className={styles.inputWithIcon}
+                        maxLength={100}
+                      />
+                    </div>
+                  </div>
+
+                  {/* CV Upload Input */}
+                  <div className={styles.formGroup}>
+                    <label>
+                      Upload CV/Resume <span className={styles.required}>*</span>
                     </label>
                     <div className={styles.fileUpload}>
                       <input
