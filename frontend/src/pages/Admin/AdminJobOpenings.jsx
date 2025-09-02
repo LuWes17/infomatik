@@ -34,7 +34,7 @@ const AdminJobOpenings = () => {
     positionsAvailable: 1,
     status: 'open',
     applicationDeadline: '',
-    employmentType: 'full-time',
+    employmentType: 'Full-Time',
     location: ''
   });
 
@@ -233,7 +233,7 @@ const AdminJobOpenings = () => {
       positionsAvailable: 1,
       status: 'open',
       applicationDeadline: '',
-      employmentType: 'full-time',
+      employmentType: 'Full-Time',
       location: ''
     });
     setShowCreateForm(false);
@@ -257,7 +257,7 @@ const AdminJobOpenings = () => {
       status: selectedJob.status,
       applicationDeadline: selectedJob.applicationDeadline ? 
         new Date(selectedJob.applicationDeadline).toISOString().split('T')[0] : '',
-      employmentType: selectedJob.employmentType || 'full-time',
+      employmentType: selectedJob.employmentType || 'Full-Time',
       location: selectedJob.location || ''
     });
     setEditMode(true);
@@ -419,10 +419,10 @@ const AdminJobOpenings = () => {
                       onChange={(e) => setFormData({...formData, employmentType: e.target.value})}
                       className="form-input"
                     >
-                      <option value="full-time">Full-time</option>
-                      <option value="part-time">Part-time</option>
-                      <option value="contract">Contract</option>
-                      <option value="temporary">Temporary</option>
+                      <option value="Full-Time">Full-time</option>
+                      <option value="Part-Time">Part-time</option>
+                      <option value="Contract">Contract</option>
+                      <option value="Temporary">Temporary</option>
                     </select>
                   </div>
 
@@ -534,7 +534,7 @@ const AdminJobOpenings = () => {
                         <div className="info-row">
                           <Clock size={18} />
                           <span className="info-label">Type:</span>
-                          {selectedJob.employmentType || 'Full-time'}
+                          {selectedJob.employmentType || 'Full-Time'}
                         </div>
                         <div className="info-row">
                           <MapPin size={18} />
