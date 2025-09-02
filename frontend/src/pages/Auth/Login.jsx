@@ -53,23 +53,22 @@ const Login = () => {
   // Format phone number for display
   const formatPhoneNumber = (value) => {
     const digits = value.replace(/\D/g, '');
-    const limitedDigits = digits.substring(0, 10);
+    const limitedDigits = digits.substring(0, 9);
     
-    if (limitedDigits.length <= 3) {
-      return limitedDigits;
-    } else if (limitedDigits.length <= 6) {
-      return `${limitedDigits.substring(0, 3)} ${limitedDigits.substring(3)}`;
+    if (limitedDigits.length <= 2) {
+      return limitedDigits; // "12"
+    } else if (limitedDigits.length <= 5) {
+      return `${limitedDigits.substring(0, 2)} ${limitedDigits.substring(2)}`; // "12 345"
     } else {
-      return `${limitedDigits.substring(0, 3)} ${limitedDigits.substring(3, 6)} ${limitedDigits.substring(6)}`;
+      return `${limitedDigits.substring(0, 2)} ${limitedDigits.substring(2, 5)} ${limitedDigits.substring(5)}`; // "12 345 6789"
     }
   };
-
   // Validation functions
   const validateField = (name, value) => {
     switch (name) {
       case 'contactNumber':
         const digits = value.replace(/\D/g, '');
-        return digits.length === 10;
+        return digits.length === 9;
       case 'password':
         return value.length >= 6;
       default:
@@ -92,7 +91,7 @@ const Login = () => {
     if (name === 'contactNumber') {
       const digits = value.replace(/\D/g, '');
       
-      if (digits.length <= 10) {
+      if (digits.length <= 9) {
         setFormData({
           ...formData,
           [name]: digits
@@ -156,9 +155,10 @@ const Login = () => {
     }
 
     // Convert phone number to full format for submission
-    const fullPhoneNumber = `+63${formData.contactNumber}`;
+    const phoneNumber = formData.contactNumber.length === 9 ? 
+    `09${formData.contactNumber}` : formData.contactNumber;
     const loginData = {
-      contactNumber: fullPhoneNumber,
+      contactNumber: phoneNumber,
       password: formData.password
     };
 
@@ -218,18 +218,18 @@ const Login = () => {
             <form onSubmit={handleSubmit} className={styles.form}>
               <div className={styles.phoneInputWrapper}>
                 <Phone className={styles.inputIcon}/>               
-                <span className={styles.phonePrefix}>+63</span>
+                <span className={styles.phonePrefix}>+639</span>
                 <input
                   type="tel"
                   name="contactNumber"
-                  placeholder={phoneNumberFocused ? "123 456 7890" : "Contact Number"}
+                  placeholder={phoneNumberFocused ? "12 345 6789" : "Contact Number"}
                   value={displayPhoneNumber}
                   onChange={handleChange}
                   onBlur={handleBlur}
                   onFocus={handlePhoneFocus}
                   className={`${getInputClass('contactNumber')} ${styles.phoneInputWithIcon} ${phoneNumberFocused ? styles.phoneInputFocused : ''}`}
                   inputMode="numeric"
-                  maxLength="13"
+                  maxLength="12"
                   required
                   disabled={isLoading}
                 />

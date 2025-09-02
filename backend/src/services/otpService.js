@@ -63,7 +63,7 @@ class OTPService {
       console.log('========================');
 
       // In production, uncomment this line to actually send SMS:
-      // await smsService.sendSMS(contactNumber, `Your City Councilor verification code is: ${otp}. Valid for 5 minutes.`);
+      // await smsService.sendSMS(formattedNumber, `Your City Councilor verification code is: ${otp}. Valid for 5 minutes.`);
 
       return {
         success: true,

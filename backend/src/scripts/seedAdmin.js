@@ -30,7 +30,7 @@ const seedSampleData = async () => {
       admin = await User.create({
         firstName: 'System',
         lastName: 'Administrator',
-        contactNumber: '09123456789',
+        contactNumber: '+639123456789',
         password: 'Admin@123',
         barangay: 'agnas',
         role: 'admin',
