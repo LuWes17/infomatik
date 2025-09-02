@@ -30,13 +30,17 @@ const JobOpenings = () => {
   const [showJobDetails, setShowJobDetails] = useState(false);
   const [showApplicationForm, setShowApplicationForm] = useState(false);
   const [showAuthPrompt, setShowAuthPrompt] = useState(false);
+  const [showAlreadyAppliedPopup, setShowAlreadyAppliedPopup] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [userApplications, setUserApplications] = useState(new Set());
   
   // Added search and dropdown states
   const [searchTerm, setSearchTerm] = useState('');
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [barangayDropdownOpen, setBarangayDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
+  
+  // Barangay dropdown states
+  const [barangayDropdownOpen, setBarangayDropdownOpen] = useState(false);
   const barangayDropdownRef = useRef(null);
   
   // Barangays list for dropdown
@@ -62,6 +66,28 @@ const JobOpenings = () => {
     cvFile: null
   });
 
+  // Fetch user applications
+  const fetchUserApplications = async () => {
+    if (!isAuthenticated) return;
+    
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('http://localhost:4000/api/jobs/my-applications', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      const data = await response.json();
+      
+      if (data.success) {
+        const appliedJobIds = new Set(data.applications.map(app => app.jobId));
+        setUserApplications(appliedJobIds);
+      }
+    } catch (error) {
+      console.error('Error fetching user applications:', error);
+    }
+  };
+
   // Fetch jobs
   const fetchJobs = async () => {
     try {
@@ -84,7 +110,8 @@ const JobOpenings = () => {
 
   useEffect(() => {
     fetchJobs();
-  }, []);
+    fetchUserApplications();
+  }, [isAuthenticated]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -134,7 +161,6 @@ const JobOpenings = () => {
         lastName: user.lastName || '',
         phone: user.contactNumber || '',
         barangay: user.barangay || '',
-        city: 'General Trias' // Default city based on your location
       }));
     }
   }, [showApplicationForm, isAuthenticated, user]);
@@ -169,8 +195,22 @@ const JobOpenings = () => {
       return;
     }
     
+    // Check if user already applied for this job
+    if (userApplications.has(job._id)) {
+      setSelectedJob(job);
+      setShowAlreadyAppliedPopup(true);
+      return;
+    }
+    
     setSelectedJob(job);
     setShowApplicationForm(true);
+    // Freeze background when application form opens
+    document.body.style.overflow = "hidden";
+  };
+
+  // Check if user has applied for a specific job
+  const hasUserApplied = (jobId) => {
+    return userApplications.has(jobId);
   };
 
   // Handle application form submission
@@ -207,6 +247,8 @@ const JobOpenings = () => {
       if (data.success) {
         alert('Application submitted successfully!');
         setShowApplicationForm(false);
+        // Add the job to user applications set
+        setUserApplications(prev => new Set(prev.add(selectedJob._id)));
         setApplicationData({
           firstName: '',
           lastName: '',
@@ -217,6 +259,8 @@ const JobOpenings = () => {
           city: '',
           cvFile: null
         });
+        // Unfreeze background when form closes after successful submission
+        document.body.style.overflow = "auto";
       } else {
         alert(data.message || 'Failed to submit application');
       }
@@ -233,7 +277,10 @@ const JobOpenings = () => {
     setShowJobDetails(false);
     setShowApplicationForm(false);
     setShowAuthPrompt(false);
+    setShowAlreadyAppliedPopup(false);
     setSelectedJob(null);
+    setBarangayDropdownOpen(false);
+    // Unfreeze background when any modal closes
     document.body.style.overflow = "auto";
   };
 
@@ -247,13 +294,21 @@ const JobOpenings = () => {
     setDropdownOpen(!dropdownOpen);
   };
 
+  // Barangay dropdown handlers
+  const handleBarangayChange = (barangay) => {
+    setApplicationData({...applicationData, barangay: barangay});
+    setBarangayDropdownOpen(false);
+  };
+
   const toggleBarangayDropdown = () => {
     setBarangayDropdownOpen(!barangayDropdownOpen);
   };
 
-  const handleBarangaySelect = (barangay) => {
-    setApplicationData({...applicationData, barangay: barangay});
-    setBarangayDropdownOpen(false);
+  // Format barangay name for display
+  const formatBarangayName = (barangay) => {
+    return barangay.split(' ').map(word => 
+      word.charAt(0).toUpperCase() + word.slice(1)
+    ).join(' ');
   };
 
   if (loading) {
@@ -395,12 +450,21 @@ const JobOpenings = () => {
                   </button>
                   
                   {job.status === 'open' && !isDeadlinePassed(job.applicationDeadline) && (
-                    <button 
-                      className={styles.applyBtn}
-                      onClick={(e) => handleApplyClick(e, job)}
-                    >
-                      Apply Now
-                    </button>
+                    hasUserApplied(job._id) ? (
+                      <button 
+                        className={styles.appliedBtn}
+                        onClick={(e) => handleApplyClick(e, job)}
+                      >
+                        Already Applied
+                      </button>
+                    ) : (
+                      <button 
+                        className={styles.applyBtn}
+                        onClick={(e) => handleApplyClick(e, job)}
+                      >
+                        Apply Now
+                      </button>
+                    )
                   )}
                 </div>
               </div>
@@ -475,12 +539,21 @@ const JobOpenings = () => {
               {/* Apply Button */}
               {selectedJob.status === 'open' && !isDeadlinePassed(selectedJob.applicationDeadline) && (
                 <div className={styles.modalActions}>
-                  <button 
-                    className={styles.applyBtn}
-                    onClick={() => handleApplyClick({stopPropagation: () => {}}, selectedJob)}
-                  >
-                    Apply for this Position
-                  </button>
+                  {hasUserApplied(selectedJob._id) ? (
+                    <button 
+                      className={styles.appliedBtn}
+                      onClick={() => handleApplyClick({stopPropagation: () => {}}, selectedJob)}
+                    >
+                      Already Applied
+                    </button>
+                  ) : (
+                    <button 
+                      className={styles.applyBtn}
+                      onClick={() => handleApplyClick({stopPropagation: () => {}}, selectedJob)}
+                    >
+                      Apply for this Position
+                    </button>
+                  )}
                 </div>
               )}
             </div>
@@ -488,7 +561,7 @@ const JobOpenings = () => {
         </div>
       )}
 
-      {/* Application Form Modal - UPDATED WITH REGISTRATION FORM STYLING */}
+      {/* Application Form Modal - UPDATED WITH CUSTOM BARANGAY DROPDOWN */}
       {showApplicationForm && selectedJob && (
         <div className={styles.modal} onClick={closeAllModals}>
           <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
@@ -507,7 +580,7 @@ const JobOpenings = () => {
                   {/* First Name Input */}
                   <div className={styles.formGroup}>
                     <label>
-                      First Name <span className={styles.required}>*</span>
+                      First Name *
                     </label>
                     <div className={styles.inputWrapper}>
                       <User size={16} className={styles.inputIcon} />
@@ -526,7 +599,7 @@ const JobOpenings = () => {
                   {/* Last Name Input */}
                   <div className={styles.formGroup}>
                     <label>
-                      Last Name <span className={styles.required}>*</span>
+                      Last Name *
                     </label>
                     <div className={styles.inputWrapper}>
                       <User size={16} className={styles.inputIcon} />
@@ -545,7 +618,7 @@ const JobOpenings = () => {
                   {/* Birthday Input */}
                   <div className={styles.formGroup}>
                     <label>
-                      Birthday <span className={styles.required}>*</span>
+                      Birthday *
                     </label>
                     <div className={styles.inputWrapper}>
                       <CalendarIcon size={16} className={styles.inputIcon} />
@@ -563,7 +636,7 @@ const JobOpenings = () => {
                   {/* Phone Number Input */}
                   <div className={styles.formGroup}>
                     <label>
-                      Phone Number <span className={styles.required}>*</span>
+                      Phone Number *
                     </label>
                     <div className={styles.phoneInputWrapper}>
                       <Phone size={16} className={styles.inputIcon} />
@@ -594,7 +667,7 @@ const JobOpenings = () => {
                   {/* Street Address Input */}
                   <div className={styles.formGroup}>
                     <label>
-                      Street Address <span className={styles.required}>*</span>
+                      Street Address *
                     </label>
                     <div className={styles.inputWrapper}>
                       <LocationIcon size={16} className={styles.inputIcon} />
@@ -610,41 +683,36 @@ const JobOpenings = () => {
                     </div>
                   </div>
 
-                  {/* Barangay Custom Dropdown */}
+                  {/* Custom Barangay Dropdown */}
                   <div className={styles.formGroup}>
                     <label>
-                      Barangay <span className={styles.required}>*</span>
+                      Barangay *
                     </label>
-                    <div className={styles.barangayFilterDropdown} ref={barangayDropdownRef}>
-                      <MapPin size={16} className={styles.barangayFilterIcon} />
-                      <button
-                        type="button"
-                        onClick={toggleBarangayDropdown}
-                        className={`${styles.barangayDropdownButton} ${barangayDropdownOpen ? styles.active : ''}`}
-                      >
-                        <span className={!applicationData.barangay ? styles.placeholder : ''}>
-                          {applicationData.barangay ? 
-                            applicationData.barangay.split(' ').map(word => 
-                              word.charAt(0).toUpperCase() + word.slice(1)
-                            ).join(' ') 
-                            : 'Select Barangay'
-                          }
-                        </span>
-                        <ChevronDown size={16} className={`${styles.barangayDropdownArrow} ${barangayDropdownOpen ? styles.open : ''}`} />
-                      </button>
-                      <div className={`${styles.barangayDropdownContent} ${barangayDropdownOpen ? styles.show : ''}`}>
-                        {barangays.map((barangay) => (
-                          <button
-                            key={barangay}
-                            type="button"
-                            onClick={() => handleBarangaySelect(barangay)}
-                            className={`${styles.barangayDropdownItem} ${applicationData.barangay === barangay ? styles.active : ''}`}
-                          >
-                            {barangay.split(' ').map(word => 
-                              word.charAt(0).toUpperCase() + word.slice(1)
-                            ).join(' ')}
-                          </button>
-                        ))}
+                    <div className={styles.inputWrapper}>
+                      <MapPin size={16} className={styles.inputIcon} />
+                      <div className={styles.barangayDropdown} ref={barangayDropdownRef}>
+                        <button
+                          type="button"
+                          onClick={toggleBarangayDropdown}
+                          className={`${styles.barangayDropdownButton} ${barangayDropdownOpen ? styles.active : ''} ${!applicationData.barangay ? styles.placeholder : ''}`}
+                        >
+                          <span>
+                            {applicationData.barangay ? formatBarangayName(applicationData.barangay) : 'Select Barangay'}
+                          </span>
+                          <ChevronDown size={16} className={`${styles.dropdownArrow} ${barangayDropdownOpen ? styles.open : ''}`} />
+                        </button>
+                        <div className={`${styles.barangayDropdownContent} ${barangayDropdownOpen ? styles.show : ''}`}>
+                          {barangays.map((barangay) => (
+                            <button
+                              key={barangay}
+                              type="button"
+                              onClick={() => handleBarangayChange(barangay)}
+                              className={`${styles.barangayDropdownItem} ${applicationData.barangay === barangay ? styles.active : ''}`}
+                            >
+                              {formatBarangayName(barangay)}
+                            </button>
+                          ))}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -652,7 +720,7 @@ const JobOpenings = () => {
                   {/* City Input (Pre-filled and readonly) */}
                   <div className={styles.formGroup}>
                     <label>
-                      City <span className={styles.required}>*</span>
+                      City *
                     </label>
                     <div className={styles.inputWrapper}>
                       <LocationIcon size={16} className={styles.inputIcon} />
@@ -671,7 +739,7 @@ const JobOpenings = () => {
                   {/* CV Upload Input */}
                   <div className={styles.formGroup}>
                     <label>
-                      Upload CV/Resume <span className={styles.required}>*</span>
+                      Upload CV/Resume *
                     </label>
                     <div className={styles.fileUpload}>
                       <input
@@ -711,6 +779,27 @@ const JobOpenings = () => {
                   </button>
                 </div>
               </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Already Applied Popup Modal */}
+      {showAlreadyAppliedPopup && selectedJob && (
+        <div className={styles.modal} onClick={closeAllModals}>
+          <div className={styles.alreadyAppliedPopup} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.alreadyAppliedHeader}>
+              <BriefcaseBusiness size={32} />
+              <h3>Application Already Submitted</h3>
+            </div>
+            <p>You have already applied for the position "<strong>{selectedJob.title}</strong>". Your application is currently being reviewed.</p>
+            <div className={styles.alreadyAppliedActions}>
+              <button 
+                className={styles.okBtn}
+                onClick={closeAllModals}
+              >
+                OK
+              </button>
             </div>
           </div>
         </div>
