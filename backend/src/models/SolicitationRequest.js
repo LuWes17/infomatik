@@ -62,7 +62,7 @@ const solicitationRequestSchema = new mongoose.Schema({
     type: String,
     required: [true, 'Request type is required'],
     enum: {
-      values: ['Medical', 'Financial', 'Construction Materials', 'Educational Supplies'],
+      values: ['Medical', 'Financial', 'Construction Materials', 'Educational Supplies', 'Others'],
       message: 'Request type must be one of: Medical, Financial, Construction Materials, Educational Supplies'
     }
   },
@@ -154,7 +154,7 @@ const solicitationRequestSchema = new mongoose.Schema({
   // Categories for public viewing
   publicCategory: {
     type: String,
-    enum: ['Medical', 'Financial', 'Construction Materials', 'Educational Supplies']
+    enum: ['Medical', 'Financial', 'Construction Materials', 'Educational Supplies', 'Others']
   },
   
   // Completion tracking

@@ -123,7 +123,7 @@ const seedSampleData = async () => {
       purpose: 'To provide educational support to underprivileged students in Barangay Agnas as part of our Back-to-School Program 2025.',
       additionalDetails: 'This program aims to help students who cannot afford basic school supplies. We have identified 50 students from grades 1-6 who need assistance.',
       solicitationLetter: '/uploads/solicitation-letters/barangay-agnas-youth-council-2025.pdf',
-      status: 'approved',
+      status: 'completed',
       reviewedBy: admin._id,
       reviewedAt: new Date(),
       approvedAmount: 25000,
