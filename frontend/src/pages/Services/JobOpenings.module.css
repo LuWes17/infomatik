@@ -799,6 +799,122 @@
   border-radius: 0.75rem;
 }
 
+/* Custom Barangay Dropdown - Copied from accomplishments page */
+.barangayDropdown {
+  position: relative;
+  width: 100%;
+}
+
+.barangayDropdownButton {
+  width: 100%;
+  padding: 0.8rem 1rem 0.8rem 2.5rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 1rem;
+  background: white;
+  color: var(--gray-700);
+  font-size: 0.9rem;
+  font-weight: 400;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  text-align: left;
+}
+
+.barangayDropdownButton:hover {
+  background-color: #f8fafc;
+  border-color: var(--primary-color);
+}
+
+.barangayDropdownButton:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 0.2rem rgba(28, 98, 187, 0.25);
+}
+
+.barangayDropdownButton.active {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 0.2rem rgba(28, 98, 187, 0.25);
+}
+
+.barangayDropdownButton.placeholder {
+  color: #999;
+}
+
+.barangayDropdownContent {
+  position: absolute;
+  top: 110%;
+  left: 0;
+  right: 0;
+  background: white;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  padding: 8px 0;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  transition: all 0.3s ease;
+  z-index: 200;
+  border: 1px solid #e2e8f0;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.barangayDropdownContent.show {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.barangayDropdownItem {
+  display: block;
+  padding: 10px 16px;
+  color: var(--gray-700);
+  text-decoration: none;
+  font-weight: 400;
+  transition: background-color 0.2s ease;
+  white-space: nowrap;
+  font-size: 0.8rem;
+  cursor: pointer;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+}
+
+.barangayDropdownItem:hover {
+  background-color: #f8fafc;
+  color: var(--primary-color);
+  font-weight: 500;
+}
+
+.barangayDropdownItem.active {
+  background-color: var(--primary-color);
+  color: white;
+  font-weight: 600;
+}
+
+/* Custom scrollbar for barangay dropdown */
+.barangayDropdownContent::-webkit-scrollbar {
+  width: 6px;
+}
+
+.barangayDropdownContent::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 3px;
+}
+
+.barangayDropdownContent::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+.barangayDropdownContent::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
 /* File Upload - Updated styling */
 .fileUpload {
   position: relative;
@@ -905,6 +1021,7 @@
   min-width: 150px;
   font-size: 0.9rem;
 }
+
 
 .submitBtn:hover {
   background: #1557a6;
@@ -1144,6 +1261,16 @@
     height: 1.2rem;
   }
 
+  .barangayDropdownButton {
+    padding: 1rem 1rem 1rem 3rem;
+    font-size: 1rem;
+  }
+
+  .barangayDropdownItem {
+    padding: 12px 16px;
+    font-size: .8rem;
+  }
+
   .formActions {
     flex-direction: column-reverse;
   }
@@ -1236,5 +1363,15 @@
   .inputIcon {
     left: 1rem;
     height: 1.1rem;
+  }
+
+  .barangayDropdownButton {
+    padding: 0.9rem 0.9rem 0.9rem 2.8rem;
+    font-size: 0.95rem;
+  }
+
+  .barangayDropdownItem {
+    padding: 10px 14px;
+    font-size: 0.8rem;
   }
 }
