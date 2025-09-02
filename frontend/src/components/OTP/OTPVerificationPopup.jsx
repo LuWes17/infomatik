@@ -131,7 +131,6 @@ const OTPVerificationPopup = ({
         {/* Header */}
         <div className={styles.header}>
           <div className={styles.headerContent}>
-            <Shield className={styles.icon} />
             <h2 className={styles.title}>Verify Your Phone Number</h2>
           </div>
           <button 

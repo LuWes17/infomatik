@@ -8,7 +8,7 @@ import OTPVerificationPopup from '../../components/OTP/OTPVerificationPopup';
 
 const Register = () => {
   const navigate = useNavigate();
-  const { register, isLoading, error, clearError, isAuthenticated } = useAuth();
+  const { verifyOTP, isAuthenticated, isLoading: authLoading, user } = useAuth();
 
   // State for form and UI
   const [showPassword, setShowPassword] = useState(false);
@@ -20,6 +20,13 @@ const Register = () => {
   const [maskedNumber, setMaskedNumber] = useState('');
   const [registrationSuccess, setRegistrationSuccess] = useState(false);
   
+  useEffect(() => {
+    if (isAuthenticated && !authLoading) {
+      console.log('User is authenticated, redirecting to profile:', user);
+      navigate('/profile', { replace: true });
+    }
+  }, [isAuthenticated, authLoading, navigate, user]);
+
   // Form data state
   const [formData, setFormData] = useState({
     firstName: '',
@@ -56,21 +63,11 @@ const Register = () => {
     'tagas', 'tayhi', 'visita'
   ];
 
-  // Redirect if already authenticated
   useEffect(() => {
-    if (isAuthenticated) {
-      navigate('/profile', { replace: true });
-    }
-  }, [isAuthenticated, navigate]);
-
-  useEffect(() => {
-  if (error) {
-    clearError();
-  }
   if (otpError) {
     setOtpError('');
   }
-}, [formData, clearError, error]);
+}, [formData]);
 
   // Tab change handler
   const handleTabChange = (tab) => {
@@ -237,53 +234,48 @@ const Register = () => {
   };
 
   const handleVerifyOTP = async (otp) => {
-  setOtpLoading(true);
-  setOtpError('');
+    setOtpLoading(true);
+    setOtpError('');
 
-  try {
+    try {
 
-     const phoneNumber = formData.contactNumber.length === 9 ? 
-    `09${formData.contactNumber}` : formData.contactNumber;
-    
-    console.log('Verifying with phone number:', phoneNumber);
-
-    const response = await fetch('/api/auth/verify-otp', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        contactNumber: phoneNumber,
-        otp: otp
-      }),
-    });
-
-    const data = await response.json();
-
-    if (data.success) {
-      setShowOTPPopup(false);
-      setRegistrationSuccess(true);
+      const phoneNumber = formData.contactNumber.length === 9 ? 
+      `09${formData.contactNumber}` : formData.contactNumber;
       
-      // Store auth tokens
-      if (data.token && data.refreshToken) {
-        localStorage.setItem('token', data.token);
-        localStorage.setItem('refreshToken', data.refreshToken);
-      }
+      console.log('Verifying with phone number:', phoneNumber);
 
-      // Redirect after showing success message
-      setTimeout(() => {
-        navigate('/profile', { replace: true });
-      }, 2000);
-    } else {
-      setOtpError(data.message || 'Invalid OTP');
+      const result = await verifyOTP(phoneNumber, otp);
+
+      console.log('OTP verification result:', result);
+
+      if (result.success) {
+        console.log('OTP verification successful, user data:', result.data.user);
+        setShowOTPPopup(false);
+        setRegistrationSuccess(true);
+        
+        // The AuthContext should now have isAuthenticated = true
+        // The useEffect above will handle the redirect automatically
+        console.log('Registration successful, waiting for auth state update...');
+        
+        // Backup redirect in case the useEffect doesn't trigger
+        setTimeout(() => {
+          if (!isAuthenticated) {
+            console.log('Backup redirect triggered');
+            navigate('/profile', { replace: true });
+          }
+        }, 2000);
+
+      } else {
+        setOtpError(result.error || 'Invalid OTP');
+        console.error('OTP verification failed:', result.error);
+      }
+    } catch (error) {
+      console.error('Verify OTP error:', error);
+      setOtpError('Network error. Please try again.');
+    } finally {
+      setOtpLoading(false);
     }
-  } catch (error) {
-    console.error('Verify OTP error:', error);
-    setOtpError('Network error. Please try again.');
-  } finally {
-    setOtpLoading(false);
-  }
-};
+  };
 
 // NEW FUNCTION - Resend OTP handler
 const handleResendOTP = async () => {
@@ -331,7 +323,7 @@ const handleResendOTP = async () => {
             <CheckCircle className={styles.successIcon} />
             <h2 className={styles.successTitle}>Account Created Successfully!</h2>
             <p className={styles.successMessage}>
-              Your account has been verified and created. You will be redirected to your profile shortly.
+              Your account has been verified and created. Redirecting to your profile...
             </p>
           </div>
         </div>
@@ -377,9 +369,9 @@ const handleResendOTP = async () => {
             </div>
 
             {/* Error Display */}
-            {(error || otpError) && (
+            {(otpError) && (
               <div className={styles.errorMessage}>
-                {error || otpError}
+                {otpError}
               </div>
             )}
 
@@ -396,7 +388,7 @@ const handleResendOTP = async () => {
                   onBlur={handleBlur}
                   className={`${getInputClass('lastName')} ${styles.inputWithIcon}`}
                   required
-                  disabled={isLoading}
+                  disabled={authLoading}
                   maxLength={50}
                 />
               </div>
@@ -412,14 +404,14 @@ const handleResendOTP = async () => {
                   onBlur={handleBlur}
                   className={`${getInputClass('firstName')} ${styles.inputWithIcon}`}
                   required
-                  disabled={isLoading}
+                  disabled={authLoading}
                   maxLength={50}
                 />
               </div>
 
               <div className={styles.phoneInputWrapper}>
                 <Phone className={styles.inputIcon}/>               
-                <span className={styles.phonePrefix}>+639</span>
+                <span className={styles.phonePrefix}>+63 9</span>
                 <input
                   type="tel"
                   name="contactNumber"
@@ -432,7 +424,7 @@ const handleResendOTP = async () => {
                   inputMode="numeric"
                   maxLength="13"
                   required
-                  disabled={isLoading}
+                  disabled={authLoading}
                 />
               </div>
 
@@ -445,7 +437,7 @@ const handleResendOTP = async () => {
                   onBlur={handleBlur}
                   className={`${getInputClass('barangay')} ${styles.inputWithIcon} ${!formData.barangay ? styles.selectPlaceholder : ''}`}
                   required
-                  disabled={isLoading}
+                  disabled={authLoading}
                 >
                   <option value="">Select Barangay</option>
                   {barangays.map((barangay) => (
@@ -469,14 +461,14 @@ const handleResendOTP = async () => {
                   onBlur={handleBlur}
                   className={`${getInputClass('password')} ${styles.inputWithIcon}`}
                   required
-                  disabled={isLoading}
+                  disabled={authLoading}
                 />
                 <button
                   type="button"
                   className={styles.passwordToggle}
                   onClick={() => setShowPassword(!showPassword)}
                   aria-label={showPassword ? "Hide password" : "Show password"}
-                  disabled={isLoading}
+                  disabled={authLoading}
                 >
                   {showPassword ? <Eye size={16} /> : <EyeOff size={16} />}
                 </button>
@@ -493,14 +485,14 @@ const handleResendOTP = async () => {
                   onBlur={handleBlur}
                   className={`${getInputClass('confirmPassword')} ${styles.inputWithIcon}`}
                   required
-                  disabled={isLoading}
+                  disabled={authLoading}
                 />
                 <button
                   type="button"
                   className={styles.passwordToggle}
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   aria-label={showConfirmPassword ? "Hide confirm password" : "Show confirm password"}
-                  disabled={isLoading}
+                  disabled={authLoading}
                 >
                   {showConfirmPassword ? <Eye size={16} /> : <EyeOff size={16} />}
                 </button>
@@ -508,8 +500,8 @@ const handleResendOTP = async () => {
 
               <button 
                 type="submit" 
-                className={`${styles.submitButton} ${(isLoading || otpLoading) ? styles.submitButtonLoading : ''}`}
-                disabled={isLoading || otpLoading}
+                className={`${styles.submitButton} ${(authLoading || otpLoading) ? styles.submitButtonLoading : ''}`}
+                disabled={authLoading || otpLoading}
               >
                 {otpLoading ? 'Sending OTP...' : 'Send Verification Code'}
               </button>
@@ -528,7 +520,7 @@ const handleResendOTP = async () => {
         onVerify={handleVerifyOTP}
         onResend={handleResendOTP}
         maskedNumber={maskedNumber}
-        isLoading={otpLoading}
+        authLoading={otpLoading}
         error={otpError}
       />
     </div>

@@ -46,8 +46,16 @@ const authReducer = (state, action) => {
     case AUTH_ACTIONS.REGISTER_SUCCESS:
     case AUTH_ACTIONS.OTP_SUCCESS:
       // Store tokens in localStorage
-      localStorage.setItem('token', action.payload.token);
-      localStorage.setItem('refreshToken', action.payload.refreshToken);
+      if (action.payload.token) {
+        localStorage.setItem('token', action.payload.token);
+      }
+      if (action.payload.refreshToken) {
+        localStorage.setItem('refreshToken', action.payload.refreshToken);
+      }
+      
+      console.log('Auth success - setting user:', action.payload.user);
+      console.log('Auth success - setting authenticated to true');
+      
       return {
         ...state,
         user: action.payload.user,
@@ -120,6 +128,38 @@ const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const [state, dispatch] = useReducer(authReducer, initialState);
 
+  // Refresh token function (defined early to avoid hoisting issues)
+  const refreshAuthToken = async () => {
+    const refreshToken = localStorage.getItem('refreshToken');
+    
+    if (!refreshToken) {
+      dispatch({ type: AUTH_ACTIONS.LOGOUT });
+      return false;
+    }
+
+    try {
+      const response = await api.post('/auth/refresh-token', { refreshToken });
+      
+      // Update token in localStorage
+      localStorage.setItem('token', response.data.token);
+      
+      dispatch({
+        type: AUTH_ACTIONS.LOGIN_SUCCESS,
+        payload: {
+          user: response.data.user,
+          token: response.data.token,
+          refreshToken: refreshToken // Keep existing refresh token
+        }
+      });
+
+      return true;
+    } catch (error) {
+      console.error('Token refresh failed:', error);
+      dispatch({ type: AUTH_ACTIONS.LOGOUT });
+      return false;
+    }
+  };
+
   // Load user from token on app start
   useEffect(() => {
     const loadUser = async () => {
@@ -127,17 +167,26 @@ export const AuthProvider = ({ children }) => {
       
       if (token) {
         try {
+          console.log('Loading user with existing token...');
           const response = await api.get('/auth/me');
+          
           dispatch({
             type: AUTH_ACTIONS.LOAD_USER,
             payload: response.data.data
           });
+          
+          console.log('User loaded successfully:', response.data.data);
         } catch (error) {
           console.error('Failed to load user:', error);
           // Token might be expired, try to refresh
-          await refreshAuthToken();
+          const refreshed = await refreshAuthToken();
+          if (!refreshed) {
+            console.log('Token refresh failed, user needs to login again');
+            dispatch({ type: AUTH_ACTIONS.SET_LOADING, payload: false });
+          }
         }
       } else {
+        console.log('No token found, setting loading to false');
         dispatch({ type: AUTH_ACTIONS.SET_LOADING, payload: false });
       }
     };
@@ -248,16 +297,21 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Verify OTP function
+  // Verify OTP function - CRITICAL FOR AUTO-LOGIN
   const verifyOTP = async (contactNumber, otp) => {
     dispatch({ type: AUTH_ACTIONS.OTP_START });
     
     try {
+      console.log('AuthContext: Verifying OTP for:', contactNumber);
+      
       const response = await api.post('/auth/verify-otp', {
         contactNumber,
         otp
       });
       
+      console.log('AuthContext: OTP verification response:', response.data);
+      
+      // This is the KEY part - dispatch OTP_SUCCESS with user data
       dispatch({
         type: AUTH_ACTIONS.OTP_SUCCESS,
         payload: {
@@ -267,8 +321,11 @@ export const AuthProvider = ({ children }) => {
         }
       });
 
+      console.log('AuthContext: OTP_SUCCESS dispatched, user should be authenticated now');
+
       return { success: true, data: response.data };
     } catch (error) {
+      console.error('AuthContext: OTP verification error:', error);
       const errorMessage = error.response?.data?.message || 'OTP verification failed';
       
       dispatch({
@@ -307,38 +364,6 @@ export const AuthProvider = ({ children }) => {
       
       // Force navigation to login after logout
       window.location.href = '/login';
-    }
-  };
-
-  // Refresh token function
-  const refreshAuthToken = async () => {
-    const refreshToken = localStorage.getItem('refreshToken');
-    
-    if (!refreshToken) {
-      dispatch({ type: AUTH_ACTIONS.LOGOUT });
-      return false;
-    }
-
-    try {
-      const response = await api.post('/auth/refresh-token', { refreshToken });
-      
-      // Update token in localStorage
-      localStorage.setItem('token', response.data.token);
-      
-      dispatch({
-        type: AUTH_ACTIONS.LOGIN_SUCCESS,
-        payload: {
-          user: response.data.user,
-          token: response.data.token,
-          refreshToken: refreshToken // Keep existing refresh token
-        }
-      });
-
-      return true;
-    } catch (error) {
-      console.error('Token refresh failed:', error);
-      dispatch({ type: AUTH_ACTIONS.LOGOUT });
-      return false;
     }
   };
 
@@ -407,6 +432,16 @@ export const AuthProvider = ({ children }) => {
     hasRole,
     isAdmin
   };
+
+  // Debug logging for authentication state changes
+  useEffect(() => {
+    console.log('AuthContext State Update:', {
+      isAuthenticated: state.isAuthenticated,
+      isLoading: state.isLoading,
+      hasUser: !!state.user,
+      userName: state.user ? `${state.user.firstName} ${state.user.lastName}` : 'None'
+    });
+  }, [state.isAuthenticated, state.isLoading, state.user]);
 
   return (
     <AuthContext.Provider value={value}>

@@ -218,7 +218,7 @@ const Login = () => {
             <form onSubmit={handleSubmit} className={styles.form}>
               <div className={styles.phoneInputWrapper}>
                 <Phone className={styles.inputIcon}/>               
-                <span className={styles.phonePrefix}>+639</span>
+                <span className={styles.phonePrefix}>+63 9</span>
                 <input
                   type="tel"
                   name="contactNumber"

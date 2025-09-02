@@ -30,7 +30,7 @@ const seedSampleData = async () => {
       admin = await User.create({
         firstName: 'System',
         lastName: 'Administrator',
-        contactNumber: '+639123456789',
+        contactNumber: '09123456789',
         password: 'Admin@123',
         barangay: 'agnas',
         role: 'admin',
@@ -162,7 +162,7 @@ This is an excellent opportunity for someone passionate about public health and 
         max: 25000,
         currency: 'PHP'
       },
-      employmentType: 'full-time',
+      employmentType: 'Full-Time',
       location: 'Fairview, Quezon City',
       createdBy: admin._id,
       totalApplications: 0,
