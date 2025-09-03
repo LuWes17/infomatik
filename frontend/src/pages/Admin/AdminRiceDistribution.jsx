@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import styles from './styles/AdminRiceDistribution.module.css';
+import { Plus } from 'lucide-react';
 
 const BARANGAYS = [
   'agnas', 'bacolod', 'bangkilingan', 'bantayan', 'baranghawon', 'basagan', 
@@ -356,7 +357,7 @@ const AdminRiceDistribution = () => {
           className={styles.createButton}
           onClick={openCreateModal}
         >
-          <span className={styles.icon}>+</span>
+          <span className={styles.icon}><Plus size={16}/></span>
           Create Distribution
         </button>
       </div>

@@ -77,153 +77,230 @@
 
 /* Accomplishment Grid - Updated to match announcement grid */
 .accomplishmentGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-  gap: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  margin-bottom: 3rem;
 }
 
+/* Accomplishment Cards - Horizontal Layout with text overflow fixes */
 .accomplishmentCard {
   background: white;
-  border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border-radius: 16px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
   overflow: hidden;
-  cursor: pointer;
   transition: all 0.3s ease;
-  border: 1px solid #e9ecef;
+  border: 1px solid #e2e8f0;
+  display: flex;
+  min-height: 200px;
 }
 
 .accomplishmentCard:hover {
   transform: translateY(-4px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 5px 10px #9AAACF;
 }
 
+/* Card Header - Horizontal layout adjustments */
 .cardHeader {
-  padding: 1.25rem 1.25rem 0.75rem;
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
+  margin-bottom: 1rem;
+  min-width: 0; /* Important for text truncation */
 }
 
-.cardTitle {
+.categoryBadge {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  flex: 1;
 }
 
-.cardTitle h3 {
-  margin: 0;
-  color: #2c3e50;
-  font-size: 1.1rem;
-  font-weight: 600;
-  line-height: 1.3;
-}
-
-.pinnedIcon {
-  color: #e74c3c;
-  flex-shrink: 0;
-}
-
-.category {
-  padding: 0.25rem 0.75rem;
-  border-radius: 12px;
-  font-size: 0.75rem;
+.projectType {
+  padding: 0.375rem 0.875rem;
+  border-radius: 20px;
+  font-size: 0.7rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  white-space: nowrap; /* Prevent badge text from wrapping */
+}
+
+/* Project Type Colors */
+.projectType.infrastructure {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.projectType.education {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.projectType.healthinitiative {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.projectType.environment {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.projectType.socialprogram {
+  background: #fde7f3;
+  color: #be185d;
+}
+
+.projectType.economicdevelopment {
+  background: #e0e7ff;
+  color: #3730a3;
+}
+
+.projectType.other,
+.projectType.general {
+  background: #cad8f6;
+  color: #374151;
+}
+
+/* Card Image - Fixed dimensions */
+.cardImageContainer {
+  position: relative;
+  width: 320px; /* Fixed width */
+  height: 240px; /* Fixed height to match card */
   flex-shrink: 0;
+  overflow: hidden;
 }
 
-.category.infrastructure {
-  background-color: #3498db;
-  color: white;
+.cardImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
 }
 
-.category.social {
-  background-color: #e74c3c;
-  color: white;
+.accomplishmentCard:hover .cardImage {
+  transform: scale(1.05);
 }
 
-.category.health {
-  background-color: #27ae60;
-  color: white;
-}
-
-.category.education {
-  background-color: #f39c12;
-  color: white;
-}
-
-.category.environment {
-  background-color: #2ecc71;
-  color: white;
-}
-
-.category.economic {
-  background-color: #9b59b6;
-  color: white;
-}
-
-.category.other {
-  background-color: #95a5a6;
-  color: white;
-}
-
-.cardBody {
-  padding: 0.75rem 1.25rem;
-}
-
-.details {
-  color: #555;
-  line-height: 1.5;
-  margin: 0 0 1rem 0;
-  font-size: 0.95rem;
-}
-
-.eventInfo {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.eventDetail {
+.placeholderImage {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  color: #666;
-  font-size: 0.9rem;
+  justify-content: center;
+  color: var(--gray-400);
 }
 
-.eventDetail svg {
+.imageCount {
+  position: absolute;
+  bottom: 0.5rem;
+  right: 0.5rem;
+  background: var(--gray-500);
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 16px;
+  font-size: 0.65rem;
+  backdrop-filter: blur(4px);
+}
+
+/* Card Content - FIXED TEXT OVERFLOW */
+.cardContent {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  flex: 1;
+  min-width: 0; /* Critical for text truncation in flex containers */
+  height: 240px;
+  overflow: hidden;
+}
+
+/* Card Title - FIXED with proper truncation */
+.cardTitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--gray-900);
+  margin: 0;
+  line-height: 1.3;
+  /* Text truncation with ellipsis - limit to 2 lines */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  flex: 1;
+  max-width: calc(100% - 120px); /* Account for category badge */
+}
+
+.cardCategory {
+  margin-left: 1rem;
   flex-shrink: 0;
 }
 
+/* Card Description - FIXED with line clamping */
+.cardDescription {
+  color: var(--gray-600);
+  line-height: 1.4;
+  margin: 0;
+  font-size: 0.9rem;
+  flex: 1;
+  /* Text truncation with ellipsis - limit to 3 lines */
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+/* Card Footer - Bottom aligned */
 .cardFooter {
-  padding: 0.75rem 1.25rem 1.25rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-top: 1px solid #f1f3f4;
-  background-color: #fafbfc;
+  margin-top: auto;
+  padding-top: 0.5rem;
 }
 
-.date {
-  color: #6c757d;
-  font-size: 0.85rem;
-}
-
-.stats {
+.cardMeta {
   display: flex;
-  gap: 1rem;
-  align-items: center;
-}
-
-.stats span {
-  display: flex;
-  align-items: center;
+  flex-direction: column;
   gap: 0.25rem;
-  color: #6c757d;
-  font-size: 0.85rem;
+  min-width: 0; /* Allow shrinking */
+  flex: 1;
+}
+
+.publishDate {
+  color: var(--gray-500);
+  font-size: 0.75rem;
+  overflow: hidden;
+  max-width: 200px;
+}
+
+.readMoreButton {
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  padding: 0.5rem 1.25rem;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.1s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.readMoreButton:hover {
+  background: #f8fafc;
+  color: var(--primary-color);
+  border: 2px solid var(--primary-color);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
 }
 
 /* Empty State */
@@ -440,89 +517,6 @@
   background-color: #f8f9fa;
   border-radius: 6px;
   font-size: 0.9rem;
-}
-
-.photoPreview {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  margin-top: 0.5rem;
-}
-
-.photoPreviewGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-  gap: 1rem;
-  margin-top: 1rem;
-}
-
-.photoPreviewItem {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.photoPreviewImage {
-  position: relative;
-  border-radius: 8px;
-  overflow: hidden;
-  aspect-ratio: 1;
-  background-color: #f8f9fa;
-  border: 2px solid #e9ecef;
-}
-
-.previewImg {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.removePhotoBtn {
-  position: absolute;
-  top: 4px;
-  right: 4px;
-  background: rgba(220, 53, 69, 0.9);
-  border: none;
-  color: white;
-  border-radius: 50%;
-  width: 24px;
-  height: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.removePhotoBtn:hover {
-  background: rgba(220, 53, 69, 1);
-  transform: scale(1.1);
-}
-
-.existingPhotoIndicator {
-  position: absolute;
-  top: 4px;
-  left: 4px;
-  background: rgba(28, 98, 187, 0.9);
-  color: white;
-  font-size: 0.7rem;
-  padding: 2px 6px;
-  border-radius: 4px;
-  font-weight: 500;
-}
-
-.photoName {
-  font-size: 0.8rem;
-  color: #6c757d;
-  text-align: center;
-  word-break: break-word;
-}
-
-.photoHint {
-  color: #6c757d;
-  font-size: 0.85rem;
-  margin: 0.5rem 0 0 0;
-  font-style: italic;
 }
 
 .removePhoto {
@@ -758,4 +752,87 @@
 
 .closeButton:hover {
   color: #495057;
+}
+
+.photoPreview {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.photoPreviewGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.photoPreviewItem {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.photoPreviewImage {
+  position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+  aspect-ratio: 1;
+  background-color: #f8f9fa;
+  border: 2px solid #e9ecef;
+}
+
+.previewImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.removePhotoBtn {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: rgba(220, 53, 69, 0.9);
+  border: none;
+  color: white;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.removePhotoBtn:hover {
+  background: rgba(220, 53, 69, 1);
+  transform: scale(1.1);
+}
+
+.existingPhotoIndicator {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  background: rgba(28, 98, 187, 0.9);
+  color: white;
+  font-size: 0.7rem;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+.photoName {
+  font-size: 0.8rem;
+  color: #6c757d;
+  text-align: center;
+  word-break: break-word;
+}
+
+.photoHint {
+  color: #6c757d;
+  font-size: 0.85rem;
+  margin: 0.5rem 0 0 0;
+  font-style: italic;
 }

@@ -1,7 +1,5 @@
 .admin-job-container {
-  min-height: 100vh;
-  background-color: #f9fafb;
-  padding: 1rem;
+  padding: 0;
 }
 
 .admin-job-wrapper {
@@ -9,29 +7,41 @@
   margin: 0 auto;
 }
 
-.admin-job-title {
-  font-size: 1.875rem;
-  font-weight: 700;
-  color: #111827;
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #e9ecef;
+}
+
+.admin-job-title {
+  margin: 0;
+  color: #2c3e50;
+  font-size: 2rem;
+  font-weight: 600;
 }
 
 /* Create Job Button */
 .create-job-btn {
-  margin-bottom: 1.5rem;
   display: flex;
   align-items: center;
+  gap: 0.5rem;
   padding: 0.75rem 1.5rem;
-  background-color: #2563eb;
+  background-color: #1c62bb;
   color: white;
-  border-radius: 0.5rem;
   border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 500;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: all 0.2s ease;
 }
 
 .create-job-btn:hover {
-  background-color: #1d4ed8;
+  background-color: #1557a6;
+  transform: translateY(-1px);
 }
 
 .create-job-btn svg {

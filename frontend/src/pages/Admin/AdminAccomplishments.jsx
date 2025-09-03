@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Edit3, Trash2, Eye, Calendar, MapPin, Pin, PinOff, Image, X } from 'lucide-react';
+import { Plus, Edit3, Trash2, Eye, Calendar, MapPin, Pin, PinOff, Image, X, ClipboardCheck } from 'lucide-react';
 import styles from './styles/AdminAccomplishments.module.css';
+
+const API_BASE = import.meta.env.VITE_API_URL; 
 
 const AdminAccomplishments = () => { 
   const [accomplishments, setAccomplishments] = useState([]);
@@ -83,6 +85,12 @@ const AdminAccomplishments = () => {
       ...prev,
       photos: [...prev.photos, ...newPhotos]
     }));
+  };
+
+  const getProjectTypeClass = (projectType) => {
+    if (!projectType) return 'general';
+    const lowerType = projectType.toLowerCase().replace(/\s+/g, ''); // remove spaces
+    return lowerType;
   };
 
 
@@ -275,7 +283,9 @@ const AdminAccomplishments = () => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'long',
-      day: 'numeric'
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
     });
   };
 
@@ -309,38 +319,67 @@ const AdminAccomplishments = () => {
 
       <div className={styles.accomplishmentGrid}>
         {accomplishments.map((accomplishment) => (
-          <div 
-            key={accomplishment._id} 
-            className={styles.accomplishmentCard}
-            onClick={() => openViewModal(accomplishment)}
-          >
-            <div className={styles.cardHeader}>
-              <div className={styles.cardTitle}>
-                <h3>{accomplishment.title}</h3>
-              </div>
-              <span className={`${styles.category} ${styles[accomplishment.projectType?.toLowerCase()]}`}>
-                {accomplishment.projectType || 'General'}
-              </span>
-            </div>
-            
-            <div className={styles.cardBody}>
-              <p className={styles.details}>
-                {accomplishment.description.length > 150 
-                  ? `${accomplishment.description.substring(0, 150)}...` 
-                  : accomplishment.description}
-              </p>
-            </div>
+          <div key={accomplishment._id} className={styles.accomplishmentCard}>
+                {/* Card Image */}
+                <div className={styles.cardImageContainer}>
+                  {accomplishment.photos && accomplishment.photos.length > 0 ? (
+                    <>
+                      <img 
+                        src={accomplishment.photos[0].filePath.startsWith('http') ? 
+                             accomplishment.photos[0].filePath : 
+                             `${API_BASE.replace('/api', '')}/${accomplishment.photos[0].filePath}`} 
+                        alt={accomplishment.title}
+                        className={styles.cardImage}
+                        loading="lazy"
+                      />
+                      {accomplishment.photos.length > 1 && (
+                        <div className={styles.imageCount}>
+                          +{accomplishment.photos.length - 1} more
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <div className={styles.placeholderImage}>
+                      <ClipboardCheck size={40} />
+                    </div>
+                  )}
+                </div>
 
-            <div className={styles.cardFooter}>
-              <span className={styles.date}>Created: {formatDate(accomplishment.createdAt)}</span>
-              <div className={styles.stats}>
-                <span><Eye size={14} /> {accomplishment.views || 0}</span>
-                {accomplishment.photos?.length > 0 && (
-                  <span><Image size={14} /> {accomplishment.photos.length}</span>
-                )}
+                {/* Card Content */}
+                <div className={styles.cardContent}>
+                  <div className={styles.cardHeader}>
+                    <h3 className={styles.cardTitle}>{accomplishment.title}</h3>
+                    <div className={styles.cardCategory}>
+                      <span className={`${styles.projectType} ${styles[getProjectTypeClass(accomplishment.projectType)]}`}>
+                        {accomplishment.projectType || 'General'}
+                      </span>
+                    </div>
+                  </div>
+                  
+                  {/* Description */}
+                  <p className={styles.cardDescription}>
+                    {accomplishment.description.length > 100 
+                      ? `${accomplishment.description.substring(0, 100)}...` 
+                      : accomplishment.description
+                    }
+                  </p>
+
+                  {/* Footer with date and button */}
+                  <div className={styles.cardFooter}>
+                    <div className={styles.cardMeta}>
+                      <span className={styles.publishDate}>
+                        {formatDate(accomplishment.createdAt)}
+                      </span>
+                    </div>
+                    <button 
+                      onClick={() => openViewModal(accomplishment)}
+                      className={styles.readMoreButton}
+                    >
+                      Read More
+                    </button>
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
         ))}
       </div>
 

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Edit3, Trash2, Eye, Calendar, MapPin, Pin, PinOff, Image, X } from 'lucide-react';
 import styles from './styles/AdminAnnouncements.module.css';
+const API_BASE = import.meta.env.VITE_API_URL; 
 
 const AdminAnnouncements = () => {
   const [announcements, setAnnouncements] = useState([]);
@@ -349,55 +350,79 @@ const AdminAnnouncements = () => {
 
       <div className={styles.announcementGrid}>
         {announcements.map((announcement) => (
-          <div 
-            key={announcement._id} 
-            className={styles.announcementCard}
-            onClick={() => openViewModal(announcement)}
-          >
+          <div  key={announcement._id} className={styles.announcementCard}>
             <div className={styles.cardHeader}>
-              <div className={styles.cardTitle}>
-                <h3>{announcement.title}</h3>
+              <div className={styles.categoryBadge}>
+                <span className={`${styles.category} ${styles[announcement.category.toLowerCase()]}`}>
+                    {announcement.category}
+                </span>
               </div>
-              <span className={`${styles.category} ${styles[announcement.category.toLowerCase()]}`}>
-                {announcement.category}
-              </span>
-            </div>
+            </div> 
             
-            <div className={styles.cardBody}>
-              <p className={styles.details}>
-                {announcement.details.length > 150 
-                  ? `${announcement.details.substring(0, 150)}...` 
-                  : announcement.details}
-              </p>
-              
-              {announcement.eventDate && (
-                <div className={styles.eventInfo}>
-                  <div className={styles.eventDetail}>
-                    <Calendar size={14} />
-                    <span>{formatDate(announcement.eventDate)}</span>
-                  </div>
-                  {announcement.eventLocation && (
-                    <div className={styles.eventDetail}>
-                      <MapPin size={14} />
-                      <span>{announcement.eventLocation}</span>
+          {/* Card Image - Updated with placeholder */}
+                <div className={styles.cardImage}>
+                  {announcement.photos && announcement.photos.length > 0 ? (
+                    <>
+                      <img 
+                        src={announcement.photos[0].filePath.startsWith('http') ? 
+                             announcement.photos[0].filePath : 
+                             `${API_BASE.replace('/api', '')}/${announcement.photos[0].filePath}`} 
+                        alt={announcement.title}
+                        loading="lazy"
+                      />
+                      {announcement.photos.length > 1 && (
+                        <div className={styles.imageCount}>
+                          +{announcement.photos.length - 1} more
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <div className={styles.placeholderImage}>
+                      <Megaphone size={40} />
                     </div>
                   )}
-                </div>
-              )}
-            </div>
-            
-            <div className={styles.cardFooter}>
-              <span className={styles.date}>
-                Created: {formatDate(announcement.createdAt)}
-              </span>
-              <div className={styles.stats}>
-                <span><Eye size={14} /> {announcement.views}</span>
-                {announcement.photos?.length > 0 && (
-                  <span><Image size={14} /> {announcement.photos.length}</span>
-                )}
-              </div>
-            </div>
-          </div>
+                </div>          
+
+                {/* Card Content */}
+                                <div className={styles.cardContent}>
+                                  <h3 className={styles.cardTitle}>{announcement.title}</h3>
+                                  <p className={styles.cardDescription}>
+                                    {announcement.details.length > 150 
+                                      ? `${announcement.details.substring(0, 150)}...` 
+                                      : announcement.details
+                                    }
+                                  </p>
+                
+                                  {/* Event Details */}
+                                  {announcement.category === 'Event' && announcement.eventDate && (
+                                    <div className={styles.eventInfo}>
+                                      <div className={styles.eventDetail}>
+                                        <Calendar size={16} />
+                                        <span>{formatDate(announcement.eventDate)}</span>
+                                      </div>
+                                      {announcement.eventLocation && (
+                                        <div className={styles.eventDetail}>
+                                          <MapPin size={16} />
+                                          <span>{announcement.eventLocation}</span>
+                                        </div>
+                                      )}
+                                    </div>
+                                  )}
+                
+                                  {/* Card Footer */}
+                                  <div className={styles.cardFooter}>
+                                    <span className={styles.publishDate}>
+                                      {formatDate(announcement.createdAt)}
+                                    </span>
+                                    <button 
+                                      onClick={() => openViewModal(announcement)}
+                                      className={styles.readMoreButton}
+                                    >
+                                      Read More
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
         ))}
       </div>
 
@@ -773,9 +798,6 @@ const AdminAnnouncements = () => {
                   <div className={styles.metadata}>
                     <div className={styles.metaItem}>
                       <strong>Created:</strong> {formatDate(selectedAnnouncement.createdAt)}
-                    </div>
-                    <div className={styles.metaItem}>
-                      <strong>Views:</strong> {selectedAnnouncement.views}
                     </div>
                     {selectedAnnouncement.updatedAt !== selectedAnnouncement.createdAt && (
                       <div className={styles.metaItem}>

@@ -291,16 +291,18 @@ const AdminJobOpenings = () => {
   return (
     <div className="admin-job-container">
       <div className="admin-job-wrapper">
-        <h1 className="admin-job-title">Job Openings Management</h1>
+        <div className='header'>
+          <h1 className="admin-job-title">Job Openings Management</h1>
         
-        {/* Create Job Button */}
-        <button
-          onClick={() => setShowCreateForm(true)}
-          className="create-job-btn"
-        >
-          <Plus size={20} />
-          Create Job Opening
-        </button>
+          {/* Create Job Button */}
+          <button
+            onClick={() => setShowCreateForm(true)}
+            className="create-job-btn"
+          >
+            <Plus size={20} />
+            Create Job Opening
+          </button>
+        </div>
 
         {/* Job Cards */}
         {loading ? (
