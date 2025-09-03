@@ -641,6 +641,15 @@
     top: 30px;
     right: -10px;
   }
+
+  .phonePrefix {
+    left: 2.5rem;
+    font-size: 0.85rem;
+  }
+  
+  .phoneInputWithIcon {
+    padding-left: 4rem !important;
+  }
 }
 
 /* Extra small devices (360px and below) */

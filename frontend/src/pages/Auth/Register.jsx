@@ -8,7 +8,7 @@ import OTPVerificationPopup from '../../components/OTP/OTPVerificationPopup';
 
 const Register = () => {
   const navigate = useNavigate();
-  const { verifyOTP, isAuthenticated, isLoading: authLoading, user } = useAuth();
+  const { verifyOTP, isAuthenticated, isLoading: authLoading, user, error, clearError } = useAuth();
 
   // State for form and UI
   const [showPassword, setShowPassword] = useState(false);
@@ -64,9 +64,12 @@ const Register = () => {
   ];
 
   useEffect(() => {
-  if (otpError) {
-    setOtpError('');
-  }
+    if (error) {
+      clearError();
+    }
+    if (otpError) {
+      setOtpError('');
+    }
 }, [formData]);
 
   // Tab change handler
@@ -369,9 +372,9 @@ const handleResendOTP = async () => {
             </div>
 
             {/* Error Display */}
-            {(otpError) && (
+            {(error) && (
               <div className={styles.errorMessage}>
-                {otpError}
+                {error}
               </div>
             )}
 
@@ -520,7 +523,7 @@ const handleResendOTP = async () => {
         onVerify={handleVerifyOTP}
         onResend={handleResendOTP}
         maskedNumber={maskedNumber}
-        authLoading={otpLoading}
+        isLoading={otpLoading}
         error={otpError}
       />
     </div>
