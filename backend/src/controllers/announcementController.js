@@ -128,8 +128,24 @@ exports.updateAnnouncement = asyncHandler(async (req, res) => {
       });
     }
     
-    // Store old photos for potential cleanup
-    const oldPhotos = [...announcement.photos];
+    // Store old photos for deletion comparison
+    const allOldPhotos = [...announcement.photos];
+    let remainingExistingPhotos = [];
+    
+    // Parse remaining existing photos from frontend
+    if (req.body.remainingExistingPhotos) {
+      try {
+        remainingExistingPhotos = JSON.parse(req.body.remainingExistingPhotos);
+      } catch (e) {
+        console.error('Error parsing remainingExistingPhotos:', e);
+        remainingExistingPhotos = [];
+      }
+    }
+    
+    // Identify photos to delete (old photos not in remaining list)
+    const photosToDelete = allOldPhotos.filter(oldPhoto => 
+      !remainingExistingPhotos.find(remaining => remaining.fileId === oldPhoto.fileId)
+    );
     
     // Handle new file uploads to B2
     let newPhotos = [];
@@ -144,7 +160,7 @@ exports.updateAnnouncement = asyncHandler(async (req, res) => {
             newPhotos.push({
               fileName: result.originalName,
               filePath: result.fileUrl,
-              fileId: result.fileId, // Store B2 file ID for deletion
+              fileId: result.fileId,
               uploadedAt: new Date()
             });
           }
@@ -161,28 +177,15 @@ exports.updateAnnouncement = asyncHandler(async (req, res) => {
       }
     }
     
-    // Handle photo updates (replace existing with new ones if provided)
-    if (newPhotos.length > 0) {
-      req.body.photos = newPhotos;
-      
-      // Clean up old photos from B2 (asynchronously, don't block response)
-      if (oldPhotos.length > 0) {
-        setImmediate(async () => {
-          for (const photo of oldPhotos) {
-            if (photo.fileId) {
-              try {
-                await deleteFromB2(photo.fileId, photo.filePath.split('/').pop());
-                console.log(`Deleted old photo from B2: ${photo.fileName}`);
-              } catch (error) {
-                console.error(`Failed to delete old photo from B2: ${photo.fileName}`, error);
-              }
-            }
-          }
-        });
-      }
-    } else {
-      // Keep existing photos if no new ones uploaded
-      req.body.photos = oldPhotos;
+    // Combine remaining existing photos with new photos
+    req.body.photos = [...remainingExistingPhotos, ...newPhotos];
+    
+    // Validate photo limit
+    if (req.body.photos.length > 4) {
+      return res.status(400).json({
+        success: false,
+        message: 'Maximum 4 photos allowed per announcement'
+      });
     }
     
     req.body.updatedBy = req.user.id;
@@ -192,6 +195,23 @@ exports.updateAnnouncement = asyncHandler(async (req, res) => {
       req.body,
       { new: true, runValidators: true }
     ).populate('createdBy', 'firstName lastName');
+    
+    // Delete removed photos from B2 (asynchronously, don't block response)
+    if (photosToDelete.length > 0) {
+      setImmediate(async () => {
+        console.log(`Deleting ${photosToDelete.length} removed photos from B2...`);
+        for (const photo of photosToDelete) {
+          if (photo.fileId) {
+            try {
+              await deleteFromB2(photo.fileId, photo.filePath.split('/').pop());
+              console.log(`Deleted removed photo from B2: ${photo.fileName}`);
+            } catch (error) {
+              console.error(`Failed to delete removed photo from B2: ${photo.fileName}`, error);
+            }
+          }
+        }
+      });
+    }
     
     res.status(200).json({
       success: true,

@@ -49,6 +49,17 @@ const AdminAnnouncements = () => {
     fetchAnnouncements();
   }, []);
 
+  useEffect(() => {
+    return () => {
+      // Cleanup any remaining preview URLs
+      formData.photos.forEach(photo => {
+        if (photo.preview) {
+          URL.revokeObjectURL(photo.preview);
+        }
+      });
+    };
+  }, []);
+
   // Handle form input changes
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -66,14 +77,29 @@ const AdminAnnouncements = () => {
       return;
     }
     
+    // Create preview URLs for the files
+    const newPhotos = files.map(file => ({
+      existing: false,
+      file: file,
+      preview: URL.createObjectURL(file),
+      name: file.name
+    }));
+    
     setFormData(prev => ({
       ...prev,
-      photos: [...prev.photos, ...files]
+      photos: [...prev.photos, ...newPhotos]
     }));
   };
 
   // Remove photo from form
   const removePhoto = (index) => {
+    const photoToRemove = formData.photos[index];
+    
+    // Cleanup the preview URL to prevent memory leaks
+    if (!photoToRemove.existing && photoToRemove.preview) {
+      URL.revokeObjectURL(photoToRemove.preview);
+    }
+    
     setFormData(prev => ({
       ...prev,
       photos: prev.photos.filter((_, i) => i !== index)
@@ -94,6 +120,10 @@ const AdminAnnouncements = () => {
 
   // Handle create announcement
   const handleCreateAnnouncement = async (e) => {
+    if (!window.confirm('Are you sure in creating this announcement?')) {
+      return;
+    }
+
     e.preventDefault();
     
     if (!formData.title || !formData.details || !formData.category) {
@@ -122,7 +152,7 @@ const AdminAnnouncements = () => {
       }
       
       formData.photos.forEach((photo) => {
-        submitData.append('images', photo);
+        submitData.append('images', photo.file);
       });
 
       const response = await fetch('/api/announcements', {
@@ -137,6 +167,13 @@ const AdminAnnouncements = () => {
         throw new Error('Failed to create announcement');
       }
 
+      // Cleanup preview URLs
+      formData.photos.forEach(photo => {
+        if (photo.preview) {
+          URL.revokeObjectURL(photo.preview);
+        }
+      });
+
       await fetchAnnouncements();
       setShowCreateModal(false);
       resetForm();
@@ -148,6 +185,9 @@ const AdminAnnouncements = () => {
 
   // Handle update announcement
   const handleUpdateAnnouncement = async (e) => {
+    if (!window.confirm('Are you sure you with your chnages to this announcement?')) {
+      return;
+    }
     e.preventDefault();
     
     try {
@@ -165,10 +205,22 @@ const AdminAnnouncements = () => {
         submitData.append('eventLocation', formData.eventLocation);
       }
       
+      // Prepare data for backend to handle B2 deletions
+      const remainingExistingPhotos = formData.photos
+        .filter(photo => photo.existing)
+        .map(photo => ({
+          fileId: photo.fileId,
+          fileName: photo.fileName,
+          filePath: photo.filePath
+        }));
+      
+      // Send remaining existing photos as JSON string
+      submitData.append('remainingExistingPhotos', JSON.stringify(remainingExistingPhotos));
+      
       // Only append new photos (File objects)
       formData.photos.forEach((photo) => {
-        if (photo instanceof File) {
-          submitData.append('images', photo);
+        if (!photo.existing && photo.file) {
+          submitData.append('images', photo.file);
         }
       });
 
@@ -183,6 +235,13 @@ const AdminAnnouncements = () => {
       if (!response.ok) {
         throw new Error('Failed to update announcement');
       }
+
+      // Cleanup preview URLs for new photos
+      formData.photos.forEach(photo => {
+        if (!photo.existing && photo.preview) {
+          URL.revokeObjectURL(photo.preview);
+        }
+      });
 
       await fetchAnnouncements();
       setShowViewModal(false);
@@ -230,13 +289,23 @@ const AdminAnnouncements = () => {
 
   // Open edit mode
   const openEditMode = () => {
+    // Convert existing photos to preview format for consistent handling
+    const existingPhotos = selectedAnnouncement.photos?.map(photo => ({
+      existing: true,
+      fileId: photo.fileId,
+      fileName: photo.fileName,
+      filePath: photo.filePath,
+      preview: photo.filePath, // Use B2 URL as preview
+      name: photo.fileName
+    })) || [];
+    
     setFormData({
       title: selectedAnnouncement.title,
       details: selectedAnnouncement.details,
       category: selectedAnnouncement.category,
       eventDate: selectedAnnouncement.eventDate ? selectedAnnouncement.eventDate.split('T')[0] : '',
       eventLocation: selectedAnnouncement.eventLocation || '',
-      photos: selectedAnnouncement.photos || []
+      photos: existingPhotos
     });
     setIsEditMode(true);
   };
@@ -440,18 +509,27 @@ const AdminAnnouncements = () => {
                 
                 {formData.photos.length > 0 && (
                   <div className={styles.photoPreview}>
-                    {formData.photos.map((photo, index) => (
-                      <div key={index} className={styles.photoItem}>
-                        <span>{photo.name || `Photo ${index + 1}`}</span>
-                        <button 
-                          type="button"
-                          onClick={() => removePhoto(index)}
-                          className={styles.removePhoto}
-                        >
-                          <X size={16} />
-                        </button>
-                      </div>
-                    ))}
+                    <div className={styles.photoPreviewGrid}>
+                      {formData.photos.map((photo, index) => (
+                        <div key={index} className={styles.photoPreviewItem}>
+                          <div className={styles.photoPreviewImage}>
+                            <img 
+                              src={photo.preview} 
+                              alt={`Preview ${index + 1}`}
+                              className={styles.previewImg}
+                            />
+                            <button 
+                              type="button"
+                              onClick={() => removePhoto(index)}
+                              className={styles.removePhotoBtn}
+                            >
+                              <X size={16} />
+                            </button>
+                          </div>
+                          <span className={styles.photoName}>{photo.name}</span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 )}
               </div>
@@ -586,31 +664,51 @@ const AdminAnnouncements = () => {
                   </>
                 )}
 
-                <div className={styles.formGroup}>
-                  <label>Current Photos</label>
-                  {selectedAnnouncement.photos?.length > 0 ? (
-                    <div className={styles.currentPhotos}>
-                      {selectedAnnouncement.photos.map((photo, index) => (
-                        <div key={index} className={styles.photoItem}>
-                          <span>{photo.fileName}</span>
-                        </div>
-                      ))}
+                  <div className={styles.formGroup}>
+                    <label>Photos (Max 4 total)</label>
+                      <input
+                        type="file"
+                        multiple
+                        accept="image/*"
+                        onChange={handleFileUpload}
+                        className={styles.fileInput}
+                      />
+                    
+                  {formData.photos.length > 0 && (
+                    <div className={styles.photoPreview}>
+                      <div className={styles.photoPreviewGrid}>
+                        {formData.photos.map((photo, index) => (
+                          <div key={index} className={styles.photoPreviewItem}>
+                            <div className={styles.photoPreviewImage}>
+                              <img 
+                                src={photo.preview} 
+                                alt={`Preview ${index + 1}`}
+                                className={styles.previewImg}
+                              />
+                              <button 
+                                type="button"
+                                onClick={() => removePhoto(index)}
+                                className={styles.removePhotoBtn}
+                              >
+                                <X size={16} />
+                              </button>
+                              {photo.existing && (
+                                <div className={styles.existingPhotoIndicator}>
+                                  Existing
+                                </div>
+                              )}
+                            </div>
+                            <span className={styles.photoName}>{photo.name}</span>
+                          </div>
+                        ))}
+                      </div>
+                      {formData.photos.length < 4 && (
+                        <p className={styles.photoHint}>
+                          You can add {4 - formData.photos.length} more photo{4 - formData.photos.length !== 1 ? 's' : ''}.
+                        </p>
+                      )}
                     </div>
-                  ) : (
-                    <p className={styles.noPhotos}>No photos uploaded</p>
                   )}
-                </div>
-
-                <div className={styles.formGroup}>
-                  <label htmlFor="newPhotos">Add New Photos (Max 4 total)</label>
-                  <input
-                    type="file"
-                    id="newPhotos"
-                    multiple
-                    accept="image/*"
-                    onChange={handleFileUpload}
-                    className={styles.fileInput}
-                  />
                 </div>
 
                 <div className={styles.formActions}>
