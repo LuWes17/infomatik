@@ -27,7 +27,7 @@ const solicitationRequestSchema = new mongoose.Schema({
     type: String,
     required: [true, 'Organization type is required'],
     enum: {
-      values: ['NGA', 'NGO', 'CSO', 'LGU', 'Barangay', 'SK'],
+      values: ['NGA', 'NGO', 'CSO', 'LGU', 'Barangay', 'SK', 'Others'],
       message: 'Organization type must be one of: NGA, NGO, CSO, LGU, Barangay, SK'
     }
   },
@@ -41,7 +41,6 @@ const solicitationRequestSchema = new mongoose.Schema({
   // Event Details
   eventDate: {
     type: Date,
-    required: [true, 'Event date is required'],
     validate: {
       validator: function(v) {
         return v >= new Date();

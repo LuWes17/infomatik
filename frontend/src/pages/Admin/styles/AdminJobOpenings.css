@@ -52,6 +52,7 @@
   padding: 1.5rem;
   cursor: pointer;
   transition: box-shadow 0.2s;
+  overflow: hidden;
 }
 
 .job-card:hover {

@@ -98,6 +98,15 @@ const AdminJobOpenings = () => {
   // Handle form submission for create/update
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    const confirmMessage = editMode 
+      ? 'Are you sure you want to update this job opening?' 
+      : 'Are you sure you want to create this job opening?';
+      
+    if (!window.confirm(confirmMessage)) {
+      return;
+    }
+
     try {
       const url = editMode 
         ? `http://localhost:4000/api/jobs/${selectedJob._id}`
