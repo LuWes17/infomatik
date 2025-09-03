@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { Calendar, Filter, Plus, X, Upload, Search, Eye, Building2, Phone, MapPin, FileText, Calendar as CalendarIcon, User, Type, DollarSign, Users } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Calendar, Filter, Plus, X, Upload, Search, Eye, Building2, Phone, MapPin, FileText, Calendar as CalendarIcon, User, Type, DollarSign, Users, Mail, ChevronDown } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
-import './SolicitationRequests.css';
+import styles from './SolicitationRequests.module.css';
 
 const SolicitationRequests = () => {
   // Auth context
@@ -16,26 +16,46 @@ const SolicitationRequests = () => {
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState(null);
   
-  // Filter states
-  const [dateFilter, setDateFilter] = useState({
-    startDate: '',
-    endDate: ''
-  });
+  // Filter and search states
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
 
-  // Form data
+  // Custom dropdown states
+  const [barangayDropdownOpen, setBarangayDropdownOpen] = useState(false);
+  const [organizationTypeDropdownOpen, setOrganizationTypeDropdownOpen] = useState(false);
+  const [requestTypeDropdownOpen, setRequestTypeDropdownOpen] = useState(false);
+  const barangayDropdownRef = useRef(null);
+  const organizationTypeDropdownRef = useRef(null);
+  const requestTypeDropdownRef = useRef(null);
+
+  // Barangays list
+  const barangays = [
+    'agnas', 'bacolod', 'bangkilingan', 'bantayan', 'baranghawon', 'basagan', 
+    'basud', 'bognabong', 'bombon', 'bonot', 'san isidro', 'buang', 'buhian', 
+    'cabagnan', 'cobo', 'comon', 'cormidal', 'divino rostro', 'fatima', 
+    'guinobat', 'hacienda', 'magapo', 'mariroc', 'matagbac', 'oras', 'oson', 
+    'panal', 'pawa', 'pinagbobong', 'quinale cabasan', 'quinastillojan', 'rawis', 
+    'sagurong', 'salvacion', 'san antonio', 'san carlos', 'san juan', 'san lorenzo', 
+    'san ramon', 'san roque', 'san vicente', 'santo cristo', 'sua-igot', 'tabiguian', 
+    'tagas', 'tayhi', 'visita'
+  ];
+
+  // Form data - Updated structure
   const [formData, setFormData] = useState({
-    contactPerson: '',
-    organizationName: '',
-    organizationType: '',
+    contactPersonFirstName: '',
+    contactPersonLastName: '',
     contactNumber: '',
+    organizationType: '',
+    organizationName: '',
+    street: '',
+    barangay: '',
+    city: '',
     eventDate: '',
-    address: '',
     requestType: '',
     requestedAssistanceDetails: '',
     purpose: '',
-    additionalDetails: '',
     solicitationLetter: null
   });
 
@@ -43,6 +63,42 @@ const SolicitationRequests = () => {
   useEffect(() => {
     fetchSolicitationRequests();
   }, []);
+
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setDropdownOpen(false);
+      }
+      if (barangayDropdownRef.current && !barangayDropdownRef.current.contains(event.target)) {
+        setBarangayDropdownOpen(false);
+      }
+      if (organizationTypeDropdownRef.current && !organizationTypeDropdownRef.current.contains(event.target)) {
+        setOrganizationTypeDropdownOpen(false);
+      }
+      if (requestTypeDropdownRef.current && !requestTypeDropdownRef.current.contains(event.target)) {
+        setRequestTypeDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  // Auto-populate form with user data when form opens
+  useEffect(() => {
+    if (showRequestForm && isAuthenticated && user) {
+      setFormData(prev => ({
+        ...prev,
+        contactPersonFirstName: user.firstName || '',
+        contactPersonLastName: user.lastName || '',
+        contactNumber: user.contactNumber || '',
+        barangay: user.barangay || '',
+      }));
+    }
+  }, [showRequestForm, isAuthenticated, user]);
 
   const fetchSolicitationRequests = async () => {
     try {
@@ -74,18 +130,6 @@ const SolicitationRequests = () => {
       filtered = filtered.filter(request => request.requestType === categoryFilter);
     }
 
-    // Date filter
-    if (dateFilter.startDate) {
-      filtered = filtered.filter(request => 
-        new Date(request.createdAt) >= new Date(dateFilter.startDate)
-      );
-    }
-    if (dateFilter.endDate) {
-      filtered = filtered.filter(request => 
-        new Date(request.createdAt) <= new Date(dateFilter.endDate)
-      );
-    }
-
     // Search filter
     if (searchTerm) {
       filtered = filtered.filter(request =>
@@ -96,13 +140,14 @@ const SolicitationRequests = () => {
     }
 
     setFilteredRequests(filtered);
-  }, [solicitationRequests, dateFilter, categoryFilter, searchTerm]);
+  }, [solicitationRequests, categoryFilter, searchTerm]);
 
   const handleRequestClick = () => {
     if (!isAuthenticated) {
       setShowAuthModal(true);
     } else {
       setShowRequestForm(true);
+      document.body.style.overflow = "hidden";
     }
   };
 
@@ -114,17 +159,25 @@ const SolicitationRequests = () => {
       return;
     }
     
+    if (!formData.solicitationLetter) {
+      alert('Please upload your solicitation letter');
+      return;
+    }
+    
     try {
       const submitData = new FormData();
       
-      // Append all form fields
-      Object.keys(formData).forEach(key => {
-        if (key === 'solicitationLetter' && formData[key]) {
-          submitData.append(key, formData[key]);
-        } else if (key !== 'solicitationLetter') {
-          submitData.append(key, formData[key]);
-        }
-      });
+      // Map form data to API expected format
+      submitData.append('contactPerson', `${formData.contactPersonFirstName} ${formData.contactPersonLastName}`);
+      submitData.append('organizationName', formData.organizationName);
+      submitData.append('organizationType', formData.organizationType);
+      submitData.append('contactNumber', formData.contactNumber);
+      submitData.append('eventDate', formData.eventDate);
+      submitData.append('address', `${formData.street}, ${formData.barangay}, ${formData.city}`);
+      submitData.append('requestType', formData.requestType);
+      submitData.append('requestedAssistanceDetails', formData.requestedAssistanceDetails);
+      submitData.append('purpose', formData.purpose);
+      submitData.append('solicitationLetter', formData.solicitationLetter);
 
       const response = await fetch(`http://localhost:4000/api/solicitations/`, {
         method: 'POST',
@@ -135,7 +188,6 @@ const SolicitationRequests = () => {
       });
 
       if (response.ok) {
-        // Success - close modal and refresh data
         setShowRequestForm(false);
         resetForm();
         alert('Solicitation request submitted successfully!');
@@ -152,30 +204,33 @@ const SolicitationRequests = () => {
 
   const resetForm = () => {
     setFormData({
-      contactPerson: '',
-      organizationName: '',
-      organizationType: '',
+      contactPersonFirstName: '',
+      contactPersonLastName: '',
       contactNumber: '',
+      organizationType: '',
+      organizationName: '',
+      street: '',
+      barangay: '',
+      city: '',
       eventDate: '',
-      address: '',
       requestType: '',
       requestedAssistanceDetails: '',
       purpose: '',
-      additionalDetails: '',
       solicitationLetter: null
     });
     setShowRequestForm(false);
+    document.body.style.overflow = "auto";
   };
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
       // Validate file type and size
-      const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/jpg'];
+      const allowedTypes = ['application/pdf'];
       const maxSize = 5 * 1024 * 1024; // 5MB
 
       if (!allowedTypes.includes(file.type)) {
-        alert('Please upload a PDF or image file (JPEG, PNG, JPG)');
+        alert('Please upload a PDF file only');
         return;
       }
 
@@ -193,8 +248,65 @@ const SolicitationRequests = () => {
     setShowDetailsModal(true);
   };
 
-  const organizationTypes = ['NGA', 'NGO', 'CSO', 'LGU', 'Barangay', 'SK'];
-  const requestTypes = ['Medical', 'Financial', 'Construction Materials', 'Educational Supplies'];
+  // Filter dropdown handlers
+  const handleFilterChange = (category) => {
+    setCategoryFilter(category);
+    setDropdownOpen(false);
+  };
+
+  const toggleDropdown = () => {
+    setDropdownOpen(!dropdownOpen);
+  };
+
+  // Custom dropdown handlers
+  const handleBarangayChange = (barangay) => {
+    setFormData({...formData, barangay: barangay});
+    setBarangayDropdownOpen(false);
+  };
+
+  const toggleBarangayDropdown = () => {
+    setBarangayDropdownOpen(!barangayDropdownOpen);
+  };
+
+  const handleOrganizationTypeChange = (type) => {
+    setFormData({...formData, organizationType: type});
+    setOrganizationTypeDropdownOpen(false);
+  };
+
+  const toggleOrganizationTypeDropdown = () => {
+    setOrganizationTypeDropdownOpen(!organizationTypeDropdownOpen);
+  };
+
+  const handleRequestTypeChange = (type) => {
+    setFormData({...formData, requestType: type});
+    setRequestTypeDropdownOpen(false);
+  };
+
+  const toggleRequestTypeDropdown = () => {
+    setRequestTypeDropdownOpen(!requestTypeDropdownOpen);
+  };
+
+  // Format barangay name for display
+  const formatBarangayName = (barangay) => {
+    return barangay.split(' ').map(word => 
+      word.charAt(0).toUpperCase() + word.slice(1)
+    ).join(' ');
+  };
+
+  // Close all modals
+  const closeAllModals = () => {
+    setShowRequestForm(false);
+    setShowAuthModal(false);
+    setShowDetailsModal(false);
+    setSelectedRequest(null);
+    setBarangayDropdownOpen(false);
+    setOrganizationTypeDropdownOpen(false);
+    setRequestTypeDropdownOpen(false);
+    document.body.style.overflow = "auto";
+  };
+
+  const organizationTypes = ['NGA', 'NGO', 'CSO', 'LGU', 'Barangay', 'SK', 'Others'];
+  const requestTypes = ['Medical', 'Financial', 'Construction Materials', 'Educational Supplies', 'Others'];
 
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -204,365 +316,485 @@ const SolicitationRequests = () => {
     });
   };
 
+  if (loading || authLoading) {
+    return (
+      <div className={styles.solicitationRequests}>
+        <div className={styles.loadingContainer}>
+          <div className={styles.spinner}></div>
+          <p>Loading solicitation requests...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="solicitation-requests-container">
-      <div className="solicitation-requests-wrapper">
-        {/* Header */}
-        <div className="header-section">
-          <h1 className="page-title">Solicitation Requests</h1>
-          <p className="page-description">
-            View completed solicitation requests and submit your own request for assistance.
-          </p>
+    <div className={styles.solicitationRequests}>
+      {/* Header */}
+      <div className={styles.header}>
+        <div className={styles.headerText}>
+          <Mail size={92} className={styles.icon} />
+          <div className={styles.headerContent}>
+            <h1>Solicitation Requests</h1>
+            <p>View approved solicitation requests and submit your own request for assistance.</p>
+          </div>
         </div>
 
-        {/* Filters and Controls */}
-        <div className="controls-section">
-          <div className="filters-row">
-            <div className="search-container">
-              <Search size={20} className="search-icon" />
-              <input
-                type="text"
-                placeholder="Search organizations or purposes..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="search-input"
-              />
-            </div>
+        <div className={styles.filterSection}>
+          {/* Search Bar */}
+          <div className={styles.searchContainer}>
+            <Search size={20} className={styles.searchIcon} />
+            <input
+              type="text"
+              placeholder="Search organizations or purposes..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className={styles.searchInput}
+            />
+          </div>
 
-            <div className="date-filters">
-              <input
-                type="date"
-                value={dateFilter.startDate}
-                onChange={(e) => setDateFilter({...dateFilter, startDate: e.target.value})}
-                className="date-input"
-                placeholder="Start Date"
-              />
-              <input
-                type="date"
-                value={dateFilter.endDate}
-                onChange={(e) => setDateFilter({...dateFilter, endDate: e.target.value})}
-                className="date-input"
-                placeholder="End Date"
-              />
-            </div>
-
-            <select
-              value={categoryFilter}
-              onChange={(e) => setCategoryFilter(e.target.value)}
-              className="category-filter"
+          {/* Filter Dropdown */}
+          <div className={styles.filterDropdown} ref={dropdownRef}>
+            <Filter size={20} className={styles.filterIcon} />
+            <button
+              onClick={toggleDropdown}
+              className={`${styles.dropdownButton} ${dropdownOpen ? styles.active : ''}`}
             >
-              <option value="all">All Categories</option>
-              {requestTypes.map(type => (
-                <option key={type} value={type}>{type}</option>
-              ))}
-            </select>
-          </div>
-
-          <button
-            onClick={handleRequestClick}
-            className="request-button"
-          >
-            <Plus size={20} />
-            Send Solicitation Request
-          </button>
-        </div>
-
-        {/* Requests Grid */}
-        {loading || authLoading ? (
-          <div className="loading-container">
-            <div className="loading-spinner"></div>
-            <p>Loading solicitation requests...</p>
-          </div>
-        ) : filteredRequests.length === 0 ? (
-          <div className="no-requests">
-            <FileText size={64} className="no-requests-icon" />
-            <h3>No requests found</h3>
-            <p>There are no completed solicitation requests to display.</p>
-          </div>
-        ) : (
-          <div className="requests-grid">
-            {filteredRequests.map((request) => (
-              <div
-                key={request._id}
-                onClick={() => openDetailsModal(request)}
-                className="request-card"
+              <span>{categoryFilter === 'all' ? 'All Categories' : categoryFilter}</span>
+              <ChevronDown size={16} className={`${styles.dropdownArrow} ${dropdownOpen ? styles.open : ''}`} />
+            </button>
+            <div className={`${styles.dropdownContent} ${dropdownOpen ? styles.show : ''}`}>
+              <button
+                onClick={() => handleFilterChange('all')}
+                className={`${styles.dropdownItem} ${categoryFilter === 'all' ? styles.active : ''}`}
               >
-                <div className="request-card-header">
-                  <div className="organization-info">
-                    <h3 className="organization-name">{request.organizationName}</h3>
-                    <span className="organization-type">{request.organizationType}</span>
-                  </div>
-                  <div className={`request-type-badge ${request.requestType.toLowerCase().replace(' ', '-')}`}>
-                    {request.requestType}
-                  </div>
-                </div>
-
-                <div className="request-details">
-                  <div className="detail-item">
-                    <User size={16} />
-                    <span>{request.contactPerson}</span>
-                  </div>
-                  <div className="detail-item">
-                    <CalendarIcon size={16} />
-                    <span>{formatDate(request.eventDate)}</span>
-                  </div>
-                  <div className="detail-item">
-                    <MapPin size={16} />
-                    <span>{request.address}</span>
-                  </div>
-                </div>
-
-                <p className="request-purpose">
-                  {request.purpose.length > 120 
-                    ? `${request.purpose.substring(0, 120)}...` 
-                    : request.purpose}
-                </p>
-
-                <div className="request-footer">
-                  <span className="submitted-date">
-                    Submitted: {formatDate(request.createdAt)}
-                  </span>
-                  <button className="view-details-btn">
-                    <Eye size={16} />
-                    View Details
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Authentication Modal */}
-        {showAuthModal && (
-          <div className="modal-overlay">
-            <div className="modal-content auth-modal">
-              <div className="modal-header">
-                <h2 className="modal-title">Account Required</h2>
+                All Categories ({solicitationRequests.length})
+              </button>
+              {requestTypes.map(type => (
                 <button
-                  onClick={() => setShowAuthModal(false)}
-                  className="modal-close-btn"
+                  key={type}
+                  onClick={() => handleFilterChange(type)}
+                  className={`${styles.dropdownItem} ${categoryFilter === type ? styles.active : ''}`}
                 >
-                  <X size={24} />
+                  {type} ({solicitationRequests.filter(request => request.requestType === type).length})
                 </button>
-              </div>
-              <div className="auth-modal-body">
-                <p>You need to have an account to submit a solicitation request.</p>
-                <div className="auth-modal-actions">
-                  <a href="/login" className="btn btn-primary">Login</a>
-                  <a href="/register" className="btn btn-secondary">Register</a>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Requests Grid with Add New Request Card */}
+      {filteredRequests.length === 0 && !searchTerm && categoryFilter === 'all' ? (
+        <div className={styles.noRequests}>
+          <FileText size={64} className={styles.noRequestsIcon} />
+          <h3>No requests found</h3>
+          <p>There are no completed solicitation requests to display.</p>
+        </div>
+      ) : (
+        <div className={styles.content}>
+          <div className={styles.requestsGrid}>
+            {/* Add New Request Card */}
+            <div
+              onClick={handleRequestClick}
+              className={styles.addRequestCard}
+            >
+              <div className={styles.addRequestContent}>
+                <div className={styles.addRequestIconContainer}>
+                  <Plus size={48} className={styles.addRequestIcon} />
                 </div>
+                <h3 className={styles.addRequestTitle}>Submit New Request</h3>
+                <p className={styles.addRequestDescription}>
+                  Submit a new solicitation request for assistance
+                </p>
+              </div>
+            </div>
+
+            {filteredRequests.length === 0 ? (
+              <div className={styles.noFilteredRequests}>
+                <FileText size={64} className={styles.noRequestsIcon} />
+                <h3>No requests found</h3>
+                <p>Try adjusting your search or filter criteria</p>
+              </div>
+            ) : (
+              filteredRequests.map((request) => (
+                <div
+                  key={request._id}
+                  onClick={() => openDetailsModal(request)}
+                  className={styles.requestCard}
+                >
+                  <div className={styles.requestCardHeader}>
+                    <div className={styles.organizationInfo}>
+                      <h3 className={styles.organizationName}>{request.organizationName}</h3>
+                      <span className={styles.organizationType}>{request.organizationType}</span>
+                    </div>
+                    <div className={`${styles.requestTypeBadge} ${styles[request.requestType.toLowerCase().replace(' ', '-')]}`}>
+                      {request.requestType}
+                    </div>
+                  </div>
+
+                  <div className={styles.requestDetails}>
+                    <div className={styles.detailItem}>
+                      <User size={16} />
+                      <span>{request.contactPerson}</span>
+                    </div>
+                    <div className={styles.detailItem}>
+                      <CalendarIcon size={16} />
+                      <span>{formatDate(request.eventDate)}</span>
+                    </div>
+                    <div className={styles.detailItem}>
+                      <MapPin size={16} />
+                      <span>{request.address}</span>
+                    </div>
+                  </div>
+
+                  <p className={styles.requestPurpose}>
+                    {request.purpose.length > 120 
+                      ? `${request.purpose.substring(0, 120)}...` 
+                      : request.purpose}
+                  </p>
+
+                  <div className={styles.requestFooter}>
+                    <span className={styles.submittedDate}>
+                      Submitted: {formatDate(request.createdAt)}
+                    </span>
+                    <button className={styles.viewDetailsBtn}>
+                      <Eye size={16} />
+                      View Details
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Authentication Modal */}
+      {showAuthModal && (
+        <div className={styles.modal} onClick={() => setShowAuthModal(false)}>
+          <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.modalHeader}>
+              <h2 className={styles.modalTitle}>Account Required</h2>
+              <button
+                onClick={() => setShowAuthModal(false)}
+                className={styles.closeBtn}
+              >
+                <X size={24} />
+              </button>
+            </div>
+            <div className={styles.authModalBody}>
+              <p>You need to have an account to submit a solicitation request.</p>
+              <div className={styles.authModalActions}>
+                <a href="/login" className={`${styles.btn} ${styles.loginBtn}`}>Login</a>
+                <a href="/register" className={`${styles.btn} ${styles.registerBtn}`}>Register</a>
               </div>
             </div>
           </div>
-        )}
+        </div>
+      )}
 
-        {/* Solicitation Request Form Modal */}
-        {showRequestForm && (
-          <div className="modal-overlay">
-            <div className="modal-content form-modal">
-              <div className="modal-header">
-                <h2 className="modal-title">Submit Solicitation Request</h2>
-                <button
-                  onClick={resetForm}
-                  className="modal-close-btn"
-                >
-                  <X size={24} />
-                </button>
+      {/* Solicitation Request Form Modal */}
+      {showRequestForm && (
+        <div className={styles.modal} onClick={closeAllModals}>
+          <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.modalHeader}>
+              <div className={styles.modalTitle}>
+                <h2>Submit Solicitation Request</h2>
               </div>
-              
-              <form onSubmit={handleFormSubmit} className="solicitation-form">
-                <div className="form-grid">
-                  {/* Organization Information */}
-                  <div className="form-section">
-                    <h3 className="form-section-title">Organization Information</h3>
-                    
-                    <div className="form-group">
-                      <label className="form-label">Contact Person *</label>
+              <button
+                onClick={closeAllModals}
+                className={styles.closeBtn}
+              >
+                ×
+              </button>
+            </div>
+            
+            <div className={styles.modalBody}>
+              <form onSubmit={handleFormSubmit} className={styles.applicationForm}>
+                <div className={styles.formGrid}>
+                  {/* Contact Person First Name */}
+                  <div className={styles.formGroup}>
+                    <label>Contact Person First Name *</label>
+                    <div className={styles.inputWrapper}>
+                      <User size={16} className={styles.inputIcon} />
                       <input
                         type="text"
+                        value={formData.contactPersonFirstName}
+                        onChange={(e) => setFormData({...formData, contactPersonFirstName: e.target.value})}
                         required
-                        value={formData.contactPerson}
-                        onChange={(e) => setFormData({...formData, contactPerson: e.target.value})}
-                        className="form-input"
-                        placeholder="Enter contact person name"
-                        maxLength={100}
+                        placeholder="First Name"
+                        className={styles.inputWithIcon}
+                        maxLength={50}
                       />
                     </div>
+                  </div>
 
-                    <div className="form-group">
-                      <label className="form-label">Organization Name *</label>
+                  {/* Contact Person Last Name */}
+                  <div className={styles.formGroup}>
+                    <label>Contact Person Last Name *</label>
+                    <div className={styles.inputWrapper}>
+                      <User size={16} className={styles.inputIcon} />
                       <input
                         type="text"
+                        value={formData.contactPersonLastName}
+                        onChange={(e) => setFormData({...formData, contactPersonLastName: e.target.value})}
                         required
+                        placeholder="Last Name"
+                        className={styles.inputWithIcon}
+                        maxLength={50}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Contact Number */}
+                  <div className={styles.formGroup}>
+                    <label>Contact Number *</label>
+                    <div className={styles.phoneInputWrapper}>
+                      <Phone size={16} className={styles.inputIcon} />
+                      <span className={styles.phonePrefix}>+63</span>
+                      <input
+                        type="tel"
+                        value={formData.contactNumber.replace(/^(\+63|63)/, '').replace(/^09/, '9')}
+                        onChange={(e) => {
+                          let value = e.target.value.replace(/\D/g, '');
+                          if (value && !value.startsWith('9')) {
+                            value = '9' + value.substring(1);
+                          }
+                          value = value.substring(0, 10);
+                          setFormData({...formData, contactNumber: `09${value.substring(1)}`});
+                        }}
+                        required
+                        placeholder="9XX XXX XXXX"
+                        pattern="^9\d{9}$"
+                        title="Please enter a valid Philippine mobile number (9XXXXXXXXX)"
+                        className={styles.phoneInputWithIcon}
+                        maxLength={10}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Organization Type - Custom Dropdown */}
+                  <div className={styles.formGroup}>
+                    <label>Organization Type *</label>
+                    <div className={styles.inputWrapper}>
+                      <Building2 size={16} className={styles.inputIcon} />
+                      <div className={styles.customDropdown} ref={organizationTypeDropdownRef}>
+                        <button
+                          type="button"
+                          onClick={toggleOrganizationTypeDropdown}
+                          className={`${styles.customDropdownButton} ${organizationTypeDropdownOpen ? styles.active : ''} ${!formData.organizationType ? styles.placeholder : ''}`}
+                        >
+                          <span>
+                            {formData.organizationType || 'Select organization type'}
+                          </span>
+                          <ChevronDown size={16} className={`${styles.dropdownArrow} ${organizationTypeDropdownOpen ? styles.open : ''}`} />
+                        </button>
+                        <div className={`${styles.customDropdownContent} ${organizationTypeDropdownOpen ? styles.show : ''}`}>
+                          {organizationTypes.map((type) => (
+                            <button
+                              key={type}
+                              type="button"
+                              onClick={() => handleOrganizationTypeChange(type)}
+                              className={`${styles.customDropdownItem} ${formData.organizationType === type ? styles.active : ''}`}
+                            >
+                              {type}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Organization Name */}
+                  <div className={styles.formGroup}>
+                    <label>Organization Name *</label>
+                    <div className={styles.inputWrapper}>
+                      <Building2 size={16} className={styles.inputIcon} />
+                      <input
+                        type="text"
                         value={formData.organizationName}
                         onChange={(e) => setFormData({...formData, organizationName: e.target.value})}
-                        className="form-input"
+                        required
                         placeholder="Enter organization name"
+                        className={styles.inputWithIcon}
                         maxLength={150}
                       />
                     </div>
+                  </div>
 
-                    <div className="form-row">
-                      <div className="form-group">
-                        <label className="form-label">Organization Type *</label>
-                        <select
-                          required
-                          value={formData.organizationType}
-                          onChange={(e) => setFormData({...formData, organizationType: e.target.value})}
-                          className="form-select"
+                  {/* Street Address */}
+                  <div className={styles.formGroup}>
+                    <label>Street Address *</label>
+                    <div className={styles.inputWrapper}>
+                      <MapPin size={16} className={styles.inputIcon} />
+                      <input
+                        type="text"
+                        value={formData.street}
+                        onChange={(e) => setFormData({...formData, street: e.target.value})}
+                        required
+                        placeholder="House/Unit No., Street Name"
+                        maxLength={200}
+                        className={styles.inputWithIcon}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Barangay Dropdown */}
+                  <div className={styles.formGroup}>
+                    <label>Barangay *</label>
+                    <div className={styles.inputWrapper}>
+                      <MapPin size={16} className={styles.inputIcon} />
+                      <div className={styles.customDropdown} ref={barangayDropdownRef}>
+                        <button
+                          type="button"
+                          onClick={toggleBarangayDropdown}
+                          className={`${styles.customDropdownButton} ${barangayDropdownOpen ? styles.active : ''} ${!formData.barangay ? styles.placeholder : ''}`}
                         >
-                          <option value="">Select organization type</option>
-                          {organizationTypes.map(type => (
-                            <option key={type} value={type}>{type}</option>
+                          <span>
+                            {formData.barangay ? formatBarangayName(formData.barangay) : 'Select Barangay'}
+                          </span>
+                          <ChevronDown size={16} className={`${styles.dropdownArrow} ${barangayDropdownOpen ? styles.open : ''}`} />
+                        </button>
+                        <div className={`${styles.customDropdownContent} ${barangayDropdownOpen ? styles.show : ''}`}>
+                          {barangays.map((barangay) => (
+                            <button
+                              key={barangay}
+                              type="button"
+                              onClick={() => handleBarangayChange(barangay)}
+                              className={`${styles.customDropdownItem} ${formData.barangay === barangay ? styles.active : ''}`}
+                            >
+                              {formatBarangayName(barangay)}
+                            </button>
                           ))}
-                        </select>
-                      </div>
-
-                      <div className="form-group">
-                        <label className="form-label">Contact Number *</label>
-                        <input
-                          type="tel"
-                          required
-                          value={formData.contactNumber}
-                          onChange={(e) => setFormData({...formData, contactNumber: e.target.value})}
-                          className="form-input"
-                          placeholder="09XXXXXXXXX"
-                          pattern="(09|\+639)\d{9}"
-                        />
+                        </div>
                       </div>
                     </div>
                   </div>
 
-                  {/* Event Details */}
-                  <div className="form-section">
-                    <h3 className="form-section-title">Event Details</h3>
-                    
-                    <div className="form-row">
-                      <div className="form-group">
-                        <label className="form-label">Event Date *</label>
-                        <input
-                          type="date"
-                          required
-                          value={formData.eventDate}
-                          onChange={(e) => setFormData({...formData, eventDate: e.target.value})}
-                          className="form-input"
-                          min={new Date().toISOString().split('T')[0]}
-                        />
-                      </div>
-                    </div>
-
-                    <div className="form-group">
-                      <label className="form-label">Address *</label>
-                      <textarea
+                  {/* City */}
+                  <div className={styles.formGroup}>
+                    <label>City *</label>
+                    <div className={styles.inputWrapper}>
+                      <MapPin size={16} className={styles.inputIcon} />
+                      <input
+                        type="text"
+                        value={formData.city}
+                        onChange={(e) => setFormData({...formData, city: e.target.value})}
                         required
-                        value={formData.address}
-                        onChange={(e) => setFormData({...formData, address: e.target.value})}
-                        className="form-textarea"
-                        placeholder="Enter complete address"
-                        rows={3}
-                        maxLength={300}
+                        placeholder="City"
+                        className={styles.inputWithIcon}
+                        maxLength={100}
                       />
                     </div>
                   </div>
 
-                  {/* Request Information */}
-                  <div className="form-section">
-                    <h3 className="form-section-title">Request Information</h3>
-                    
-                    <div className="form-group">
-                      <label className="form-label">Request Type *</label>
-                      <select
-                        required
-                        value={formData.requestType}
-                        onChange={(e) => setFormData({...formData, requestType: e.target.value})}
-                        className="form-select"
-                      >
-                        <option value="">Select request type</option>
-                        {requestTypes.map(type => (
-                          <option key={type} value={type}>{type}</option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div className="form-group">
-                      <label className="form-label">Requested Assistance Details *</label>
-                      <textarea
-                        required
-                        value={formData.requestedAssistanceDetails}
-                        onChange={(e) => setFormData({...formData, requestedAssistanceDetails: e.target.value})}
-                        className="form-textarea"
-                        placeholder="Describe the specific assistance you are requesting..."
-                        rows={4}
-                        maxLength={1000}
-                      />
-                    </div>
-
-                    <div className="form-group">
-                      <label className="form-label">Purpose *</label>
-                      <textarea
-                        required
-                        value={formData.purpose}
-                        onChange={(e) => setFormData({...formData, purpose: e.target.value})}
-                        className="form-textarea"
-                        placeholder="Explain the purpose and importance of this request..."
-                        rows={4}
-                        maxLength={800}
-                      />
-                    </div>
-
-                    <div className="form-group">
-                      <label className="form-label">Additional Details</label>
-                      <textarea
-                        value={formData.additionalDetails}
-                        onChange={(e) => setFormData({...formData, additionalDetails: e.target.value})}
-                        className="form-textarea"
-                        placeholder="Any additional information that might be helpful..."
-                        rows={3}
-                        maxLength={1000}
+                  {/* Event Date */}
+                  <div className={styles.formGroup}>
+                    <label>Event Date</label>
+                    <div className={styles.inputWrapper}>
+                      <CalendarIcon size={16} className={styles.inputIcon} />
+                      <input
+                        type="date"
+                        value={formData.eventDate}
+                        onChange={(e) => setFormData({...formData, eventDate: e.target.value})}
+                        min={new Date().toISOString().split('T')[0]}
+                        className={styles.inputWithIcon}
                       />
                     </div>
                   </div>
 
-                  {/* Document Upload */}
-                  <div className="form-section">
-                    <h3 className="form-section-title">Document Upload</h3>
-                    
-                    <div className="form-group">
-                      <label className="form-label">Solicitation Letter *</label>
-                      <div className="file-upload-container">
-                        <input
-                          type="file"
-                          required
-                          onChange={handleFileChange}
-                          className="file-input"
-                          accept=".pdf,.jpg,.jpeg,.png"
-                          id="solicitation-letter"
-                        />
-                        <label htmlFor="solicitation-letter" className="file-upload-label">
-                          <Upload size={20} />
-                          {formData.solicitationLetter 
-                            ? formData.solicitationLetter.name 
-                            : 'Choose file (PDF, JPG, PNG)'}
-                        </label>
+                  {/* Request Type - Custom Dropdown */}
+                  <div className={styles.formGroup}>
+                    <label>Request Type *</label>
+                    <div className={styles.inputWrapper}>
+                      <Type size={16} className={styles.inputIcon} />
+                      <div className={styles.customDropdown} ref={requestTypeDropdownRef}>
+                        <button
+                          type="button"
+                          onClick={toggleRequestTypeDropdown}
+                          className={`${styles.customDropdownButton} ${requestTypeDropdownOpen ? styles.active : ''} ${!formData.requestType ? styles.placeholder : ''}`}
+                        >
+                          <span>
+                            {formData.requestType || 'Select request type'}
+                          </span>
+                          <ChevronDown size={16} className={`${styles.dropdownArrow} ${requestTypeDropdownOpen ? styles.open : ''}`} />
+                        </button>
+                        <div className={`${styles.customDropdownContent} ${requestTypeDropdownOpen ? styles.show : ''}`}>
+                          {requestTypes.map((type) => (
+                            <button
+                              key={type}
+                              type="button"
+                              onClick={() => handleRequestTypeChange(type)}
+                              className={`${styles.customDropdownItem} ${formData.requestType === type ? styles.active : ''}`}
+                            >
+                              {type}
+                            </button>
+                          ))}
+                        </div>
                       </div>
-                      <small className="file-help-text">
-                        Maximum file size: 5MB. Accepted formats: PDF, JPG, PNG
-                      </small>
                     </div>
+                  </div>
+
+                  {/* Specific Request Details */}
+                  <div className={styles.formGroup}>
+                    <label>Specific Request Details *</label>
+                    <textarea
+                      value={formData.requestedAssistanceDetails}
+                      onChange={(e) => setFormData({...formData, requestedAssistanceDetails: e.target.value})}
+                      required
+                      placeholder="Describe the specific assistance you are requesting..."
+                      rows={4}
+                      maxLength={1000}
+                    />
+                  </div>
+
+                  {/* Purpose */}
+                  <div className={styles.formGroup}>
+                    <label>Purpose *</label>
+                    <textarea
+                      value={formData.purpose}
+                      onChange={(e) => setFormData({...formData, purpose: e.target.value})}
+                      required
+                      placeholder="Explain the purpose and importance of this request..."
+                      rows={4}
+                      maxLength={800}
+                    />
+                  </div>
+
+                  {/* Solicitation Letter Upload */}
+                  <div className={styles.formGroup}>
+                    <label>Upload Solicitation Letter *</label>
+                    <div className={styles.fileUpload}>
+                      <input
+                        type="file"
+                        id="solicitationFile"
+                        accept=".pdf"
+                        onChange={handleFileChange}
+                        required
+                        className={styles.fileInput}
+                      />
+                      <label htmlFor="solicitationFile" className={styles.fileLabel}>
+                        <Upload size={18} />
+                        {formData.solicitationLetter ? formData.solicitationLetter.name : 'Choose Solicitation Letter (PDF only)'}
+                      </label>
+                    </div>
+                    <small className={styles.fileHint}>
+                      Maximum file size: 5MB. Accepted formats: PDF only
+                    </small>
                   </div>
                 </div>
 
-                <div className="form-actions">
-                  <button
-                    type="button"
-                    onClick={resetForm}
-                    className="btn btn-secondary"
+                <div className={styles.formActions}>
+                  <button 
+                    type="button" 
+                    className={styles.cancelBtn}
+                    onClick={closeAllModals}
                   >
                     Cancel
                   </button>
-                  <button
-                    type="submit"
-                    className="btn btn-primary"
+                  <button 
+                    type="submit" 
+                    className={styles.submitBtn}
                   >
                     Submit Request
                   </button>
@@ -570,115 +802,117 @@ const SolicitationRequests = () => {
               </form>
             </div>
           </div>
-        )}
+        </div>
+      )}
 
-        {/* Request Details Modal */}
-        {showDetailsModal && selectedRequest && (
-          <div className="modal-overlay">
-            <div className="modal-content details-modal">
-              <div className="modal-header">
-                <div>
-                  <h2 className="modal-title">{selectedRequest.organizationName}</h2>
-                  <span className={`request-type-badge ${selectedRequest.requestType.toLowerCase().replace(' ', '-')}`}>
-                    {selectedRequest.requestType}
-                  </span>
-                </div>
-                <button
-                  onClick={() => setShowDetailsModal(false)}
-                  className="modal-close-btn"
-                >
-                  <X size={24} />
-                </button>
+      {/* Request Details Modal */}
+      {showDetailsModal && selectedRequest && (
+        <div className={styles.modal} onClick={() => setShowDetailsModal(false)}>
+          <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.modalHeader}>
+              <div>
+                <h2 className={styles.modalTitle}>{selectedRequest.organizationName}</h2>
+                <span className={`${styles.requestTypeBadge} ${styles.large} ${styles[selectedRequest.requestType.toLowerCase().replace(' ', '-')]}`}>
+                  {selectedRequest.requestType}
+                </span>
               </div>
-              
-              <div className="details-content">
-                <div className="details-grid">
-                  <div className="details-section">
-                    <h3 className="details-section-title">Organization Information</h3>
-                    <div className="details-list">
-                      <div className="detail-row">
-                        <User size={16} />
-                        <div>
-                          <span className="detail-label">Contact Person:</span>
-                          <span className="detail-value">{selectedRequest.contactPerson}</span>
-                        </div>
-                      </div>
-                      <div className="detail-row">
-                        <Building2 size={16} />
-                        <div>
-                          <span className="detail-label">Organization:</span>
-                          <span className="detail-value">{selectedRequest.organizationName}</span>
-                        </div>
-                      </div>
-                      <div className="detail-row">
-                        <Type size={16} />
-                        <div>
-                          <span className="detail-label">Type:</span>
-                          <span className="detail-value">{selectedRequest.organizationType}</span>
-                        </div>
-                      </div>
-                      <div className="detail-row">
-                        <Phone size={16} />
-                        <div>
-                          <span className="detail-label">Contact:</span>
-                          <span className="detail-value">{selectedRequest.contactNumber}</span>
-                        </div>
+              <button
+                onClick={() => setShowDetailsModal(false)}
+                className={styles.closeBtn}
+              >
+                <X size={24} />
+              </button>
+            </div>
+            
+            <div className={styles.modalBody}>
+              <div className={styles.detailsGrid}>
+                <div className={styles.detailsSection}>
+                  <h3 className={styles.detailsSectionTitle}>Organization Information</h3>
+                  <div className={styles.detailsList}>
+                    <div className={styles.detailRow}>
+                      <User size={16} />
+                      <div>
+                        <span className={styles.detailLabel}>Contact Person:</span>
+                        <span className={styles.detailValue}>{selectedRequest.contactPerson}</span>
                       </div>
                     </div>
-                  </div>
-
-                  <div className="details-section">
-                    <h3 className="details-section-title">Event Information</h3>
-                    <div className="details-list">
-                      <div className="detail-row">
-                        <CalendarIcon size={16} />
-                        <div>
-                          <span className="detail-label">Event Date:</span>
-                          <span className="detail-value">{formatDate(selectedRequest.eventDate)}</span>
-                        </div>
+                    <div className={styles.detailRow}>
+                      <Building2 size={16} />
+                      <div>
+                        <span className={styles.detailLabel}>Organization:</span>
+                        <span className={styles.detailValue}>{selectedRequest.organizationName}</span>
                       </div>
-                      <div className="detail-row">
-                        <MapPin size={16} />
-                        <div>
-                          <span className="detail-label">Address:</span>
-                          <span className="detail-value">{selectedRequest.address}</span>
-                        </div>
+                    </div>
+                    <div className={styles.detailRow}>
+                      <Type size={16} />
+                      <div>
+                        <span className={styles.detailLabel}>Type:</span>
+                        <span className={styles.detailValue}>{selectedRequest.organizationType}</span>
+                      </div>
+                    </div>
+                    <div className={styles.detailRow}>
+                      <Phone size={16} />
+                      <div>
+                        <span className={styles.detailLabel}>Contact:</span>
+                        <span className={styles.detailValue}>{selectedRequest.contactNumber}</span>
                       </div>
                     </div>
                   </div>
                 </div>
 
-                <div className="details-section full-width">
-                  <h3 className="details-section-title">Request Details</h3>
-                  <div className="request-details-content">
-                    <div className="detail-block">
-                      <h4 className="detail-block-title">Requested Assistance</h4>
-                      <p className="detail-block-text">{selectedRequest.requestedAssistanceDetails}</p>
-                    </div>
-                    <div className="detail-block">
-                      <h4 className="detail-block-title">Purpose</h4>
-                      <p className="detail-block-text">{selectedRequest.purpose}</p>
-                    </div>
-                    {selectedRequest.additionalDetails && (
-                      <div className="detail-block">
-                        <h4 className="detail-block-title">Additional Details</h4>
-                        <p className="detail-block-text">{selectedRequest.additionalDetails}</p>
+                <div className={styles.detailsSection}>
+                  <h3 className={styles.detailsSectionTitle}>Event Information</h3>
+                  <div className={styles.detailsList}>
+                    <div className={styles.detailRow}>
+                      <CalendarIcon size={16} />
+                      <div>
+                        <span className={styles.detailLabel}>Event Date:</span>
+                        <span className={styles.detailValue}>
+                          {selectedRequest.eventDate ? formatDate(selectedRequest.eventDate) : 'Not specified'}
+                        </span>
                       </div>
-                    )}
+                    </div>
+                    <div className={styles.detailRow}>
+                      <MapPin size={16} />
+                      <div>
+                        <span className={styles.detailLabel}>Address:</span>
+                        <span className={styles.detailValue}>{selectedRequest.address}</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
+              </div>
 
-                <div className="request-meta">
-                  <span className="meta-item">Submitted: {formatDate(selectedRequest.createdAt)}</span>
-                  {selectedRequest.completedAt && (
-                    <span className="meta-item">Completed: {formatDate(selectedRequest.completedAt)}</span>
+              <div className={`${styles.detailsSection} ${styles.fullWidth}`}>
+                <h3 className={styles.detailsSectionTitle}>Request Details</h3>
+                <div className={styles.requestDetailsContent}>
+                  <div className={styles.detailBlock}>
+                    <h4 className={styles.detailBlockTitle}>Requested Assistance</h4>
+                    <p className={styles.detailBlockText}>{selectedRequest.requestedAssistanceDetails}</p>
+                  </div>
+                  <div className={styles.detailBlock}>
+                    <h4 className={styles.detailBlockTitle}>Purpose</h4>
+                    <p className={styles.detailBlockText}>{selectedRequest.purpose}</p>
+                  </div>
+                  {selectedRequest.additionalDetails && (
+                    <div className={styles.detailBlock}>
+                      <h4 className={styles.detailBlockTitle}>Additional Details</h4>
+                      <p className={styles.detailBlockText}>{selectedRequest.additionalDetails}</p>
+                    </div>
                   )}
                 </div>
               </div>
+
+              <div className={styles.requestMeta}>
+                <span className={styles.metaItem}>Submitted: {formatDate(selectedRequest.createdAt)}</span>
+                {selectedRequest.completedAt && (
+                  <span className={styles.metaItem}>Completed: {formatDate(selectedRequest.completedAt)}</span>
+                )}
+              </div>
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 };

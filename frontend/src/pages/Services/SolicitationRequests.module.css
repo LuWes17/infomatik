@@ -1,0 +1,1524 @@
+/* SolicitationRequests.module.css - Updated to match JobOpenings styling */
+
+.solicitationRequests {
+  padding: 0;
+  min-height: 100vh;
+  background-color: #f8fafc;
+  font-family: var(--font-family-primary);
+}
+
+/* Header Section - Updated to match JobOpenings horizontal layout */
+.header {
+  background: white;
+  color: var(--gray-900);
+  padding: 2rem 0;
+  margin-bottom: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-left: 3rem;
+  padding-right: 3rem;
+  border-bottom: 1px solid #e2e8f0;
+  flex-wrap: wrap;
+}
+
+.headerText {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  flex: 1;
+}
+
+.icon {
+  color: var(--gray-900);
+  flex-shrink: 0;
+  width: 92px;
+  height: 92px;
+}
+
+.headerContent {
+  flex: 1;
+}
+
+.headerContent h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--gray-900);
+  text-shadow: none;
+  margin: 0 0 0.5rem 0;
+}
+
+.headerContent p {
+  font-size: 1rem;
+  color: var(--gray-500);
+  margin: 0;
+  opacity: 1;
+}
+
+/* Filter Section - Updated to match JobOpenings style */
+.filterSection {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: flex-end;
+  flex-shrink: 0;
+  min-width: 400px;
+}
+
+/* Search Container */
+.searchContainer {
+  position: relative;
+  max-width: 500px;
+  width: 100%;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--gray-500);
+  z-index: 1;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 0.875rem 1rem 0.875rem 3rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 50px;
+  background: white;
+  color: var(--gray-900);
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.searchInput::placeholder {
+  color: var(--gray-300);
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+}
+
+/* Filter Dropdown - Custom styled to match JobOpenings */
+.filterDropdown {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.filterIcon {
+  color: var(--gray-500);
+}
+
+.dropdownButton {
+  padding: 0.5rem 1.5rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 25px;
+  background: white;
+  color: var(--gray-700);
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  min-width: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.dropdownButton:hover {
+  background-color: #f8fafc;
+  border-color: var(--primary-color);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.dropdownButton.active {
+  border-color: var(--primary-color);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+}
+
+.dropdownArrow {
+  transition: transform 0.3s ease;
+}
+
+.dropdownArrow.open {
+  transform: rotate(180deg);
+}
+
+.dropdownContent {
+  position: absolute;
+  top: 110%;
+  left: 0;
+  right: 0;
+  background: white;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  padding: 8px 0;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  transition: all 0.3s ease;
+  z-index: 100;
+  border: 1px solid #e2e8f0;
+}
+
+.dropdownContent.show {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.dropdownItem {
+  display: block;
+  padding: 10px 16px;
+  color: var(--gray-700);
+  text-decoration: none;
+  font-weight: 400;
+  transition: background-color 0.2s ease;
+  white-space: nowrap;
+  font-size: 0.8rem;
+  cursor: pointer;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+}
+
+.dropdownItem:hover {
+  background-color: #f8fafc;
+  color: var(--primary-color);
+  font-weight: 500;
+}
+
+.dropdownItem.active {
+  background-color: var(--primary-color);
+  color: white;
+  font-weight: 600;
+}
+
+/* Legacy category filter for backwards compatibility */
+.categoryFilter {
+  padding: 0.5rem 1.5rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 25px;
+  background: white;
+  color: var(--gray-700);
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  min-width: 180px;
+}
+
+.categoryFilter:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(28, 98, 187, 0.1);
+}
+
+/* Submit Section */
+.submitSection {
+  padding: 0 3rem;
+  margin-bottom: 2rem;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.submitBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 25px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.submitBtn:hover {
+  background: var(--primary-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Content Section */
+.content {
+  padding: 0 3rem;
+}
+
+/* Loading State */
+.loadingContainer {
+  text-align: center;
+  padding: 4rem 0;
+  color: var(--gray-500);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  gap: 1rem;
+}
+
+.spinner {
+  width: 3rem;
+  height: 3rem;
+  border: 3px solid var(--gray-200);
+  border-top-color: var(--primary-color);
+  border-radius: 50%;
+  margin: 0 auto 1rem;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* No Requests State */
+.noRequests {
+  text-align: center;
+  padding: 4rem 0;
+  color: var(--gray-500);
+}
+
+.noRequestsIcon {
+  opacity: 0.3;
+  margin-bottom: 1rem;
+  color: var(--gray-400);
+}
+
+.noRequests h3 {
+  font-size: 1.5rem;
+  color: var(--gray-700);
+  margin-bottom: 0.5rem;
+  margin: 0 0 0.5rem 0;
+}
+
+.noRequests p {
+  font-size: 1rem;
+  color: var(--gray-500);
+  margin: 0;
+}
+
+/* Add New Request */
+.addRequestCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;        /* Centers content horizontally */
+  justify-content: center;    /* Centers content vertically */
+  text-align: center;         /* Centers text specifically */
+  gap: 0.5rem;
+  padding: 1rem;
+  background: #f9fafb;
+  border: 2px dashed #d1d5db;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+  height: 100%;               /* Match the height of other cards */
+  font-weight: 500;
+  color: var(--gray-700);
+}
+
+.addRequestCard:hover {
+  background: #f3f4f6;
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+}
+
+.addRequestContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.addRequestTitle {
+  text-align: center;         /* Ensure title is centered */
+  margin: 0;                  /* Remove default margins */
+}
+
+.addRequestDescription {
+  text-align: center;         /* Ensure description is centered */
+  margin: 0;                  /* Remove default margins */
+}
+
+.addRequestIconContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.5rem;
+}
+
+/* Requests Grid */
+.requestsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 2rem;
+}
+
+.requestCard {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 1px solid #e2e8f0;
+  position: relative;
+}
+
+.requestCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  border-color: var(--primary-color);
+}
+
+.requestCardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+  gap: 1rem;
+}
+
+.organizationInfo {
+  flex: 1;
+}
+
+.organizationName {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--gray-800);
+  margin: 0 0 0.25rem 0;
+  line-height: 1.4;
+}
+
+.organizationType {
+  font-size: 0.875rem;
+  color: var(--gray-600);
+  background: var(--gray-100);
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-weight: 500;
+  display: inline-block;
+}
+
+.requestTypeBadge {
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+  flex-shrink: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+.requestTypeBadge.large {
+  font-size: 0.875rem;
+  padding: 0.375rem 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.requestTypeBadge.medical {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+.requestTypeBadge.financial {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.requestTypeBadge.construction-materials {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.requestTypeBadge.educational-supplies {
+  background-color: #dbeafe;
+  color: #1e40af;
+}
+
+.requestDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.detailItem {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--gray-600);
+}
+
+.detailItem svg {
+  color: var(--gray-400);
+  flex-shrink: 0;
+}
+
+.requestPurpose {
+  color: var(--gray-700);
+  line-height: 1.5;
+  margin-bottom: 1rem;
+  font-size: 0.875rem;
+}
+
+.requestFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 1rem;
+  border-top: 1px solid #e2e8f0;
+}
+
+.submittedDate {
+  font-size: 0.875rem;
+  color: var(--gray-500);
+}
+
+.viewDetailsBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.5rem 1rem;
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.viewDetailsBtn:hover {
+  background: var(--primary-dark);
+  transform: translateY(-1px);
+}
+
+/* Modal Styles - Updated to match JobOpenings */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+  backdrop-filter: blur(4px);
+}
+
+.modalContent {
+  background: white;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 800px;
+  max-height: 90vh;
+  overflow: hidden;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+}
+
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 2rem 2rem 1rem;
+  border-bottom: 1px solid #e2e8f0;
+  flex-shrink: 0;
+  gap: 1rem;
+}
+
+.modalTitle {
+  color: var(--gray-900);
+  font-size: 1.5rem;
+  font-weight: 600;
+  flex: 1;
+  min-width: 0;
+  padding-right: 1rem;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
+  margin: 0;
+}
+
+.closeBtn {
+  background: none;
+  border: none;
+  font-size: 1.8rem;
+  color: var(--gray-500);
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  transition: color 0.3s ease;
+  flex-shrink: 0;
+}
+
+.closeBtn:hover {
+  color: #334155;
+}
+
+.modalBody {
+  overflow-y: auto;
+  max-height: calc(90vh - 120px);
+  flex: 1;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 #f1f5f9;
+  padding: .8rem 2rem 1rem;
+}
+
+.modalBody::-webkit-scrollbar {
+  width: 8px;
+}
+
+.modalBody::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 4px;
+}
+
+.modalBody::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+.modalBody::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Auth Modal */
+.authModalBody {
+  text-align: center;
+}
+
+.authModalBody p {
+  margin-bottom: 1.5rem;
+  color: var(--gray-600);
+  font-size: 1rem;
+}
+
+.authModalActions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+}
+
+/* APPLICATION FORM STYLES - Updated to match JobOpenings */
+.applicationForm {
+  width: 100%;
+}
+
+.formGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.formGroup label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--gray-800);
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+/* Input wrapper for icons - Copied from JobOpenings */
+.inputWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.inputIcon {
+  position: absolute;
+  left: 1rem;
+  color: var(--primary-color);
+  z-index: 1;
+  pointer-events: none;
+  height: 1.15rem;
+}
+
+.inputWithIcon {
+  padding-left: 2.5rem !important;
+  width: 100%;
+}
+
+/* Phone input specific styling - Copied from JobOpenings */
+.phoneInputWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.phonePrefix {
+  position: absolute;
+  left: 3rem;
+  color: #999;
+  z-index: 1;
+  pointer-events: none;
+  font-size: 0.9rem;
+}
+
+.phoneInputWithIcon {
+  padding-left: 5rem !important;
+  width: 100%;
+}
+
+/* Updated input styling to match JobOpenings form */
+.formGroup input,
+.formGroup textarea,
+.formGroup select {
+  padding: 0.8rem 1rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 1rem;
+  font-size: 0.9rem;
+  font-family: inherit;
+  transition: all 0.3s ease;
+  background: white;
+  outline: none;
+}
+
+.formGroup input::placeholder,
+.formGroup textarea::placeholder {
+  color: #999;
+}
+
+.formGroup input:focus,
+.formGroup textarea:focus,
+.formGroup select:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 0.2rem rgba(28, 98, 187, 0.25);
+}
+
+.formGroup select {
+  cursor: pointer;
+}
+
+/* Select placeholder styling - Copied from JobOpenings */
+.selectPlaceholder {
+  color: #999 !important;
+}
+
+.formGroup select option {
+  padding: 0.5rem;
+  background-color: white;
+  color: #333;
+}
+
+.formGroup select option:hover {
+  background-color: #f8f9fa;
+}
+
+.formGroup select option[value=""] {
+  color: #999;
+}
+
+.formGroup select option:not([value=""]) {
+  color: #000;
+}
+
+.formGroup select:invalid {
+  color: #999;
+}
+
+.formGroup textarea {
+  resize: vertical;
+  min-height: 120px;
+  line-height: 1.5;
+  border-radius: 0.75rem;
+}
+
+/* Custom Barangay Dropdown - Copied from JobOpenings */
+/* CUSTOM DROPDOWN STYLES - Consistent for all dropdowns */
+.customDropdown {
+  position: relative;
+  width: 100%;
+}
+
+.customDropdownButton {
+  width: 100%;
+  padding: 0.8rem 1rem 0.8rem 2.5rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 1rem;
+  background: white;
+  color: var(--gray-700);
+  font-size: 0.9rem;
+  font-weight: 400;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  text-align: left;
+}
+
+.customDropdownButton:hover {
+  background-color: #f8fafc;
+  border-color: var(--primary-color);
+}
+
+.customDropdownButton:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 0.2rem rgba(28, 98, 187, 0.25);
+}
+
+.customDropdownButton.active {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 0.2rem rgba(28, 98, 187, 0.25);
+}
+
+.customDropdownButton.placeholder {
+  color: #999;
+}
+
+.customDropdownContent {
+  position: absolute;
+  top: 110%;
+  left: 0;
+  right: 0;
+  background: white;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  padding: 8px 0;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  transition: all 0.3s ease;
+  z-index: 200;
+  border: 1px solid #e2e8f0;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.customDropdownContent.show {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.customDropdownItem {
+  display: block;
+  padding: 10px 16px;
+  color: var(--gray-700);
+  text-decoration: none;
+  font-weight: 400;
+  transition: background-color 0.2s ease;
+  white-space: nowrap;
+  font-size: 0.8rem;
+  cursor: pointer;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+}
+
+.customDropdownItem:hover {
+  background-color: #f8fafc;
+  color: var(--primary-color);
+  font-weight: 500;
+}
+
+.customDropdownItem.active {
+  background-color: var(--primary-color);
+  color: white;
+  font-weight: 600;
+}
+
+/* Custom scrollbar for dropdown */
+.customDropdownContent::-webkit-scrollbar {
+  width: 6px;
+}
+
+.customDropdownContent::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 3px;
+}
+
+.customDropdownContent::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+.customDropdownContent::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+
+/* File Upload - Updated styling to match JobOpenings */
+.fileUpload {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.fileInput {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+.fileLabel {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  border: 2px dashed #e2e8f0;
+  border-radius: 0.75rem;
+  background: #f8fafc;
+  color: var(--gray-700);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-align: center;
+  min-height: 120px;
+  justify-content: center;
+}
+
+.fileLabel:hover {
+  border-color: var(--primary-color);
+  background: var(--primary-color);
+  color: white;
+}
+
+.fileLabel svg {
+  flex-shrink: 0;
+}
+
+.fileHint {
+  color: var(--gray-500);
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+  display: block;
+}
+
+.fileUpload input[type="file"]:valid + .fileLabel {
+  border-color: #16a34a;
+  background: white;
+  color: #16a34a;
+  border-style: solid;
+}
+
+.fileUpload input[type="file"]:valid + .fileLabel:hover {
+  background: #16a34a;
+  color: white;
+}
+
+/* Form Actions - Updated styling to match JobOpenings */
+.formActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  padding-top: 2rem;
+  border-top: 1px solid #e2e8f0;
+}
+
+.cancelBtn {
+  padding: 0.8rem 1.5rem;
+  border: 2px solid #e2e8f0;
+  background: white;
+  color: var(--gray-700);
+  border-radius: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.9rem;
+}
+
+.cancelBtn:hover {
+  background: #f8fafc;
+  border-color: var(--gray-400);
+}
+
+.cancelBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.submitBtn {
+  padding: 0.8rem 1.5rem;
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 150px;
+  font-size: 0.9rem;
+}
+
+.submitBtn:hover {
+  background: #1557a6;
+}
+
+.submitBtn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  background: var(--gray-400);
+}
+
+/* Button Styles for other modals */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  gap: 0.5rem;
+}
+
+.loginBtn {
+  background: var(--primary-color);
+  color: white;
+  border: 1px solid var(--primary-color);
+}
+
+.loginBtn:hover {
+  background: var(--primary-dark);
+  border-color: var(--primary-dark);
+}
+
+.registerBtn {
+  background: white;
+  color: var(--primary-color);
+  border: 1px solid var(--primary-color);
+}
+
+.registerBtn:hover {
+  background: var(--primary-color);
+  color: white;
+}
+
+/* Details Modal Content */
+.detailsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.detailsSection {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.detailsSection.fullWidth {
+  grid-column: 1 / -1;
+}
+
+.detailsSectionTitle {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--gray-800);
+  margin: 0;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid var(--primary-color);
+}
+
+.detailsList {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.detailRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.detailRow svg {
+  color: var(--primary-color);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.detailRow div {
+  flex: 1;
+}
+
+.detailLabel {
+  font-weight: 500;
+  color: var(--gray-600);
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+.detailValue {
+  color: var(--gray-800);
+  word-wrap: break-word;
+}
+
+.requestDetailsContent {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.detailBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.detailBlockTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--gray-700);
+  margin: 0;
+}
+
+.detailBlockText {
+  color: var(--gray-700);
+  line-height: 1.6;
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+.requestMeta {
+  display: flex;
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e2e8f0;
+  flex-wrap: wrap;
+}
+
+.metaItem {
+  font-size: 0.875rem;
+  color: var(--gray-500);
+  font-weight: 500;
+}
+
+/* Applied Button for consistency with JobOpenings */
+.appliedBtn {
+  flex: 1;
+  padding: 0.5rem 1rem;
+  background: var(--gray-100);
+  color: var(--gray-600);
+  border: 1px solid var(--gray-300);
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: not-allowed;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .header {
+    padding: 2rem 2rem;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+  }
+
+  .headerText {
+    justify-content: center;
+    text-align: center;
+  }
+
+  .filterSection {
+    align-items: center;
+    min-width: auto;
+    width: 100%;
+    max-width: 500px;
+  }
+
+  .searchContainer {
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .filterDropdown {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .dropdownButton {
+    width: 100%;
+    max-width: 300px;
+    min-width: auto;
+  }
+
+  .dropdownContent {
+    left: 0;
+    right: 0;
+    width: 100%;
+    max-width: 300px;
+    margin: 0 auto;
+  }
+
+  .submitSection {
+    padding: 0 2rem;
+  }
+
+  .content {
+    padding: 0 2rem;
+  }
+
+  .requestsGrid {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .headerContent h1 {
+    font-size: 1.75rem;
+  }
+
+  .filterSection {
+    flex-direction: column;
+    gap: 1rem;
+    width: 100%;
+  }
+
+  .submitSection {
+    padding: 0 1rem;
+    justify-content: center;
+  }
+
+  .content {
+    padding: 0 1rem;
+  }
+
+  .requestsGrid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .requestCard {
+    padding: 1rem;
+  }
+
+  .requestCardHeader {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .organizationInfo {
+    order: 2;
+  }
+
+  .requestTypeBadge {
+    align-self: flex-start;
+    order: 1;
+  }
+
+  .detailsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .requestMeta {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .modal {
+    padding: 0.5rem;
+  }
+
+  .modalContent {
+    max-height: 95vh;
+  }
+
+  .modalHeader {
+    padding: 1rem;
+  }
+
+  .modalTitle {
+    font-size: 1.25rem;
+  }
+
+  .modalBody {
+    padding: 1rem;
+  }
+
+  .formGrid {
+    gap: 1rem;
+  }
+
+  .formGroup input,
+  .formGroup textarea,
+  .formGroup select {
+    padding: 1rem;
+    font-size: 1rem;
+    border-radius: 0.75rem;
+  }
+
+  .inputWithIcon {
+    padding-left: 3rem !important;
+  }
+
+  .phoneInputWithIcon {
+    padding-left: 6rem !important;
+  }
+
+  .phonePrefix {
+    left: 3.5rem;
+    font-size: 1rem;
+  }
+
+  .inputIcon {
+    left: 1.2rem;
+    height: 1.2rem;
+  }
+
+  .barangayDropdownButton {
+    padding: 1rem 1rem 1rem 3rem;
+    font-size: 1rem;
+  }
+
+  .barangayDropdownItem {
+    padding: 12px 16px;
+    font-size: .8rem;
+  }
+
+  .formActions {
+    flex-direction: column-reverse;
+  }
+
+  .cancelBtn,
+  .submitBtn {
+    padding: 1rem 2rem;
+    font-size: 1rem;
+    border-radius: 0.75rem;
+  }
+
+  .authModalActions {
+    flex-direction: column;
+  }
+
+  .requestFooter {
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 480px) {
+  .header {
+    padding: 1.5rem 1rem;
+  }
+
+  .headerContent h1 {
+    font-size: 1.5rem;
+  }
+
+  .headerContent p {
+    font-size: 0.875rem;
+  }
+
+  .filterSection {
+    gap: 0.75rem;
+  }
+
+  .dropdownButton {
+    font-size: 0.875rem;
+    min-width: auto;
+  }
+
+  .dropdownItem {
+    padding: 8px 12px;
+    font-size: 0.75rem;
+  }
+
+  .addRequestCard {
+    padding: 1rem;
+    min-height: 120px;
+  }
+
+  .addRequestIcon {
+    width: 32px;
+    height: 32px;
+    margin-bottom: 0.5rem;
+  }
+
+  .addRequestTitle {
+    font-size: 1rem;
+  }
+
+  .addRequestDescription {
+    font-size: 0.75rem;
+  }
+
+  .fileUpload {
+    padding: 1rem;
+  }
+
+  .fileLabel {
+    min-height: 80px;
+  }
+
+  .fileLabel svg {
+    width: 28px;
+    height: 28px;
+  }
+
+  .requestCard {
+    padding: 1rem;
+  }
+
+  .organizationName {
+    font-size: 1.125rem;
+  }
+
+  .requestTypeBadge {
+    font-size: 0.625rem;
+    padding: 0.25rem 0.5rem;
+  }
+
+  .detailItem {
+    font-size: 0.8rem;
+  }
+
+  .requestPurpose {
+    font-size: 0.8rem;
+  }
+
+  .viewDetailsBtn {
+    font-size: 0.75rem;
+    padding: 0.375rem 0.75rem;
+  }
+
+  .modalHeader,
+  .modalBody {
+    padding: 1rem;
+  }
+
+  .modalTitle {
+    font-size: 1.125rem;
+  }
+
+  .formGroup {
+    gap: 0.75rem;
+  }
+
+  .formGroup label {
+    font-size: 0.8rem;
+  }
+
+  .formGroup input,
+  .formGroup textarea,
+  .formGroup select {
+    padding: 0.625rem;
+    font-size: 0.875rem;
+  }
+
+  .inputWithIcon {
+    padding-left: 2.8rem !important;
+  }
+
+  .phoneInputWithIcon {
+    padding-left: 5.5rem !important;
+  }
+
+  .phonePrefix {
+    left: 3.2rem;
+    font-size: 0.95rem;
+  }
+
+  .inputIcon {
+    left: 1rem;
+    height: 1.1rem;
+  }
+
+  .barangayDropdownButton {
+    padding: 0.9rem 0.9rem 0.9rem 2.8rem;
+    font-size: 0.95rem;
+  }
+
+  .barangayDropdownItem {
+    padding: 10px 14px;
+    font-size: 0.8rem;
+  }
+
+  .fileLabel {
+    padding: 2rem 1.5rem;
+    min-height: 140px;
+  }
+
+  .fileLabel svg {
+    width: 36px;
+    height: 36px;
+  }
+
+  .cancelBtn,
+  .submitBtn {
+    font-size: 0.875rem;
+    padding: 0.625rem 1.25rem;
+  }
+
+  .detailsSection {
+    gap: 0.75rem;
+  }
+
+  .detailsSectionTitle {
+    font-size: 1rem;
+  }
+
+  .detailBlockTitle {
+    font-size: 0.9rem;
+  }
+
+  .detailBlockText {
+    font-size: 0.85rem;
+    line-height: 1.5;
+  }
+
+  .requestMeta {
+    gap: 0.75rem;
+  }
+
+  .metaItem {
+    font-size: 0.8rem;
+  }
+}
