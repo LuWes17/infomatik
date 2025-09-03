@@ -801,53 +801,46 @@ const SolicitationRequests = () => {
               </button>
             </div>
             
-            <div className={styles.modalBody}>
-              <div className={styles.detailsGrid}>
-                <div className={styles.detailsList}>
-                    <div className={styles.detailRow}>
-                      <User size={16} />
-                      <div>
-                        <span className={styles.detailLabel}>Contact Person:</span>
-                        <span className={styles.detailValue}>{selectedRequest.contactPerson}</span>
-                      </div>
-                    </div>
-                    <div className={styles.detailRow}>
-                      <Building2 size={16} />
-                      <div>
-                        <span className={styles.detailLabel}>Organization:</span>
-                        <span className={styles.detailValue}>{selectedRequest.organizationName}</span>
-                      </div>
-                    </div>
-                    <div className={styles.detailRow}>
-                      <Type size={16} />
-                      <div>
-                        <span className={styles.detailLabel}>Type:</span>
-                        <span className={styles.detailValue}>{selectedRequest.organizationType}</span>
-                      </div>
-                    </div>
-                  </div>
-              </div>
-
-              <div className={`${styles.detailsSection} ${styles.fullWidth}`}>
-                <div className={styles.requestDetailsContent}>
-                  <div className={styles.detailBlock}>
-                    <h4 className={styles.detailBlockTitle}>Requested Assistance</h4>
-                    <p className={styles.detailBlockText}>{selectedRequest.requestedAssistanceDetails}</p>
-                  </div>
-                  <div className={styles.detailBlock}>
-                    <h4 className={styles.detailBlockTitle}>Purpose</h4>
-                    <p className={styles.detailBlockText}>{selectedRequest.purpose}</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className={styles.requestMeta}>
-                <span className={styles.metaItem}>Submitted: {formatDate(selectedRequest.createdAt)}</span>
-                {selectedRequest.completedAt && (
-                  <span className={styles.metaItem}>Completed: {formatDate(selectedRequest.completedAt)}</span>
-                )}
-              </div>
+            <div className={styles.modalBody}>        
+        {/* Request Details Grid */}
+        <div className={styles.detailsGrid}>
+          <div className={styles.detailItem}>
+            <User size={20} />
+            <div>
+              <strong>Contact Person:</strong> {selectedRequest.contactPerson}
             </div>
+          </div>
+        
+          <div className={styles.detailItem}>
+            <Building2 size={20} />
+            <div>
+              <strong>Organization Type:</strong> {selectedRequest.organizationType}
+            </div>
+          </div>
+          
+      
+        </div>
+
+        {/* Requested Assistance Details */}
+        <div className={styles.section}>
+          <h4>Specific Request Details</h4>
+          <p className={styles.description}>{selectedRequest.requestedAssistanceDetails}</p>
+        </div>
+
+        {/* Purpose */}
+        <div className={styles.section}>
+          <h4>Purpose</h4>
+          <p className={styles.requirements}>{selectedRequest.purpose}</p>
+        </div>
+
+        {/* Request Metadata */}
+        <div className={styles.requestMeta}>
+          <span className={styles.metaItem}>Submitted: {formatDate(selectedRequest.createdAt)}</span>
+          {selectedRequest.completedAt && (
+            <span className={styles.metaItem}>Completed: {formatDate(selectedRequest.completedAt)}</span>
+          )}
+        </div>
+      </div>
           </div>
         </div>
       )}
