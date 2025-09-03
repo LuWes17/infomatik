@@ -172,7 +172,6 @@ const SolicitationRequests = () => {
       submitData.append('organizationName', formData.organizationName);
       submitData.append('organizationType', formData.organizationType);
       submitData.append('contactNumber', formData.contactNumber);
-      submitData.append('eventDate', formData.eventDate);
       submitData.append('address', `${formData.street}, ${formData.barangay}, ${formData.city}`);
       submitData.append('requestType', formData.requestType);
       submitData.append('requestedAssistanceDetails', formData.requestedAssistanceDetails);
@@ -393,7 +392,7 @@ const SolicitationRequests = () => {
       ) : (
         <div className={styles.content}>
           <div className={styles.requestsGrid}>
-            {/* Add New Request Card */}
+            {/* Add New Solicitation Request */}
             <div
               onClick={handleRequestClick}
               className={styles.addRequestCard}
@@ -425,7 +424,6 @@ const SolicitationRequests = () => {
                   <div className={styles.requestCardHeader}>
                     <div className={styles.organizationInfo}>
                       <h3 className={styles.organizationName}>{request.organizationName}</h3>
-                      <span className={styles.organizationType}>{request.organizationType}</span>
                     </div>
                     <div className={`${styles.requestTypeBadge} ${styles[request.requestType.toLowerCase().replace(' ', '-')]}`}>
                       {request.requestType}
@@ -435,15 +433,11 @@ const SolicitationRequests = () => {
                   <div className={styles.requestDetails}>
                     <div className={styles.detailItem}>
                       <User size={16} />
-                      <span>{request.contactPerson}</span>
+                      <span>{`${request.contactPerson}`}</span>
                     </div>
                     <div className={styles.detailItem}>
-                      <CalendarIcon size={16} />
-                      <span>{formatDate(request.eventDate)}</span>
-                    </div>
-                    <div className={styles.detailItem}>
-                      <MapPin size={16} />
-                      <span>{request.address}</span>
+                      <Building2 size={16} />
+                      <span>{(request.organizationType)}</span>
                     </div>
                   </div>
 
@@ -455,10 +449,9 @@ const SolicitationRequests = () => {
 
                   <div className={styles.requestFooter}>
                     <span className={styles.submittedDate}>
-                      Submitted: {formatDate(request.createdAt)}
+                      {formatDate(request.createdAt)}
                     </span>
                     <button className={styles.viewDetailsBtn}>
-                      <Eye size={16} />
                       View Details
                     </button>
                   </div>
@@ -688,20 +681,6 @@ const SolicitationRequests = () => {
                     </div>
                   </div>
 
-                  {/* Event Date */}
-                  <div className={styles.formGroup}>
-                    <label>Event Date</label>
-                    <div className={styles.inputWrapper}>
-                      <CalendarIcon size={16} className={styles.inputIcon} />
-                      <input
-                        type="date"
-                        value={formData.eventDate}
-                        onChange={(e) => setFormData({...formData, eventDate: e.target.value})}
-                        min={new Date().toISOString().split('T')[0]}
-                        className={styles.inputWithIcon}
-                      />
-                    </div>
-                  </div>
 
                   {/* Request Type - Custom Dropdown */}
                   <div className={styles.formGroup}>
@@ -805,17 +784,15 @@ const SolicitationRequests = () => {
         </div>
       )}
 
-      {/* Request Details Modal */}
+      {/* View Details Modal */}
       {showDetailsModal && selectedRequest && (
         <div className={styles.modal} onClick={() => setShowDetailsModal(false)}>
           <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
             <div className={styles.modalHeader}>
-              <div>
                 <h2 className={styles.modalTitle}>{selectedRequest.organizationName}</h2>
                 <span className={`${styles.requestTypeBadge} ${styles.large} ${styles[selectedRequest.requestType.toLowerCase().replace(' ', '-')]}`}>
                   {selectedRequest.requestType}
                 </span>
-              </div>
               <button
                 onClick={() => setShowDetailsModal(false)}
                 className={styles.closeBtn}
@@ -826,9 +803,7 @@ const SolicitationRequests = () => {
             
             <div className={styles.modalBody}>
               <div className={styles.detailsGrid}>
-                <div className={styles.detailsSection}>
-                  <h3 className={styles.detailsSectionTitle}>Organization Information</h3>
-                  <div className={styles.detailsList}>
+                <div className={styles.detailsList}>
                     <div className={styles.detailRow}>
                       <User size={16} />
                       <div>
@@ -850,41 +825,10 @@ const SolicitationRequests = () => {
                         <span className={styles.detailValue}>{selectedRequest.organizationType}</span>
                       </div>
                     </div>
-                    <div className={styles.detailRow}>
-                      <Phone size={16} />
-                      <div>
-                        <span className={styles.detailLabel}>Contact:</span>
-                        <span className={styles.detailValue}>{selectedRequest.contactNumber}</span>
-                      </div>
-                    </div>
                   </div>
-                </div>
-
-                <div className={styles.detailsSection}>
-                  <h3 className={styles.detailsSectionTitle}>Event Information</h3>
-                  <div className={styles.detailsList}>
-                    <div className={styles.detailRow}>
-                      <CalendarIcon size={16} />
-                      <div>
-                        <span className={styles.detailLabel}>Event Date:</span>
-                        <span className={styles.detailValue}>
-                          {selectedRequest.eventDate ? formatDate(selectedRequest.eventDate) : 'Not specified'}
-                        </span>
-                      </div>
-                    </div>
-                    <div className={styles.detailRow}>
-                      <MapPin size={16} />
-                      <div>
-                        <span className={styles.detailLabel}>Address:</span>
-                        <span className={styles.detailValue}>{selectedRequest.address}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
               </div>
 
               <div className={`${styles.detailsSection} ${styles.fullWidth}`}>
-                <h3 className={styles.detailsSectionTitle}>Request Details</h3>
                 <div className={styles.requestDetailsContent}>
                   <div className={styles.detailBlock}>
                     <h4 className={styles.detailBlockTitle}>Requested Assistance</h4>
@@ -894,12 +838,6 @@ const SolicitationRequests = () => {
                     <h4 className={styles.detailBlockTitle}>Purpose</h4>
                     <p className={styles.detailBlockText}>{selectedRequest.purpose}</p>
                   </div>
-                  {selectedRequest.additionalDetails && (
-                    <div className={styles.detailBlock}>
-                      <h4 className={styles.detailBlockTitle}>Additional Details</h4>
-                      <p className={styles.detailBlockText}>{selectedRequest.additionalDetails}</p>
-                    </div>
-                  )}
                 </div>
               </div>
 

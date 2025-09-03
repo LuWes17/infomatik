@@ -38,17 +38,6 @@ const solicitationRequestSchema = new mongoose.Schema({
     match: [/^(09|\+639)\d{9}$/, 'Please enter a valid Philippine mobile number']
   },
   
-  // Event Details
-  eventDate: {
-    type: Date,
-    validate: {
-      validator: function(v) {
-        return v >= new Date();
-      },
-      message: 'Event date must be today or in the future'
-    }
-  },
-  
   address: {
     type: String,
     required: [true, 'Address is required'],

@@ -280,6 +280,7 @@ const JobOpenings = () => {
     setShowAlreadyAppliedPopup(false);
     setSelectedJob(null);
     setBarangayDropdownOpen(false);
+    setShowDetailsModal(false);
     // Unfreeze background when any modal closes
     document.body.style.overflow = "auto";
   };
@@ -483,8 +484,11 @@ const JobOpenings = () => {
               <div className={`${styles.statusBadge} ${styles[selectedJob.status]} ${styles.large}`}>
                 {selectedJob.status === 'open' ? 'Open Position' : 'Position Closed'}
               </div>
-              <button className={styles.closeBtn} onClick={closeAllModals}>
-                ×
+              <button
+                onClick={() => setShowJobDetails(false)}
+                className={styles.closeBtn}
+              >
+                <X size={24} />
               </button>
             </div>
             
