@@ -45,6 +45,17 @@ const AdminAccomplishments = () => {
     fetchAccomplishments();
   }, []);
 
+  useEffect(() => {
+    return () => {
+      // Cleanup any remaining preview URLs
+      formData.photos.forEach(photo => {
+        if (photo.preview && !photo.existing) {
+          URL.revokeObjectURL(photo.preview);
+        }
+      });
+    };
+  }, []);
+
   const handleInputChange = (e) => {
     const {name, value } = e.target;
     setFormData(prev => ({
@@ -59,20 +70,29 @@ const AdminAccomplishments = () => {
       alert('Maximum 4 photos allowed');
       return;
     }
-
+    
+    // Create preview URLs for the files
+    const newPhotos = files.map(file => ({
+      existing: false,
+      file: file,
+      preview: URL.createObjectURL(file),
+      name: file.name
+    }));
+    
     setFormData(prev => ({
       ...prev,
-      photos: [...prev.photos, ...files]
+      photos: [...prev.photos, ...newPhotos]
     }));
   };
+
 
   // And update the removePhoto function to handle cleanup properly:
   const removePhoto = (index) => {
     const photoToRemove = formData.photos[index];
     
-    // If it's a File object (not a string URL), revoke the object URL to prevent memory leaks
-    if (typeof photoToRemove !== 'string') {
-      URL.revokeObjectURL(URL.createObjectURL(photoToRemove));
+    // Cleanup the preview URL to prevent memory leaks
+    if (!photoToRemove.existing && photoToRemove.preview) {
+      URL.revokeObjectURL(photoToRemove.preview);
     }
     
     setFormData(prev => ({
@@ -92,26 +112,60 @@ const AdminAccomplishments = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.title || !formData.description) return;
+
+    if (!formData.title || !formData.description || !formData.projectType) {
+    alert('Please fill in all required fields');
+    return;
+  }
+
+    const confirmMessage = isEditMode 
+      ? 'Are you sure you want to update this accomplishment?' 
+      : 'Are you sure you want to create this accomplishment?';
+      
+    if (!window.confirm(confirmMessage)) {
+      return;
+    }
 
     try {
       const token = localStorage.getItem('token');
       const submitData = new FormData();
       
-      Object.keys(formData).forEach(key => {
-        if (key !== 'photos') {
-          submitData.append(key, formData[key]);
-        }
-      });
-
-      formData.photos.forEach(photo => {
-        submitData.append('photos', photo);
-      });
+      submitData.append('title', formData.title);
+      submitData.append('description', formData.description);
+      submitData.append('projectType', formData.projectType);
+      
+      if (isEditMode) {
+        // Prepare data for backend to handle existing photos
+        const remainingExistingPhotos = formData.photos
+          .filter(photo => photo.existing)
+          .map(photo => ({
+            fileId: photo.fileId,
+            fileName: photo.fileName,
+            filePath: photo.filePath
+          }));
+        
+        // Send remaining existing photos as JSON string
+        submitData.append('remainingExistingPhotos', JSON.stringify(remainingExistingPhotos));
+        
+        // Only append new photos (File objects)
+        formData.photos.forEach((photo) => {
+          if (!photo.existing && photo.file) {
+            submitData.append('photos', photo.file);
+          }
+        });
+      } else {
+        // For creating new accomplishments, append all photos
+        formData.photos.forEach((photo) => {
+          if (photo.file) {
+            submitData.append('photos', photo.file);
+          }
+        });
+      }
 
       const url = isEditMode 
-        ? `http://localhost:4000/api/accomplishments/${selectedAccomplishment._id}` 
+        ? `http://localhost:4000/api/accomplishments/${selectedAccomplishment._id}`
         : 'http://localhost:4000/api/accomplishments';
-      
+        
       const method = isEditMode ? 'PUT' : 'POST';
 
       const response = await fetch(url, {
@@ -123,12 +177,22 @@ const AdminAccomplishments = () => {
       });
 
       if (!response.ok) {
-        throw new Error(isEditMode ? 'Failed to update accomplishment' : 'Failed to create accomplishment');
+        const errorData = await response.json();
+        throw new Error(errorData.message || `Failed to ${isEditMode ? 'update' : 'create'} accomplishment`);
       }
+
+      // Cleanup preview URLs
+      formData.photos.forEach(photo => {
+        if (!photo.existing && photo.preview) {
+          URL.revokeObjectURL(photo.preview);
+        }
+      });
 
       await fetchAccomplishments();
       closeModal();
+      alert(`Accomplishment ${isEditMode ? 'updated' : 'created'} successfully!`);
     } catch (err) {
+      console.error('Submit error:', err);
       setError(err.message);
     }
   };
@@ -184,29 +248,27 @@ const AdminAccomplishments = () => {
   };
 
   const openEditModal = () => {
-    // Fix: Make sure photos are properly handled - convert photo objects to URLs if needed
-    const existingPhotos = selectedAccomplishment.photos || [];
+    // Convert existing photos to preview format for consistent handling
+    const existingPhotos = selectedAccomplishment.photos?.map(photo => ({
+      existing: true,
+      fileId: photo.fileId,
+      fileName: photo.fileName,
+      filePath: photo.filePath,
+      preview: photo.filePath, // Use file path as preview for existing photos
+      name: photo.fileName || `Photo ${selectedAccomplishment.photos.indexOf(photo) + 1}`
+    })) || [];
     
-    // Convert photo objects to URLs if they're in object format
-    const photoUrls = existingPhotos.map(photo => {
-      // If photo is an object with filePath property, use filePath
-      if (typeof photo === 'object' && photo.filePath) {
-        return photo.filePath;
-      }
-      // If photo is already a string URL, use it directly
-      return photo;
-    });
-
     setFormData({
       title: selectedAccomplishment.title,
       description: selectedAccomplishment.description,
       projectType: selectedAccomplishment.projectType || '',
-      photos: photoUrls // Use the processed URLs
+      photos: existingPhotos
     });
     setIsEditMode(true);
     setShowViewModal(false);
     setShowCreateModal(true);
   };
+
 
   // Format date
   const formatDate = (dateString) => {
@@ -319,7 +381,7 @@ const AdminAccomplishments = () => {
                 </div>
 
                 <div className={styles.formGroup}>
-                  <label className={styles.label}>Project Type</label>
+                  <label className={styles.label}>Accomplishment Type *</label>
                   <select
                     name="projectType"
                     value={formData.projectType}
@@ -350,50 +412,54 @@ const AdminAccomplishments = () => {
                 />
               </div>
 
-              <div className={styles.formGroup + ' ' + styles.fullWidth}>
-                <label className={styles.label}>Photos (Max 4)</label>
+              <div className={styles.formGroup}>
+                <label htmlFor="photos">
+                  <Image size={18} />
+                  Photos (Max 4)
+                </label>
                 <input
+                  id="photos"
                   type="file"
                   multiple
                   accept="image/*"
                   onChange={handleFileUpload}
                   className={styles.fileInput}
-                  id="photo-upload"
+                  disabled={formData.photos.length >= 4}
                 />
-                <label htmlFor="photo-upload" className={styles.fileInputLabel}>
-                  <Image size={20} />
-                  Choose Photos
-                </label>
                 
                 {formData.photos.length > 0 && (
-                  <div className={styles.photosGrid}>
-                    {formData.photos.map((photo, index) => (
-                      <div key={index} className={styles.photoPreview}>
-                        {/* Fix: Check if photo is a string (URL) or File object */}
-                        {typeof photo === 'string' ? (
-                          <img 
-                            src={photo} 
-                            alt={`Preview ${index + 1}`} 
-                            className={styles.photoImage}
-                          />
-                        ) : (
-                          <img 
-                            src={URL.createObjectURL(photo)} 
-                            alt={`Preview ${index + 1}`} 
-                            className={styles.photoImage}
-                          />
-                        )}
-                        <div className={styles.photoOverlay}>
-                          <button
-                            type="button"
-                            onClick={() => removePhoto(index)}
-                            className={styles.removePhotoButton}
-                          >
-                            <X size={16} />
-                          </button>
+                  <div className={styles.photoPreview}>
+                    <div className={styles.photoPreviewGrid}>
+                      {formData.photos.map((photo, index) => (
+                        <div key={index} className={styles.photoPreviewItem}>
+                          <div className={styles.photoPreviewImage}>
+                            <img 
+                              src={photo.preview} 
+                              alt={`Preview ${index + 1}`}
+                              className={styles.previewImg}
+                            />
+                            <button 
+                              type="button"
+                              onClick={() => removePhoto(index)}
+                              className={styles.removePhotoBtn}
+                            >
+                              <X size={16} />
+                            </button>
+                            {photo.existing && (
+                              <div className={styles.existingPhotoIndicator}>
+                                Existing
+                              </div>
+                            )}
+                          </div>
+                          <span className={styles.photoName}>{photo.name}</span>
                         </div>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
+                    {formData.photos.length < 4 && (
+                      <p className={styles.photoHint}>
+                        You can add {4 - formData.photos.length} more photo{4 - formData.photos.length !== 1 ? 's' : ''}.
+                      </p>
+                    )}
                   </div>
                 )}
               </div>
