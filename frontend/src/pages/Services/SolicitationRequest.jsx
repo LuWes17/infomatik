@@ -465,26 +465,20 @@ const SolicitationRequests = () => {
       {/* Authentication Modal */}
       {showAuthModal && (
         <div className={styles.modal} onClick={() => setShowAuthModal(false)}>
-          <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-            <div className={styles.modalHeader}>
-              <h2 className={styles.modalTitle}>Account Required</h2>
-              <button
-                onClick={() => setShowAuthModal(false)}
-                className={styles.closeBtn}
-              >
-                <X size={24} />
-              </button>
+          <div className={styles.authPrompt} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.authPromptHeader}>
+              <User size={32} />
+              <h3>Account Required</h3>
             </div>
-            <div className={styles.authModalBody}>
-              <p>You need to have an account to submit a solicitation request.</p>
-              <div className={styles.authModalActions}>
-                <a href="/login" className={`${styles.btn} ${styles.loginBtn}`}>Login</a>
-                <a href="/register" className={`${styles.btn} ${styles.registerBtn}`}>Register</a>
-              </div>
+            <p>You need to have an account to submit a solicitation request.</p>
+            <div className={styles.authActions}>
+              <a href="/login" className={styles.loginBtn}>Login</a>
+              <a href="/register" className={styles.registerBtn}>Register</a>
             </div>
           </div>
         </div>
       )}
+
 
       {/* Solicitation Request Form Modal */}
       {showRequestForm && (
