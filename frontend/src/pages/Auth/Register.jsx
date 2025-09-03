@@ -79,18 +79,18 @@ const Register = () => {
 
   // Phone number formatting
   const formatPhoneNumber = (value) => {
-  const digits = value.replace(/\D/g, '');
-  // Limit to exactly 10 digits (will become 11 with '09' prefix)
-  const limitedDigits = digits.substring(0, 9);
-  
-  if (limitedDigits.length <= 2) {
-    return limitedDigits; // "12"
-    } else if (limitedDigits.length <= 5) {
-      return `${limitedDigits.substring(0, 2)} ${limitedDigits.substring(2)}`; // "12 345"
+    const digits = value.replace(/\D/g, '');
+    const limitedDigits = digits.substring(0, 10); // Allow up to 10 digits
+    
+    if (limitedDigits.length <= 3) {
+      return limitedDigits; // "123"
+    } else if (limitedDigits.length <= 6) {
+      return `${limitedDigits.substring(0, 3)} ${limitedDigits.substring(3)}`; // "123 456"
     } else {
-      return `${limitedDigits.substring(0, 2)} ${limitedDigits.substring(2, 5)} ${limitedDigits.substring(5)}`; // "12 345 6789"
+      return `${limitedDigits.substring(0, 3)} ${limitedDigits.substring(3, 6)} ${limitedDigits.substring(6)}`; // "123 456 7890"
     }
   };
+
   // Field validation - CORRECTED VERSION
   const validateField = (name, value) => {
     switch (name) {
@@ -101,7 +101,7 @@ const Register = () => {
                /^[a-zA-Z\s]+$/.test(value.trim());
       case 'contactNumber':
         const digits = value.replace(/\D/g, '');
-        return digits.length === 9;
+        return digits.length === 10;
       case 'password':
       // UPDATED: Only requires 8 characters minimum
         return value.length >= 8;
@@ -199,8 +199,8 @@ const Register = () => {
 
     try {
 
-      const phoneNumber = formData.contactNumber.length === 9 ? 
-      `09${formData.contactNumber}` : formData.contactNumber;
+      const phoneNumber = formData.contactNumber.length === 10 ? 
+      `0${formData.contactNumber}` : formData.contactNumber;
       
       console.log('Sending phone number:', phoneNumber); // Debug log
       const response = await fetch('/api/auth/send-otp', {
@@ -239,8 +239,8 @@ const Register = () => {
 
     try {
 
-      const phoneNumber = formData.contactNumber.length === 9 ? 
-      `09${formData.contactNumber}` : formData.contactNumber;
+      const phoneNumber = formData.contactNumber.length === 10 ? 
+      `0${formData.contactNumber}` : formData.contactNumber;
       
       console.log('Verifying with phone number:', phoneNumber);
 
@@ -411,18 +411,18 @@ const handleResendOTP = async () => {
 
               <div className={styles.phoneInputWrapper}>
                 <Phone className={styles.inputIcon}/>               
-                <span className={styles.phonePrefix}>+63 9</span>
+                <span className={styles.phonePrefix}>+63</span>
                 <input
                   type="tel"
                   name="contactNumber"
-                  placeholder={phoneNumberFocused ? "12 345 6789" : "Contact Number"}
+                  placeholder={phoneNumberFocused ? "123 456 7890" : "Contact Number"}
                   value={displayPhoneNumber}
                   onChange={handleChange}
                   onBlur={handleBlur}
                   onFocus={handlePhoneFocus}
                   className={`${getInputClass('contactNumber')} ${styles.phoneInputWithIcon} ${phoneNumberFocused ? styles.phoneInputFocused : ''}`}
                   inputMode="numeric"
-                  maxLength="13"
+                  maxLength="12"
                   required
                   disabled={authLoading}
                 />
