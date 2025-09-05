@@ -8,6 +8,7 @@ import FeedbackSection from './FeedbackSection';
 import LatestUpdates from './LatestUpdates';
 import LatestAccomplishments from './LatestAccomplishments';
 import { Link, useNavigate } from 'react-router-dom';
+import CalendarEvents from './CalendarEvents';
 
 const Home = () => {
   const slides = [konsiroy, withkonsi, konsiCommunity];
@@ -159,6 +160,9 @@ const Home = () => {
        <LatestUpdates />
 
        <LatestAccomplishments />
+
+       <CalendarEvents />
+       
     </div>
   );
 };
