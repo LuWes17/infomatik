@@ -465,26 +465,20 @@ const SolicitationRequests = () => {
       {/* Authentication Modal */}
       {showAuthModal && (
         <div className={styles.modal} onClick={() => setShowAuthModal(false)}>
-          <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-            <div className={styles.modalHeader}>
-              <h2 className={styles.modalTitle}>Account Required</h2>
-              <button
-                onClick={() => setShowAuthModal(false)}
-                className={styles.closeBtn}
-              >
-                <X size={24} />
-              </button>
+          <div className={styles.authPrompt} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.authPromptHeader}>
+              <User size={32} />
+              <h3>Account Required</h3>
             </div>
-            <div className={styles.authModalBody}>
-              <p>You need to have an account to submit a solicitation request.</p>
-              <div className={styles.authModalActions}>
-                <a href="/login" className={`${styles.btn} ${styles.loginBtn}`}>Login</a>
-                <a href="/register" className={`${styles.btn} ${styles.registerBtn}`}>Register</a>
-              </div>
+            <p>You need to have an account to submit a solicitation request.</p>
+            <div className={styles.authActions}>
+              <a href="/login" className={styles.loginBtn}>Login</a>
+              <a href="/register" className={styles.registerBtn}>Register</a>
             </div>
           </div>
         </div>
       )}
+
 
       {/* Solicitation Request Form Modal */}
       {showRequestForm && (
@@ -801,53 +795,46 @@ const SolicitationRequests = () => {
               </button>
             </div>
             
-            <div className={styles.modalBody}>
-              <div className={styles.detailsGrid}>
-                <div className={styles.detailsList}>
-                    <div className={styles.detailRow}>
-                      <User size={16} />
-                      <div>
-                        <span className={styles.detailLabel}>Contact Person:</span>
-                        <span className={styles.detailValue}>{selectedRequest.contactPerson}</span>
-                      </div>
-                    </div>
-                    <div className={styles.detailRow}>
-                      <Building2 size={16} />
-                      <div>
-                        <span className={styles.detailLabel}>Organization:</span>
-                        <span className={styles.detailValue}>{selectedRequest.organizationName}</span>
-                      </div>
-                    </div>
-                    <div className={styles.detailRow}>
-                      <Type size={16} />
-                      <div>
-                        <span className={styles.detailLabel}>Type:</span>
-                        <span className={styles.detailValue}>{selectedRequest.organizationType}</span>
-                      </div>
-                    </div>
-                  </div>
-              </div>
-
-              <div className={`${styles.detailsSection} ${styles.fullWidth}`}>
-                <div className={styles.requestDetailsContent}>
-                  <div className={styles.detailBlock}>
-                    <h4 className={styles.detailBlockTitle}>Requested Assistance</h4>
-                    <p className={styles.detailBlockText}>{selectedRequest.requestedAssistanceDetails}</p>
-                  </div>
-                  <div className={styles.detailBlock}>
-                    <h4 className={styles.detailBlockTitle}>Purpose</h4>
-                    <p className={styles.detailBlockText}>{selectedRequest.purpose}</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className={styles.requestMeta}>
-                <span className={styles.metaItem}>Submitted: {formatDate(selectedRequest.createdAt)}</span>
-                {selectedRequest.completedAt && (
-                  <span className={styles.metaItem}>Completed: {formatDate(selectedRequest.completedAt)}</span>
-                )}
-              </div>
+            <div className={styles.modalBody}>        
+        {/* Request Details Grid */}
+        <div className={styles.detailsGrid}>
+          <div className={styles.detailItem}>
+            <User size={20} />
+            <div>
+              <strong>Contact Person:</strong> {selectedRequest.contactPerson}
             </div>
+          </div>
+        
+          <div className={styles.detailItem}>
+            <Building2 size={20} />
+            <div>
+              <strong>Organization Type:</strong> {selectedRequest.organizationType}
+            </div>
+          </div>
+          
+      
+        </div>
+
+        {/* Requested Assistance Details */}
+        <div className={styles.section}>
+          <h4>Specific Request Details</h4>
+          <p className={styles.description}>{selectedRequest.requestedAssistanceDetails}</p>
+        </div>
+
+        {/* Purpose */}
+        <div className={styles.section}>
+          <h4>Purpose</h4>
+          <p className={styles.requirements}>{selectedRequest.purpose}</p>
+        </div>
+
+        {/* Request Metadata */}
+        <div className={styles.requestMeta}>
+          <span className={styles.metaItem}>Submitted: {formatDate(selectedRequest.createdAt)}</span>
+          {selectedRequest.completedAt && (
+            <span className={styles.metaItem}>Completed: {formatDate(selectedRequest.completedAt)}</span>
+          )}
+        </div>
+      </div>
           </div>
         </div>
       )}
