@@ -49,6 +49,20 @@ const OTPVerificationPopup = ({
     }
   }, [isOpen]);
 
+useEffect(() => {
+  if (error && error.trim() !== '') {
+    console.log('🔴 OTP Error received:', error);
+    // Clear OTP inputs when there's an error to allow easy retry
+    setOtp(['', '', '', '', '', '']);
+    // Focus first input for immediate retry
+    setTimeout(() => {
+      if (inputRefs.current[0]) {
+        inputRefs.current[0].focus();
+      }
+    }, 100); // Reduce delay
+  }
+}, [error]);
+
   // Format time display
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
@@ -103,7 +117,7 @@ const OTPVerificationPopup = ({
   // Handle verification
   const handleVerify = (otpValue = null) => {
     const otpToVerify = otpValue || otp.join('');
-    if (otpToVerify.length === 6) {
+    if (otpToVerify.length === 6 && !isLoading) {
       onVerify(otpToVerify);
     }
   };

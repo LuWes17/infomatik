@@ -72,7 +72,7 @@ const JobOpenings = () => {
     
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:4000/api/jobs/my-applications', {
+      const response = await fetch('http://localhost:4000/api/jobs/my/applications', {
         headers: {
           'Authorization': `Bearer ${token}`
         }

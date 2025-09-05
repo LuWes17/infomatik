@@ -17,25 +17,30 @@ const {
   getJobStatistics
 } = require('../controllers/jobController');
 
+// IMPORTANT: Specific routes MUST come BEFORE parameterized routes
+
 // Public routes
 router.get('/', optionalAuth, getAllJobPostings);
-router.get('/:id', optionalAuth, getJobPostingById);
 
-// Protected routes - User
-// Add multer middleware for CV file upload
-router.post('/:id/apply', protect, upload().single('cvFile'), applyForJob);
+// Protected routes - User (specific routes first)
 router.get('/my/applications', protect, getMyApplications);
 
-// Admin only routes
-router.post('/', protect, adminOnly, createJobPosting);
-router.put('/:id', protect, adminOnly, updateJobPosting);
-router.delete('/:id', protect, adminOnly, deleteJobPosting);
-router.put('/:id/toggle-status', protect, adminOnly, toggleJobStatus);
-
-// Application management (Admin)
+// Application management (Admin) - specific routes
 router.get('/applications/all', protect, adminOnly, getAllApplications);
 router.get('/applications/:id', protect, adminOnly, getApplicationById);
 router.put('/applications/:id/status', protect, adminOnly, updateApplicationStatus);
 router.get('/statistics/overview', protect, adminOnly, getJobStatistics);
+
+// Admin only routes (specific routes)
+router.post('/', protect, adminOnly, createJobPosting);
+
+// Parameterized routes MUST come last
+router.get('/:id', optionalAuth, getJobPostingById);
+router.put('/:id', protect, adminOnly, updateJobPosting);
+router.delete('/:id', protect, adminOnly, deleteJobPosting);
+router.put('/:id/toggle-status', protect, adminOnly, toggleJobStatus);
+
+// Add multer middleware for CV file upload
+router.post('/:id/apply', protect, upload().single('cvFile'), applyForJob);
 
 module.exports = router;

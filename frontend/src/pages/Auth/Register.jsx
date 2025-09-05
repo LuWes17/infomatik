@@ -64,13 +64,13 @@ const Register = () => {
   ];
 
   useEffect(() => {
-    if (error) {
-      clearError();
-    }
-    if (otpError) {
-      setOtpError('');
-    }
-}, [formData]);
+    console.log('=== REGISTER STATE DEBUG ===');
+    console.log('showOTPPopup:', showOTPPopup);
+    console.log('otpError:', otpError);
+    console.log('otpLoading:', otpLoading);
+    console.log('registrationSuccess:', registrationSuccess);
+    console.log('============================');
+  }, [showOTPPopup, otpError, otpLoading, registrationSuccess]);
 
   // Tab change handler
   const handleTabChange = (tab) => {
@@ -148,7 +148,6 @@ const Register = () => {
     }
     
     clearError();
-    setOtpError('');
   };
 
   const handlePhoneFocus = () => {
@@ -237,9 +236,9 @@ const Register = () => {
   };
 
   const handleVerifyOTP = async (otp) => {
+    console.log('🔄 Starting OTP verification...');
     setOtpLoading(true);
-    setOtpError('');
-
+    
     try {
 
       const phoneNumber = formData.contactNumber.length === 10 ? 
@@ -255,6 +254,7 @@ const Register = () => {
         console.log('OTP verification successful, user data:', result.data.user);
         setShowOTPPopup(false);
         setRegistrationSuccess(true);
+        setOtpError('');
         
         // The AuthContext should now have isAuthenticated = true
         // The useEffect above will handle the redirect automatically
@@ -270,7 +270,9 @@ const Register = () => {
 
       } else {
         setOtpError(result.error || 'Invalid OTP');
-        console.error('OTP verification failed:', result.error);
+        console.log('❌ OTP FAILED - Setting error:', result.error);
+        console.log('❌ showOTPPopup should still be:', showOTPPopup);
+        console.log('❌ otpError now set to:', result.error || 'Invalid OTP');
       }
     } catch (error) {
       console.error('Verify OTP error:', error);
