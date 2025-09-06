@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import styles from './JobOpenings.module.css';
+import { useNotification } from '../../contexts/NotificationContext';
 
 const JobOpenings = () => {
   const { isAuthenticated, user } = useAuth();
@@ -33,6 +34,7 @@ const JobOpenings = () => {
   const [showAlreadyAppliedPopup, setShowAlreadyAppliedPopup] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [userApplications, setUserApplications] = useState(new Set());
+  const { showSuccess, showError, showWarning, showInfo } = useNotification();
   
   // Added search and dropdown states
   const [searchTerm, setSearchTerm] = useState('');
@@ -159,8 +161,7 @@ const JobOpenings = () => {
         ...prev,
         firstName: user.firstName || '',
         lastName: user.lastName || '',
-        phone: user.contactNumber || '',
-        barangay: user.barangay || '',
+        phone: user.contactNumber || ''
       }));
     }
   }, [showApplicationForm, isAuthenticated, user]);
@@ -245,7 +246,7 @@ const JobOpenings = () => {
       const data = await response.json();
       
       if (data.success) {
-        alert('Application submitted successfully!');
+        showSuccess('Application submitted successfully. You will be notified via SMS for status regarding your application.')
         setShowApplicationForm(false);
         // Add the job to user applications set
         setUserApplications(prev => new Set(prev.add(selectedJob._id)));
@@ -262,7 +263,7 @@ const JobOpenings = () => {
         // Unfreeze background when form closes after successful submission
         document.body.style.overflow = "auto";
       } else {
-        alert(data.message || 'Failed to submit application');
+        showError('Application submission failed. Please try again later.')
       }
     } catch (error) {
       console.error('Error submitting application:', error);
@@ -694,30 +695,15 @@ const JobOpenings = () => {
                     </label>
                     <div className={styles.inputWrapper}>
                       <MapPin size={16} className={styles.inputIcon} />
-                      <div className={styles.barangayDropdown} ref={barangayDropdownRef}>
-                        <button
-                          type="button"
-                          onClick={toggleBarangayDropdown}
-                          className={`${styles.barangayDropdownButton} ${barangayDropdownOpen ? styles.active : ''} ${!applicationData.barangay ? styles.placeholder : ''}`}
-                        >
-                          <span>
-                            {applicationData.barangay ? formatBarangayName(applicationData.barangay) : 'Select Barangay'}
-                          </span>
-                          <ChevronDown size={16} className={`${styles.dropdownArrow} ${barangayDropdownOpen ? styles.open : ''}`} />
-                        </button>
-                        <div className={`${styles.barangayDropdownContent} ${barangayDropdownOpen ? styles.show : ''}`}>
-                          {barangays.map((barangay) => (
-                            <button
-                              key={barangay}
-                              type="button"
-                              onClick={() => handleBarangayChange(barangay)}
-                              className={`${styles.barangayDropdownItem} ${applicationData.barangay === barangay ? styles.active : ''}`}
-                            >
-                              {formatBarangayName(barangay)}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
+                      <input
+                        type="text"
+                        value={applicationData.barangay}
+                        onChange={(e) => setApplicationData({...applicationData, barangay: e.target.value})}
+                        required
+                        placeholder="Barangay"
+                        className={styles.inputWithIcon}
+                        maxLength={100}
+                      />
                     </div>
                   </div>
 
