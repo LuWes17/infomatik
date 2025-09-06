@@ -322,7 +322,7 @@
   line-height: 1.4;
   /* Text truncation with ellipsis */
   display: -webkit-box;
-  -webkit-line-clamp: 2; /* Limit to 2 lines */
+  -webkit-line-clamp: 1; /* Limit to 2 lines */
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -335,9 +335,8 @@
   line-height: 1.4;
   margin: 1rem 0 1rem 0;
   font-size: 0.9rem;
-  /* Text truncation with ellipsis */
   display: -webkit-box;
-  -webkit-line-clamp: 3; /* Limit to 3 lines */
+  -webkit-line-clamp: 1; /* Limit to 3 lines */
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -360,7 +359,7 @@
   gap: 0.5rem;
   margin-bottom: 0.5rem;
   color: #475569;
-  font-size: 0.875rem;
+  font-size: 0.8rem;
 }
 
 .eventDetail:last-child {
@@ -382,8 +381,7 @@
 
 .publishDate {
   color: var(--gray-500);
-  font-size: 0.75rem;
-  /* Truncate date if too long */
+  font-size: 0.7rem;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -517,11 +515,10 @@
 }
 
 .modalContent {
-  padding: 0 2rem 2rem;
+  padding: 2rem 2rem 2rem;
   overflow-y: auto;
   max-height: calc(90vh - 120px);
   flex: 1;
-  /* Ensure scrollbar is visible when needed */
   overflow-y: auto;
   scrollbar-width: thin;
   scrollbar-color: #cbd5e1 #f1f5f9;
@@ -547,9 +544,6 @@
 }
 
 /* Image Gallery in Modal - New styles matching accomplishments */
-.imageGallery {
-  margin: 1.5rem 0;
-}
 
 /* Main Image Container */
 .mainImageContainer {
@@ -618,7 +612,7 @@
   display: flex;
   gap: 0.5rem;
   overflow-x: auto;
-  padding: 0.5rem 0;
+  padding: 0.5rem 0.5rem;
 }
 
 .thumbnail {
@@ -692,7 +686,7 @@
 
 .eventInfoFull {
   background: #fef2f2;
-  padding: 1.5rem;
+  padding: 1rem;
   border-radius: 12px;
   border-left: 4px solid #dc2626;
   margin: 1.5rem 0;

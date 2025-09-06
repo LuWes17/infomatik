@@ -250,22 +250,19 @@ const PublicAnnouncements = () => {
                 <div className={styles.cardContent}>
                   <h3 className={styles.cardTitle}>{announcement.title}</h3>
                   <p className={styles.cardDescription}>
-                    {announcement.details.length > 150 
-                      ? `${announcement.details.substring(0, 150)}...` 
-                      : announcement.details
-                    }
+                    {announcement.details}
                   </p>
 
                   {/* Event Details */}
                   {announcement.category === 'Event' && announcement.eventDate && (
                     <div className={styles.eventInfo}>
                       <div className={styles.eventDetail}>
-                        <Calendar size={16} />
+                        <Calendar size={14} />
                         <span>{formatDate(announcement.eventDate)}</span>
                       </div>
                       {announcement.eventLocation && (
                         <div className={styles.eventDetail}>
-                          <MapPin size={16} />
+                          <MapPin size={14} />
                           <span>{announcement.eventLocation}</span>
                         </div>
                       )}
@@ -379,20 +376,17 @@ const PublicAnnouncements = () => {
                 {/* Event Information */}
                 {selectedAnnouncement.category === 'Event' && selectedAnnouncement.eventDate && (
                   <div className={styles.eventInfoFull}>
-                    <h4>Event Details</h4>
                     <div className={styles.eventDetail}>
-                      <Calendar size={18} />
+                      <Calendar size={16} />
                       <div>
-                        <strong>Date:</strong>
-                        <span>{formatDate(selectedAnnouncement.eventDate)}</span>
+                        <span><strong>Date:</strong> {formatDate(selectedAnnouncement.eventDate)}</span>
                       </div>
                     </div>
                     {selectedAnnouncement.eventLocation && (
                       <div className={styles.eventDetail}>
-                        <MapPin size={18} />
+                        <MapPin size={16} />
                         <div>
-                          <strong>Location:</strong>
-                          <span>{selectedAnnouncement.eventLocation}</span>
+                          <span><strong>Location:</strong> {selectedAnnouncement.eventLocation}</span>
                         </div>
                       </div>
                     )}
