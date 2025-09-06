@@ -49,6 +49,15 @@ const Register = () => {
     barangay: false
   });
 
+  const [fieldErrors, setFieldErrors] = useState({
+    firstName: '',
+    lastName: '',
+    contactNumber: '',
+    password: '',
+    confirmPassword: '',
+    barangay: ''
+  });
+
   // Phone number formatting state
   const [phoneNumberFocused, setPhoneNumberFocused] = useState(false);
   const [displayPhoneNumber, setDisplayPhoneNumber] = useState('');
@@ -97,35 +106,91 @@ const Register = () => {
   };
 
   // Field validation - CORRECTED VERSION
-  const validateField = (name, value) => {
+  const getFieldValidation = (name, value) => {
+    let isValid = true;
+    let errorMessage = '';
+
     switch (name) {
       case 'firstName':
       case 'lastName':
-        return value.trim().length >= 2 && 
-               value.trim().length <= 50 && 
-               /^[a-zA-Z\s]+$/.test(value.trim());
+        if (!value.trim()) {
+          isValid = false;
+          errorMessage = `${name === 'firstName' ? 'First' : 'Last'} name is required`;
+        } else if (value.trim().length < 2) {
+          isValid = false;
+          errorMessage = `${name === 'firstName' ? 'First' : 'Last'} name must be at least 2 characters`;
+        } else if (value.trim().length > 50) {
+          isValid = false;
+          errorMessage = `${name === 'firstName' ? 'First' : 'Last'} name must be less than 50 characters`;
+        } else if (!/^[a-zA-Z\s]+$/.test(value.trim())) {
+          isValid = false;
+          errorMessage = `${name === 'firstName' ? 'First' : 'Last'} name can only contain letters and spaces`;
+        }
+        break;
+      
       case 'contactNumber':
         const digits = value.replace(/\D/g, '');
-        return digits.length === 10;
+        if (!digits) {
+          isValid = false;
+          errorMessage = 'Contact number is required';
+        } else if (digits.length !== 10) {
+          isValid = false;
+          errorMessage = 'Contact number must be exactly 10 digits';
+        }
+        break;
+      
       case 'password':
-      // UPDATED: Only requires 8 characters minimum
-        return value.length >= 8;
+        if (!value) {
+          isValid = false;
+          errorMessage = 'Password is required';
+        } else if (value.length < 8) {
+          isValid = false;
+          errorMessage = 'Password must be at least 8 characters';
+        }
+        break;
+      
       case 'confirmPassword':
-        return value === formData.password && value.length > 0;
+        if (!value) {
+          isValid = false;
+          errorMessage = 'Please confirm your password';
+        } else if (value !== formData.password) {
+          isValid = false;
+          errorMessage = 'Passwords do not match';
+        }
+        break;
+      
       case 'barangay':
-        return value !== '';
+        if (!value) {
+          isValid = false;
+          errorMessage = 'Please select a barangay';
+        }
+        break;
+      
       default:
-        return true;
+        break;
     }
+
+    return { isValid, errorMessage };
   };
 
-  const getInputClass = (fieldName) => {
+  const validateField = (name, value) => {
+    const validation = getFieldValidation(name, value);
+    setFieldErrors(prev => ({
+      ...prev,
+      [name]: validation.errorMessage
+    }));
+    return validation.isValid;
+  };
+
+
+   const getInputClass = (fieldName) => {
     if (!touched[fieldName]) {
       return styles.input;
     }
     
-    const isValid = validateField(fieldName, formData[fieldName]);
-    return `${styles.input} ${isValid ? styles.inputValid : styles.inputInvalid}`;
+    // Use current field error state instead of calling validation
+    const hasError = fieldErrors[fieldName] && fieldErrors[fieldName] !== '';
+    return `${styles.input} ${hasError ? styles.inputInvalid : styles.inputValid}`;
   };
 
   // Handle form input changes
@@ -140,7 +205,7 @@ const Register = () => {
       setDisplayPhoneNumber(formattedValue);
       setFormData(prev => ({
         ...prev,
-        [name]: limitedDigits // Store only 10 digits
+        [name]: limitedDigits
       }));
     } else {
       setFormData(prev => ({
@@ -149,8 +214,24 @@ const Register = () => {
       }));
     }
     
+    // *** NEW: Validate field on change if already touched ***
+    if (touched[name]) {
+        validateField(name, value);
+    }
+    
     clearError();
   };
+
+  useEffect(() => {
+    if (touched.confirmPassword && formData.confirmPassword) {
+      const validation = getFieldValidation('confirmPassword', formData.confirmPassword);
+      setFieldErrors(prev => ({
+        ...prev,
+        confirmPassword: validation.errorMessage
+      }));
+    }
+  }, [formData.password, formData.confirmPassword, touched.confirmPassword]);
+
 
   const handlePhoneFocus = () => {
     setPhoneNumberFocused(true);
@@ -162,16 +243,19 @@ const Register = () => {
   };
 
   const handleBlur = (e) => {
-    const { name } = e.target;
+    const { name, value } = e.target;
     
     if (name === 'contactNumber') {
       setPhoneNumberFocused(false);
     }
     
-    setTouched({
-      ...touched,
+    setTouched(prev => ({
+      ...prev,
       [name]: true
-    });
+    }));
+
+    const valueToValidate = name === 'contactNumber' ? value.replace(/\D/g, '').substring(0, 10) : value;
+    validateField(name, valueToValidate);
   };
 
 
@@ -186,10 +270,21 @@ const Register = () => {
     };
     setTouched(newTouched);
 
-    return Object.keys(formData).every(key => 
-      validateField(key, formData[key])
-    );
-  };
+    // Validate all fields
+    let isFormValid = true;
+    const newFieldErrors = {};
+    
+    Object.keys(formData).forEach(key => {
+        const validation = getFieldValidation(key, formData[key]);
+        newFieldErrors[key] = validation.errorMessage;
+        if (!validation.isValid) {
+          isFormValid = false;
+        }
+      });
+
+      setFieldErrors(newFieldErrors);
+      return isFormValid;
+    };
 
   const handleSendOTP = async (e) => {
     e.preventDefault();
@@ -227,7 +322,18 @@ const Register = () => {
         setMaskedNumber(data.data.maskedNumber);
         setShowOTPPopup(true);
       } else {
-        setOtpError(data.message || 'Failed to send OTP');
+        if (data.errors && Array.isArray(data.errors)) {
+          const newFieldErrors = { ...fieldErrors };
+          data.errors.forEach(error => {
+            if (error.field && error.message) {
+              newFieldErrors[error.field] = error.message;
+              setTouched(prev => ({ ...prev, [error.field]: true }));
+            }
+          });
+          setFieldErrors(newFieldErrors);
+        } else {
+          setOtpError(data.message || 'Failed to send OTP');
+        }
       }
     } catch (error) {
       console.error('Send OTP error:', error);
@@ -441,7 +547,13 @@ const getDropdownButtonClass = () => {
                   maxLength={50}
                 />
               </div>
-              
+               {/* *** NEW: Error message below field *** */}
+              {touched.lastName && fieldErrors.lastName && (
+                <div className={styles.fieldError}>
+                  {fieldErrors.lastName}
+                </div>
+              )}
+
               <div className={styles.inputWrapper}>
                 <UserRound className={styles.inputIcon}/>
                 <input
@@ -457,6 +569,12 @@ const getDropdownButtonClass = () => {
                   maxLength={50}
                 />
               </div>
+              {/* *** NEW: Error message below field *** */}
+              {touched.firstName && fieldErrors.firstName && (
+                <div className={styles.fieldError}>
+                  {fieldErrors.firstName}
+                </div>
+              )}
 
               <div className={styles.phoneInputWrapper}>
                 <Phone className={styles.inputIcon}/>               
@@ -476,6 +594,12 @@ const getDropdownButtonClass = () => {
                   disabled={authLoading}
                 />
               </div>
+              {/* *** NEW: Error message below field *** */}
+              {touched.contactNumber && fieldErrors.contactNumber && (
+                <div className={styles.fieldError}>
+                  {fieldErrors.contactNumber}
+                </div>
+              )}
 
               <div className={styles.customDropdown} ref={barangayDropdownRef}>
                 <MapPin className={styles.inputIcon} />
@@ -512,6 +636,11 @@ const getDropdownButtonClass = () => {
                   ))}
                 </div>
               </div>
+              {touched.barangay && fieldErrors.barangay && (
+                <div className={styles.fieldError}>
+                  {fieldErrors.barangay}
+                </div>
+              )}
 
               <div className={styles.passwordWrapper}>
                 <Lock className={styles.inputIcon}/> 
@@ -536,6 +665,12 @@ const getDropdownButtonClass = () => {
                   {showPassword ? <Eye size={16} /> : <EyeOff size={16} />}
                 </button>
               </div>
+              {/* *** NEW: Error message below field *** */}
+              {touched.password && fieldErrors.password && (
+                <div className={styles.fieldError}>
+                  {fieldErrors.password}
+                </div>
+              )}
 
               <div className={styles.passwordWrapper}>
                 <Lock className={styles.inputIcon}/> 
@@ -559,7 +694,12 @@ const getDropdownButtonClass = () => {
                 >
                   {showConfirmPassword ? <Eye size={16} /> : <EyeOff size={16} />}
                 </button>
-              </div>
+              </div> 
+              {touched.confirmPassword && fieldErrors.confirmPassword && (
+                <div className={styles.fieldError}>
+                  {fieldErrors.confirmPassword}
+                </div>
+              )}
 
               <button 
                 type="submit" 

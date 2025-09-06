@@ -21,6 +21,11 @@ const Login = () => {
     password: false
   });
 
+  const [fieldErrors, setFieldErrors] = useState({
+    contactNumber: '',
+    password: ''
+  });
+
   const [phoneNumberFocused, setPhoneNumberFocused] = useState(false);
   const [displayPhoneNumber, setDisplayPhoneNumber] = useState('');
 
@@ -65,25 +70,56 @@ const Login = () => {
   };
 
   // Validation functions
-  const validateField = (name, value) => {
+  const getFieldValidation = (name, value) => {
+    let isValid = true;
+    let errorMessage = '';
+
     switch (name) {
       case 'contactNumber':
         const digits = value.replace(/\D/g, '');
-        return digits.length === 10;
+        if (!digits) {
+          isValid = false;
+          errorMessage = 'Contact number is required';
+        } else if (digits.length !== 10) {
+          isValid = false;
+          errorMessage = 'Contact number must be exactly 10 digits';
+        }
+        break;
       case 'password':
-        return value.length >= 6;
+        if (!value) {
+          isValid = false;
+          errorMessage = 'Password is required';
+        } else if (value.length < 6) {
+          isValid = false;
+          errorMessage = 'Password must be at least 6 characters';
+        }
+        break;
       default:
-        return true;
+        break;
     }
+
+    return { isValid, errorMessage };
   };
+
+  const validateField = (name, value) => {
+    const validation = getFieldValidation(name, value);
+    setFieldErrors(prev => ({
+      ...prev,
+      [name]: validation.errorMessage
+    }));
+    return validation.isValid;
+  };
+
+
+  
 
   const getInputClass = (fieldName) => {
     if (!touched[fieldName]) {
       return styles.input;
     }
     
-    const isValid = validateField(fieldName, formData[fieldName]);
-    return `${styles.input} ${isValid ? styles.inputValid : styles.inputInvalid}`;
+    const hasError = fieldErrors[fieldName] && fieldErrors[fieldName] !== '';
+    return `${styles.input} ${hasError ? styles.inputInvalid : styles.inputValid}`;
   };
 
   const handleChange = (e) => {
@@ -106,14 +142,22 @@ const Login = () => {
       });
     }
 
-    if (!touched[name]) {
-      setTouched({
-        ...touched,
-        [name]: true
-      });
-    }
+     if (touched[name]) {
+        validateField(name, value);
+      }
   };
 
+
+  useEffect(() => {
+      if (touched.confirmPassword && formData.confirmPassword) {
+        const validation = getFieldValidation('confirmPassword', formData.confirmPassword);
+        setFieldErrors(prev => ({
+          ...prev,
+          confirmPassword: validation.errorMessage
+        }));
+      }
+    }, [formData.password, formData.confirmPassword, touched.confirmPassword]);
+  
   const handlePhoneFocus = () => {
     setPhoneNumberFocused(true);
     if (formData.contactNumber === '') {
@@ -124,17 +168,47 @@ const Login = () => {
   };
 
   const handleBlur = (e) => {
-    const { name } = e.target;
+    const { name, value } = e.target;
     
     if (name === 'contactNumber') {
       setPhoneNumberFocused(false);
     }
     
-    setTouched({
-      ...touched,
+    setTouched(prev => ({
+      ...prev,
       [name]: true
-    });
+    }));
+
+    const valueToValidate = name === 'contactNumber' ? value.replace(/\D/g, '').substring(0, 10) : value;
+    validateField(name, valueToValidate);
   };
+
+   const validateForm = () => {
+    const newTouched = {
+      firstName: true,
+      lastName: true,
+      contactNumber: true,
+      password: true,
+      confirmPassword: true,
+      barangay: true
+    };
+    setTouched(newTouched);
+
+    // Validate all fields
+    let isFormValid = true;
+    const newFieldErrors = {};
+    
+    Object.keys(formData).forEach(key => {
+        const validation = getFieldValidation(key, formData[key]);
+        newFieldErrors[key] = validation.errorMessage;
+        if (!validation.isValid) {
+          isFormValid = false;
+        }
+      });
+
+      setFieldErrors(newFieldErrors);
+      return isFormValid;
+    };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -169,6 +243,15 @@ const Login = () => {
     if (result.success) {
       // Navigation will happen automatically via useEffect due to isAuthenticated change
       console.log('Login successful');
+    } else {
+      const newFieldErrors = { ...fieldErrors };
+          data.errors.forEach(error => {
+            if (error.field && error.message) {
+              newFieldErrors[error.field] = error.message;
+              setTouched(prev => ({ ...prev, [error.field]: true }));
+            }
+          });
+          setFieldErrors(newFieldErrors);
     }
     // Error handling is managed by the context and displayed in UI
   };
@@ -235,6 +318,11 @@ const Login = () => {
                   disabled={isLoading}
                 />
               </div>
+              {touched.contactNumber && fieldErrors.contactNumber && (
+                <div className={styles.fieldError}>
+                  {fieldErrors.contactNumber}
+                </div>
+              )}
 
               <div className={styles.passwordWrapper}>  
                 <Lock className={styles.inputIcon} /> 
@@ -259,6 +347,11 @@ const Login = () => {
                   {showPassword ? <Eye size={16} /> : <EyeOff size={16} />}
                 </button>
               </div>
+              {touched.password && fieldErrors.password && (
+                <div className={styles.fieldError}>
+                  {fieldErrors.password}
+                </div>
+              )}
 
               <button 
                 type="submit" 
