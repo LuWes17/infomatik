@@ -16,7 +16,7 @@ const Ordinance = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
 
-  // Resolution categories for filtering
+  // Ordinance categories for filtering
   const categories = [
     'All',
     'Public Safety',
@@ -136,7 +136,7 @@ const Ordinance = () => {
       <div className={styles.container}>
         <div className={styles.loadingContainer}>
           <div className={styles.spinner}></div>
-          <p>Loading resolutions...</p>
+          <p>Loading ordinances...</p>
         </div>
       </div>
     );
@@ -165,7 +165,7 @@ const Ordinance = () => {
           <div className={styles.headerContent}>
             <h1 className={styles.title}>Local Resolutions</h1>
             <p className={styles.subtitle}>
-              Mga lokal na resolusyon at patakaran ng aming pamunuan. Alamin ang mga batas na umiiral sa ating komunidad.
+              Mga resolusyon ipinatutupad ng aming pamunuan. Alamin ang mga desisyong nagbibigay gabay at direksyon sa ating komunidad.
             </p>
           </div>
         </div>
@@ -215,7 +215,7 @@ const Ordinance = () => {
         {filteredOrdinances.length === 0 ? (
           <div className={styles.emptyState}>
             <FileText size={80} className={styles.emptyIcon} />
-            <h3>No resolution found</h3>
+            <h3>No resolutions found</h3>
             <p>
               {searchTerm || categoryFilter !== 'All' 
                 ? 'Try adjusting your search or filter criteria' 
@@ -251,17 +251,14 @@ const Ordinance = () => {
                   </div>
                   
                   <p className={styles.summary}>
-                    {ordinance.summary.length > 150 
-                      ? `${ordinance.summary.substring(0, 150)}...` 
-                      : ordinance.summary
-                    }
+                    {ordinance.summary}
+                    
                   </p>
                   
                   {/* Footer with date and button */}
                   <div className={styles.cardFooter}>
                     <div className={styles.cardMeta}>
                       <div className={styles.metaItem}>
-                        <Calendar size={16} />
                         <span>Implemented: {formatDate(ordinance.implementationDate)}</span>
                       </div>
                     </div>
@@ -281,7 +278,12 @@ const Ordinance = () => {
         <div className={styles.modalOverlay} onClick={closeModal}>
           <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
             <div className={styles.modalHeader}>
-              <h2 className={styles.modalTitle}>{selectedOrdinance.title}</h2>
+              <div className={styles.modalTitle}>
+                <h2>{selectedOrdinance.title}</h2>
+                <div className={`${styles.categoryBadge} ${styles[getCategoryClass(selectedOrdinance.category)]}`}>
+                  {selectedOrdinance.category || 'General'}
+                </div>
+              </div>
               <button onClick={closeModal} className={styles.closeButton}>
                 ×
               </button>
@@ -291,14 +293,8 @@ const Ordinance = () => {
               <div className={styles.ordinanceInfo}>
                 <div className={styles.infoGrid}>
                   <div className={styles.infoItem}>
-                    <span className={styles.infoLabel}>Ordinance Number:</span>
+                    <span className={styles.infoLabel}>Resolutions Number:</span>
                     <span className={styles.infoValue}>{selectedOrdinance.policyNumber}</span>
-                  </div>
-                  <div className={styles.infoItem}>
-                    <span className={styles.infoLabel}>Category:</span>
-                    <span className={`${styles.categoryTag} ${styles[getCategoryClass(selectedOrdinance.category)]}`}>
-                      {selectedOrdinance.category}
-                    </span>
                   </div>
                   <div className={styles.infoItem}>
                     <span className={styles.infoLabel}>Implementation Date:</span>
@@ -309,7 +305,7 @@ const Ordinance = () => {
                 </div>
               </div>
 
-              <div className={styles.summarySection}>
+              <div className={styles.modalSummarySection}>
                 <h4>Summary</h4>
                 <p>{selectedOrdinance.summary}</p>
               </div>

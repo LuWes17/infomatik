@@ -116,13 +116,16 @@
   gap: 0.5rem;
 }
 
-
 /* Filter Dropdown*/
 .filterDropdown {
   position: relative;
   display: flex;
   align-items: center;
   gap: 0.5rem;
+}
+
+.filterIcon {
+  color: var(--gray-500);
 }
 
 .dropdownButton {
@@ -415,7 +418,6 @@
   line-height: 1.4;
   margin: 0;
   font-size: 0.9rem;
-  flex: 1;
   display: -webkit-box;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
@@ -550,7 +552,7 @@
   font-size: 1rem;
 }
 
-/* Modal Styles - Updated to match accomplishments */
+/* Modal Styles - Updated to match accomplishments modal header exactly */
 .modalOverlay {
   position: fixed;
   top: 0;
@@ -578,26 +580,40 @@
   flex-direction: column;
 }
 
+/* Modal Header - Updated to match accomplishments exactly */
 .modalHeader {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;
   padding: 2rem 2rem 1rem;
   border-bottom: 1px solid #e2e8f0;
   flex-shrink: 0;
 }
 
 .modalTitle {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex: 1;
+  min-width: 0;
+  padding-right: 1rem;
+}
+
+.modalTitle h2 {
   font-size: 1.5rem;
   font-weight: 600;
   color: var(--gray-900);
   margin: 0;
   flex: 1;
   min-width: 0;
-  padding-right: 1rem;
   word-wrap: break-word;
   overflow-wrap: break-word;
   hyphens: auto;
+}
+
+.modalTitle .categoryBadge {
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .closeButton {

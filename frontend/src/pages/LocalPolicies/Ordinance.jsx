@@ -251,17 +251,14 @@ const Ordinance = () => {
                   </div>
                   
                   <p className={styles.summary}>
-                    {ordinance.summary.length > 150 
-                      ? `${ordinance.summary.substring(0, 150)}...` 
-                      : ordinance.summary
-                    }
+                    {ordinance.summary}
+                    
                   </p>
                   
                   {/* Footer with date and button */}
                   <div className={styles.cardFooter}>
                     <div className={styles.cardMeta}>
                       <div className={styles.metaItem}>
-                        <Calendar size={16} />
                         <span>Implemented: {formatDate(ordinance.implementationDate)}</span>
                       </div>
                     </div>
@@ -281,7 +278,12 @@ const Ordinance = () => {
         <div className={styles.modalOverlay} onClick={closeModal}>
           <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
             <div className={styles.modalHeader}>
-              <h2 className={styles.modalTitle}>{selectedOrdinance.title}</h2>
+              <div className={styles.modalTitle}>
+                <h2>{selectedOrdinance.title}</h2>
+                <div className={`${styles.categoryBadge} ${styles[getCategoryClass(selectedOrdinance.category)]}`}>
+                  {selectedOrdinance.category || 'General'}
+                </div>
+              </div>
               <button onClick={closeModal} className={styles.closeButton}>
                 ×
               </button>
@@ -295,12 +297,6 @@ const Ordinance = () => {
                     <span className={styles.infoValue}>{selectedOrdinance.policyNumber}</span>
                   </div>
                   <div className={styles.infoItem}>
-                    <span className={styles.infoLabel}>Category:</span>
-                    <span className={`${styles.categoryTag} ${styles[getCategoryClass(selectedOrdinance.category)]}`}>
-                      {selectedOrdinance.category}
-                    </span>
-                  </div>
-                  <div className={styles.infoItem}>
                     <span className={styles.infoLabel}>Implementation Date:</span>
                     <span className={styles.infoValue}>
                       {formatDate(selectedOrdinance.implementationDate)}
@@ -309,7 +305,7 @@ const Ordinance = () => {
                 </div>
               </div>
 
-              <div className={styles.summarySection}>
+              <div className={styles.modalSummarySection}>
                 <h4>Summary</h4>
                 <p>{selectedOrdinance.summary}</p>
               </div>
