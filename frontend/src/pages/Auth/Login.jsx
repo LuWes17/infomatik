@@ -1,15 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import styles from './Auth.module.css';
 import infomatiklogo from '../../assets/infomatik-logo.png';
 import { Phone, Lock, Eye, EyeOff } from 'lucide-react';
+import { useNotification } from '../../contexts/NotificationContext';
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [activeTab, setActiveTab] = useState('login');
   const navigate = useNavigate();
-  const { login, isLoading, error, clearError, isAuthenticated, user } = useAuth();
+  const location = useLocation();
+  const { login, isAuthenticated, isLoading: authLoading, error, clearError } = useAuth();
+  const { showSuccess, showError, showWarning, showInfo } = useNotification();
 
   const [formData, setFormData] = useState({
     contactNumber: '',
@@ -29,9 +32,12 @@ const Login = () => {
   const [phoneNumberFocused, setPhoneNumberFocused] = useState(false);
   const [displayPhoneNumber, setDisplayPhoneNumber] = useState('');
 
+  const [isLoading, setIsLoading] = useState(false);
+  const [loginSuccess, setLoginSuccess] = useState(false);
+
   // Redirect based on user role when authenticated
   useEffect(() => {
-    if (isAuthenticated && user) {
+    if (isAuthenticated && !authLoading && !loginSuccess) {
       // Redirect admin users to /admin, regular users to /profile
       if (user.role === 'admin') {
         navigate('/admin', { replace: true });
@@ -39,7 +45,7 @@ const Login = () => {
         navigate('/profile', { replace: true });
       }
     }
-  }, [isAuthenticated, user, navigate]);
+  }, [isAuthenticated, authLoading, navigate, location, loginSuccess]);
 
   // Clear error when component mounts or form data changes
   useEffect(() => {
@@ -145,6 +151,10 @@ const Login = () => {
      if (touched[name]) {
         validateField(name, value);
       }
+
+      if (error) {
+      clearError();
+    }
   };
 
 
@@ -183,30 +193,24 @@ const Login = () => {
     validateField(name, valueToValidate);
   };
 
-   const validateForm = () => {
-    const newTouched = {
-      firstName: true,
-      lastName: true,
-      contactNumber: true,
-      password: true,
-      confirmPassword: true,
-      barangay: true
-    };
-    setTouched(newTouched);
+    const validateForm = () => {
+      const newFieldErrors = {};
+      let isFormValid = true;
 
-    // Validate all fields
-    let isFormValid = true;
-    const newFieldErrors = {};
-    
-    Object.keys(formData).forEach(key => {
-        const validation = getFieldValidation(key, formData[key]);
-        newFieldErrors[key] = validation.errorMessage;
+      Object.keys(formData).forEach(field => {
+        const validation = getFieldValidation(field, formData[field]);
         if (!validation.isValid) {
+          newFieldErrors[field] = validation.errorMessage;
           isFormValid = false;
         }
       });
 
       setFieldErrors(newFieldErrors);
+      setTouched({
+        contactNumber: true,
+        password: true
+      });
+
       return isFormValid;
     };
 
@@ -220,14 +224,12 @@ const Login = () => {
     };
     setTouched(allTouched);
 
-    // Check if all fields are valid
-    const isFormValid = Object.keys(formData).every(field => 
-      validateField(field, formData[field])
-    );
-
-    if (!isFormValid) {
+    if (!validateForm()) {
+      showError('Please fix the errors in the form before proceeding.');
       return;
     }
+
+    setIsLoading(true);
 
     // Convert phone number to full format for submission
     const phoneNumber = formData.contactNumber.length === 10 ? 
@@ -241,17 +243,20 @@ const Login = () => {
     const result = await login(loginData);
     
     if (result.success) {
+      setLoginSuccess(true);
       // Navigation will happen automatically via useEffect due to isAuthenticated change
       console.log('Login successful');
+      showSuccess('Welcome back! Redirecting to your dashboard...', { duration: 3000 });
+
+      setTimeout(() => {
+          const from = location.state?.from?.pathname || '/profile';
+          navigate(from, { replace: true });
+        }, 2000); 
     } else {
-      const newFieldErrors = { ...fieldErrors };
-          data.errors.forEach(error => {
-            if (error.field && error.message) {
-              newFieldErrors[error.field] = error.message;
-              setTouched(prev => ({ ...prev, [error.field]: true }));
-            }
-          });
-          setFieldErrors(newFieldErrors);
+        console.error('Login failed:', result.error);
+        showError('Invalid account details. Account does not exist')
+
+        setLoginSuccess(false);
     }
     // Error handling is managed by the context and displayed in UI
   };
@@ -291,8 +296,25 @@ const Login = () => {
               </button>
             </div>
 
+             {/* *** FIXED: Show loading state during successful login *** */}
+            {loginSuccess && (
+              <div className={styles.successMessage}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <div style={{ 
+                    width: '20px', 
+                    height: '20px', 
+                    border: '2px solid #16a34a', 
+                    borderTop: '2px solid transparent', 
+                    borderRadius: '50%', 
+                    animation: 'spin 1s linear infinite' 
+                  }}></div>
+                  Logging you in...
+                </div>
+              </div>
+            )}
+
             {/* Error Display */}
-            {error && (
+            {error && !loginSuccess && (
               <div className={styles.errorMessage}>
                 {error}
               </div>

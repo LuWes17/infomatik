@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { NotificationProvider } from './contexts/NotificationContext';
 
 // Layouts
 import UserLayout from './layouts/UserLayout';
@@ -69,85 +70,87 @@ const AdminRedirect = () => {
 function App() {
   return (
     <AuthProvider>
-      <Router>
-        <Routes>
-          {/* Public Routes with User Layout */}
-          <Route element={<UserLayout />}>
-            <Route path="/" element={<Home />} />
-            <Route path="/announcements" element={<Announcements />} />
-            <Route path="/services/job-openings" element={<JobOpenings />} />
-            <Route path="/services/solicitation-requests" element={<SolicitationRequest />} />
-            <Route path="/services/monthly-rice-distribution" element={<RiceDistribution />} />
-            <Route path="/accomplishments" element={<Accomplishments />} />
-            <Route path="/policies/ordinance" element={<Ordinance />} />
-            <Route path="/policies/resolution" element={<Resolution />} />
-            <Route path="/guide" element={<CitizenGuide />} />
-            <Route path="/about/leadership" element={<Leadership />} />
-            <Route path="/about/feedback" element={<Feedback />} />
+      <NotificationProvider>
+        <Router>
+          <Routes>
+            {/* Public Routes with User Layout */}
+            <Route element={<UserLayout />}>
+              <Route path="/" element={<Home />} />
+              <Route path="/announcements" element={<Announcements />} />
+              <Route path="/services/job-openings" element={<JobOpenings />} />
+              <Route path="/services/solicitation-requests" element={<SolicitationRequest />} />
+              <Route path="/services/monthly-rice-distribution" element={<RiceDistribution />} />
+              <Route path="/accomplishments" element={<Accomplishments />} />
+              <Route path="/policies/ordinance" element={<Ordinance />} />
+              <Route path="/policies/resolution" element={<Resolution />} />
+              <Route path="/guide" element={<CitizenGuide />} />
+              <Route path="/about/leadership" element={<Leadership />} />
+              <Route path="/about/feedback" element={<Feedback />} />
 
-            {/* Auth Routes */}
-            <Route 
-              path="/login" 
-              element={
-                <PublicRoute>
-                  <Login />
-                </PublicRoute>
-              } 
-            />
-            <Route 
-              path="/register" 
-              element={
-                <PublicRoute>
-                  <Register />
-                </PublicRoute>
-              } 
-            />
+              {/* Auth Routes */}
+              <Route 
+                path="/login" 
+                element={
+                  <PublicRoute>
+                    <Login />
+                  </PublicRoute>
+                } 
+              />
+              <Route 
+                path="/register" 
+                element={
+                  <PublicRoute>
+                    <Register />
+                  </PublicRoute>
+                } 
+              />
 
-            {/* Protected User Routes */}
+              {/* Protected User Routes */}
+              <Route 
+                path="/profile/*" 
+                element={
+                  <ProtectedRoute>
+                    <Profile />
+                  </ProtectedRoute>
+                } 
+              />
+
+              {/* Error Routes */}
+              <Route path="/unauthorized" element={<Unauthorized />} />
+              <Route path="*" element={<NotFound />} />
+            </Route>
+
+            {/* Admin Routes with Admin Layout */}
             <Route 
-              path="/profile/*" 
+              path="/admin" 
+              element={
+                <AdminRoute>
+                  <AdminLayout />
+                </AdminRoute>
+              }
+            >
+              <Route index element={<AdminDashboard />} />
+              <Route path="announcements" element={<AdminAnnouncements />} />
+              <Route path="accomplishments" element={<AdminAccomplishments />} />
+              <Route path="job-openings" element={<AdminJobOpenings />} />
+              <Route path="solicitation-requests" element={<AdminSolicitationRequests />} />
+              <Route path="rice-distribution" element={<AdminRiceDistribution />} />
+              <Route path="local-policies" element={<AdminLocalPolicies />} />
+              <Route path="feedback" element={<AdminFeedback />} />
+            </Route>
+
+            {/* Redirect authenticated users to appropriate dashboard */}
+            <Route 
+              path="/dashboard" 
               element={
                 <ProtectedRoute>
-                  <Profile />
+                  <AdminRedirect />
                 </ProtectedRoute>
               } 
             />
-
-            {/* Error Routes */}
-            <Route path="/unauthorized" element={<Unauthorized />} />
-            <Route path="*" element={<NotFound />} />
-          </Route>
-
-          {/* Admin Routes with Admin Layout */}
-          <Route 
-            path="/admin" 
-            element={
-              <AdminRoute>
-                <AdminLayout />
-              </AdminRoute>
-            }
-          >
-            <Route index element={<AdminDashboard />} />
-            <Route path="announcements" element={<AdminAnnouncements />} />
-            <Route path="accomplishments" element={<AdminAccomplishments />} />
-            <Route path="job-openings" element={<AdminJobOpenings />} />
-            <Route path="solicitation-requests" element={<AdminSolicitationRequests />} />
-            <Route path="rice-distribution" element={<AdminRiceDistribution />} />
-            <Route path="local-policies" element={<AdminLocalPolicies />} />
-            <Route path="feedback" element={<AdminFeedback />} />
-          </Route>
-
-          {/* Redirect authenticated users to appropriate dashboard */}
-          <Route 
-            path="/dashboard" 
-            element={
-              <ProtectedRoute>
-                <AdminRedirect />
-              </ProtectedRoute>
-            } 
-          />
-        </Routes>
-      </Router>
+          </Routes>
+        </Router>
+      </NotificationProvider>
     </AuthProvider>
   );
 }

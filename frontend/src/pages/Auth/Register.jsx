@@ -5,9 +5,13 @@ import styles from './Auth.module.css';
 import infomatiklogo from '../../assets/infomatik-logo.png';
 import { UserRound, Phone, Lock, Eye, EyeOff, MapPin, CheckCircle, ChevronDown } from 'lucide-react';
 import OTPVerificationPopup from '../../components/OTP/OTPVerificationPopup';
+import { useNotification } from '../../contexts/NotificationContext';
 
 const Register = () => {
   const navigate = useNavigate();
+
+  const { showSuccess, showError, showWarning, showInfo } = useNotification();
+
   const { verifyOTP, isAuthenticated, isLoading: authLoading, user, error, clearError } = useAuth();
 
   // State for form and UI
@@ -219,7 +223,9 @@ const Register = () => {
         validateField(name, value);
     }
     
-    clearError();
+    if (error) {
+      clearError();
+    }
   };
 
   useEffect(() => {
@@ -290,6 +296,7 @@ const Register = () => {
     e.preventDefault();
     
     if (!validateForm()) {
+      showError('Please fix the errors in the form before proceeding.');
       return;
     }
 
@@ -321,6 +328,7 @@ const Register = () => {
       if (data.success) {
         setMaskedNumber(data.data.maskedNumber);
         setShowOTPPopup(true);
+        showSuccess('OTP sent successfully! Please check your phone.');
       } else {
         if (data.errors && Array.isArray(data.errors)) {
           const newFieldErrors = { ...fieldErrors };
@@ -333,6 +341,10 @@ const Register = () => {
           setFieldErrors(newFieldErrors);
         } else {
           setOtpError(data.message || 'Failed to send OTP');
+        }
+
+        if (data.message && data.message.toLowerCase().includes('already registered')) {
+          showError('This phone number is already registered. Please use a different number or try logging in instead.');
         }
       }
     } catch (error) {
@@ -367,6 +379,7 @@ const Register = () => {
         // The AuthContext should now have isAuthenticated = true
         // The useEffect above will handle the redirect automatically
         console.log('Registration successful, waiting for auth state update...');
+        showSuccess('Registration completed successfully! Welcome to Infomatik!');
         
         // Backup redirect in case the useEffect doesn't trigger
         setTimeout(() => {
@@ -381,6 +394,7 @@ const Register = () => {
         console.log('❌ OTP FAILED - Setting error:', result.error);
         console.log('❌ showOTPPopup should still be:', showOTPPopup);
         console.log('❌ otpError now set to:', result.error || 'Invalid OTP');
+        showError(error || 'OTP verification failed. Please try again.');
       }
     } catch (error) {
       console.error('Verify OTP error:', error);
@@ -469,6 +483,19 @@ const getDropdownButtonClass = () => {
     setOtpError('');
   };
 
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (barangayDropdownRef.current && !barangayDropdownRef.current.contains(event.target)) {
+        setBarangayDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
   if (registrationSuccess) {
   return (
     <div className={styles.container}>
@@ -522,13 +549,6 @@ const getDropdownButtonClass = () => {
                 Sign up
               </button>
             </div>
-
-            {/* Error Display */}
-            {(error) && (
-              <div className={styles.errorMessage}>
-                {error}
-              </div>
-            )}
 
             {/* Form */}
             <form onSubmit={handleSendOTP} className={styles.form}>
