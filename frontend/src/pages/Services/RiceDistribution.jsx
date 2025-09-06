@@ -1,15 +1,20 @@
-// frontend/src/pages/Services/RiceDistribution.jsx
 import React, { useState, useEffect } from 'react';
+import { ChevronLeft, ChevronRight, Calendar, MapPin, Users, Clock, Package, AlertCircle, Search, Filter, ChevronDown, X } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
+import api from '../../services/api';
 import styles from './RiceDistribution.module.css';
 
 const RiceDistribution = () => {
   const { user } = useAuth();
   const [distributions, setDistributions] = useState([]);
+  const [filteredDistributions, setFilteredDistributions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [selectedDistribution, setSelectedDistribution] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [dropdownOpen, setDropdownOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [pagination, setPagination] = useState({
     current: 1,
@@ -17,26 +22,64 @@ const RiceDistribution = () => {
     total: 0
   });
 
+  const statusOptions = ['all', 'planned', 'completed'];
+
   useEffect(() => {
     fetchDistributions(currentPage);
   }, [currentPage]);
+
+  // Filter functionality
+  useEffect(() => {
+    let filtered = [...distributions];
+
+    // Status filter
+    if (statusFilter !== 'all') {
+      filtered = filtered.filter(dist => dist.status === statusFilter);
+    }
+
+    // Search filter
+    if (searchTerm) {
+      filtered = filtered.filter(dist => {
+        const searchLower = searchTerm.toLowerCase();
+        
+        // Search in distribution month/title
+        const monthMatch = formatMonth(dist.distributionMonth).toLowerCase().includes(searchLower);
+        
+        // Search in selected barangays
+        const barangayMatch = dist.selectedBarangays.some(barangay => 
+          barangay.toLowerCase().includes(searchLower)
+        );
+        
+        // Search in distribution schedule locations
+        const locationMatch = dist.distributionSchedule.some(schedule =>
+          schedule.location.toLowerCase().includes(searchLower) ||
+          schedule.barangay.toLowerCase().includes(searchLower)
+        );
+        
+        return monthMatch || barangayMatch || locationMatch;
+      });
+    }
+
+    setFilteredDistributions(filtered);
+  }, [distributions, statusFilter, searchTerm]);
 
   const fetchDistributions = async (page = 1) => {
     try {
       setLoading(true);
       setError('');
 
-      const response = await fetch(`/api/rice-distribution?page=${page}&limit=6`);
+      const response = await api.get(`/rice-distribution?page=${page}&limit=6`);
       
-      if (!response.ok) {
-        throw new Error('Failed to fetch rice distributions');
+      if (response.data.success) {
+        setDistributions(response.data.data || []);
+        setFilteredDistributions(response.data.data || []);
+        setPagination(response.data.pagination || { current: 1, pages: 1, total: 0 });
+      } else {
+        throw new Error(response.data.message || 'Failed to fetch rice distributions');
       }
-
-      const data = await response.json();
-      setDistributions(data.data || []);
-      setPagination(data.pagination || { current: 1, pages: 1, total: 0 });
     } catch (err) {
-      setError(err.message);
+      const errorMessage = err.response?.data?.message || err.message || 'Failed to fetch rice distributions';
+      setError(errorMessage);
       console.error('Error fetching distributions:', err);
     } finally {
       setLoading(false);
@@ -53,7 +96,15 @@ const RiceDistribution = () => {
   };
 
   const formatMonth = (monthString) => {
-    return new Date(monthString + '-01').toLocaleDateString('en-US', {
+    // Handle both YYYY-MM format and full date strings
+    let dateToFormat;
+    if (monthString.includes('-') && monthString.length === 7) {
+      dateToFormat = monthString + '-01'; // Add day for parsing
+    } else {
+      dateToFormat = monthString;
+    }
+    
+    return new Date(dateToFormat).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'long'
     });
@@ -73,25 +124,42 @@ const RiceDistribution = () => {
       .sort((a, b) => new Date(a.date) - new Date(b.date));
   };
 
-  const getUserRelevantSchedules = (distribution) => {
-    if (!user?.barangay) return [];
-    return distribution.distributionSchedule
-      .filter(schedule => schedule.barangay.toLowerCase() === user.barangay.toLowerCase());
+  const getUserRelevantSchedule = (distribution) => {
+    if (!user?.barangay) return null;
+    
+    return distribution.distributionSchedule.find(schedule =>
+      schedule.barangay.toLowerCase() === user.barangay.toLowerCase()
+    );
   };
 
-  const handleViewDetails = (distribution) => {
+  const openModal = (distribution) => {
     setSelectedDistribution(distribution);
     setShowModal(true);
+    document.body.style.overflow = "hidden";
   };
 
-  const handlePageChange = (newPage) => {
-    setCurrentPage(newPage);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+  const closeModal = () => {
+    setShowModal(false);
+    setSelectedDistribution(null);
+    document.body.style.overflow = "auto";
+  };
+
+  const handleFilterChange = (status) => {
+    setStatusFilter(status);
+    setDropdownOpen(false);
+  };
+
+  const toggleDropdown = () => {
+    setDropdownOpen(!dropdownOpen);
+  };
+
+  const getStatusBadgeClass = (status) => {
+    return `${styles.statusBadge} ${styles[status]}`;
   };
 
   if (loading) {
     return (
-      <div className={styles.pageContainer}>
+      <div className={styles.riceDistribution}>
         <div className={styles.loadingContainer}>
           <div className={styles.spinner}></div>
           <p>Loading rice distributions...</p>
@@ -100,284 +168,318 @@ const RiceDistribution = () => {
     );
   }
 
-  return (
-    <div className={styles.pageContainer}>
-      {/* Header Section */}
-      <div className={styles.headerSection}>
-        <div className={styles.headerContent}>
-          <h1 className={styles.pageTitle}>Monthly Rice Distribution</h1>
-          <p className={styles.pageDescription}>
-            Stay informed about rice distribution schedules and locations in your barangay. 
-            Qualified residents will receive SMS notifications for distribution dates.
-          </p>
+  if (error) {
+    return (
+      <div className={styles.riceDistribution}>
+        <div className={styles.errorMessage}>
+          <AlertCircle size={20} />
+          <span>Error: {error}</span>
         </div>
-        <div className={styles.headerIcon}>
-          🌾
+      </div>
+    );
+  }
+
+  return (
+    <div className={styles.riceDistribution}>
+      {/* Header */}
+      <div className={styles.header}>
+        <div className={styles.headerText}>
+          <Package size={92} className={styles.icon} />
+          <div className={styles.headerContent}>
+            <h1>Monthly Rice Distribution</h1>
+            <p>View upcoming and past rice distribution schedules for your barangay.</p>
+          </div>
+        </div>
+
+        <div className={styles.filterSection}>
+          {/* Search Bar */}
+          <div className={styles.searchContainer}>
+            <Search size={20} className={styles.searchIcon} />
+            <input
+              type="text"
+              placeholder="Search by month, barangay, or location..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className={styles.searchInput}
+            />
+          </div>
+
+          {/* Filter Dropdown */}
+          <div className={styles.filterDropdown}>
+            <Filter size={20} className={styles.filterIcon} />
+            <button
+              onClick={toggleDropdown}
+              className={`${styles.dropdownButton} ${dropdownOpen ? styles.active : ''}`}
+            >
+              <span>{statusFilter === 'all' ? 'All Status' : statusFilter}</span>
+              <ChevronDown size={16} className={`${styles.dropdownArrow} ${dropdownOpen ? styles.open : ''}`} />
+            </button>
+            <div className={`${styles.dropdownContent} ${dropdownOpen ? styles.show : ''}`}>
+              <button
+                onClick={() => handleFilterChange('all')}
+                className={`${styles.dropdownItem} ${statusFilter === 'all' ? styles.active : ''}`}
+              >
+                All Status ({distributions.length})
+              </button>
+              {statusOptions.slice(1).map(status => (
+                <button
+                  key={status}
+                  onClick={() => handleFilterChange(status)}
+                  className={`${styles.dropdownItem} ${statusFilter === status ? styles.active : ''}`}
+                >
+                  {status.charAt(0).toUpperCase() + status.slice(1)} ({distributions.filter(dist => dist.status === status).length})
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
 
       {/* User Info Banner */}
-      {user && (
-        <div className={styles.userInfoBanner}>
+      {user?.barangay && (
+        <div className={styles.userBanner}>
           <div className={styles.userInfo}>
             <span className={styles.userLabel}>Your Barangay:</span>
-            <span className={styles.userBarangay}>{user.barangay || 'Not specified'}</span>
+            <span className={styles.userBarangay}>{user.barangay}</span>
           </div>
-          <div className={styles.userNote}>
-            You will receive SMS notifications for distributions in your barangay
-          </div>
+          <span className={styles.userNote}>You'll be notified when your barangay is scheduled</span>
         </div>
       )}
 
-      {/* Error Message */}
-      {error && (
-        <div className={styles.errorMessage}>
-          <span className={styles.errorIcon}>⚠️</span>
-          {error}
-        </div>
-      )}
-
-      {/* Distributions Grid */}
-      <div className={styles.distributionsContainer}>
-        {distributions.length === 0 ? (
-          <div className={styles.emptyState}>
-            <div className={styles.emptyIcon}>📋</div>
-            <h3>No Rice Distributions Available</h3>
-            <p>There are currently no rice distributions scheduled. Check back later for updates.</p>
+      {/* Content */}
+      <div className={styles.content}>
+        {filteredDistributions.length === 0 ? (
+          <div className={styles.noDistributions}>
+            <Package size={64} className={styles.noDistributionsIcon} />
+            <h3>No distributions found</h3>
+            <p>{searchTerm || statusFilter !== 'all' 
+              ? 'Try adjusting your search or filter criteria' 
+              : 'No rice distributions are currently scheduled.'}
+            </p>
           </div>
         ) : (
-          <>
-            <div className={styles.distributionsGrid}>
-              {distributions.map((distribution) => {
-                const isRelevantToUser = isUserBarangayIncluded(distribution);
-                const upcomingSchedules = getUpcomingSchedule(distribution);
-                const userSchedules = getUserRelevantSchedules(distribution);
-                
-                return (
-                  <div 
-                    key={distribution._id} 
-                    className={`${styles.distributionCard} ${isRelevantToUser ? styles.relevantCard : ''}`}
-                  >
-                    {/* Card Header */}
-                    <div className={styles.cardHeader}>
-                      <h3 className={styles.distributionTitle}>
-                        {distribution.distributionTitle}
-                      </h3>
-                      <span className={`${styles.statusBadge} ${styles[distribution.status]}`}>
-                        {distribution.status}
-                      </span>
+          <div className={styles.distributionsGrid}>
+            {filteredDistributions.map((distribution) => {
+              const isRelevant = isUserBarangayIncluded(distribution);
+              const userSchedule = getUserRelevantSchedule(distribution);
+              const upcomingSchedules = getUpcomingSchedule(distribution);
+
+              return (
+                <div
+                  key={distribution._id}
+                  className={`${styles.distributionCard} ${isRelevant ? styles.relevantCard : ''}`}
+                  onClick={() => openModal(distribution)}
+                >
+                  <div className={styles.cardHeader}>
+                    <h3 className={styles.distributionTitle}>
+                      {formatMonth(distribution.distributionMonth)} Distribution
+                    </h3>
+                    <span className={getStatusBadgeClass(distribution.status)}>
+                      {distribution.status}
+                    </span>
+                  </div>
+
+                  <div className={styles.cardDetails}>
+                    <div className={styles.detailItem}>
+                      <MapPin size={16} />
+                      <span>{distribution.selectedBarangays.length} Barangays</span>
                     </div>
-
-                    {/* Distribution Info */}
-                    <div className={styles.cardBody}>
-                      <div className={styles.infoRow}>
-                        <span className={styles.infoLabel}>Month:</span>
-                        <span className={styles.infoValue}>
-                          {formatMonth(distribution.distributionMonth)}
-                        </span>
-                      </div>
-
-                      <div className={styles.infoRow}>
-                        <span className={styles.infoLabel}>Barangays:</span>
-                        <span className={styles.infoValue}>
-                          {distribution.selectedBarangays.length} selected
-                        </span>
-                      </div>
-
-                      <div className={styles.infoRow}>
-                        <span className={styles.infoLabel}>Rice per Family:</span>
-                        <span className={styles.infoValue}>
-                          {distribution.riceDetails.kilosPerFamily} kg
-                        </span>
-                      </div>
-
-                      {/* User-specific info */}
-                      {isRelevantToUser && (
-                        <div className={styles.userRelevantInfo}>
-                          <div className={styles.relevantBadge}>
-                            ✓ Your barangay is included
-                          </div>
-                          {userSchedules.length > 0 && (
-                            <div className={styles.userSchedule}>
-                              <strong>Your distribution date:</strong>
-                              <div className={styles.scheduleDate}>
-                                {formatDate(userSchedules[0].date)}
-                              </div>
-                              <div className={styles.scheduleLocation}>
-                                📍 {userSchedules[0].location}
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      )}
-
-                      {/* Next distribution info */}
-                      {upcomingSchedules.length > 0 && (
-                        <div className={styles.nextDistribution}>
-                          <span className={styles.nextLabel}>Next distribution:</span>
-                          <span className={styles.nextDate}>
-                            {formatDate(upcomingSchedules[0].date)}
-                          </span>
-                        </div>
-                      )}
+                    <div className={styles.detailItem}>
+                      <Calendar size={16} />
+                      <span>{distribution.distributionSchedule.length} Schedule{distribution.distributionSchedule.length > 1 ? 's' : ''}</span>
                     </div>
-
-                    {/* Card Footer */}
-                    <div className={styles.cardFooter}>
-                      <button 
-                        className={styles.viewDetailsBtn}
-                        onClick={() => handleViewDetails(distribution)}
-                      >
-                        View Details
-                      </button>
+                    <div className={styles.detailItem}>
+                      <Users size={16} />
+                      <span>{distribution.riceDetails?.kilosPerFamily || 'N/A'} kg per family</span>
                     </div>
                   </div>
-                );
-              })}
+
+                  {isRelevant && userSchedule && (
+                    <div className={styles.userRelevantInfo}>
+                      <div className={styles.relevantBadge}>Your Schedule</div>
+                      <div className={styles.userSchedule}>
+                        <strong>Date: {formatDate(userSchedule.date)}</strong>
+                        <div className={styles.scheduleLocation}>
+                          Location: {userSchedule.location}
+                        </div>
+                        {userSchedule.contactPerson?.name && (
+                          <div className={styles.scheduleContact}>
+                            Contact: {userSchedule.contactPerson.name}
+                            {userSchedule.contactPerson.phone && ` (${userSchedule.contactPerson.phone})`}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {upcomingSchedules.length > 0 && (
+                    <div className={styles.nextDistribution}>
+                      <span className={styles.nextLabel}>Next Distribution:</span>
+                      <span className={styles.nextDate}>
+                        {formatDate(upcomingSchedules[0].date)}
+                      </span>
+                    </div>
+                  )}
+
+                  <div className={styles.cardFooter}>
+                    <button className={styles.viewDetailsBtn}>
+                      View Details
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Pagination */}
+        {pagination.pages > 1 && (
+          <div className={styles.pagination}>
+            <button
+              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+              disabled={currentPage === 1}
+              className={`${styles.pageBtn} ${currentPage === 1 ? styles.disabled : ''}`}
+            >
+              <ChevronLeft size={16} />
+              Previous
+            </button>
+            
+            <div className={styles.pageNumbers}>
+              {Array.from({ length: pagination.pages }, (_, i) => i + 1).map(page => (
+                <button
+                  key={page}
+                  onClick={() => setCurrentPage(page)}
+                  className={`${styles.pageBtn} ${currentPage === page ? styles.active : ''}`}
+                >
+                  {page}
+                </button>
+              ))}
             </div>
 
-            {/* Pagination */}
-            {pagination.pages > 1 && (
-              <div className={styles.pagination}>
-                <button
-                  className={`${styles.pageBtn} ${currentPage === 1 ? styles.disabled : ''}`}
-                  onClick={() => handlePageChange(currentPage - 1)}
-                  disabled={currentPage === 1}
-                >
-                  Previous
-                </button>
-
-                <div className={styles.pageNumbers}>
-                  {Array.from({ length: pagination.pages }, (_, i) => i + 1).map((page) => (
-                    <button
-                      key={page}
-                      className={`${styles.pageBtn} ${currentPage === page ? styles.active : ''}`}
-                      onClick={() => handlePageChange(page)}
-                    >
-                      {page}
-                    </button>
-                  ))}
-                </div>
-
-                <button
-                  className={`${styles.pageBtn} ${currentPage === pagination.pages ? styles.disabled : ''}`}
-                  onClick={() => handlePageChange(currentPage + 1)}
-                  disabled={currentPage === pagination.pages}
-                >
-                  Next
-                </button>
-              </div>
-            )}
-          </>
+            <button
+              onClick={() => setCurrentPage(prev => Math.min(prev + 1, pagination.pages))}
+              disabled={currentPage === pagination.pages}
+              className={`${styles.pageBtn} ${currentPage === pagination.pages ? styles.disabled : ''}`}
+            >
+              Next
+              <ChevronRight size={16} />
+            </button>
+          </div>
         )}
       </div>
 
-      {/* Details Modal */}
+      {/* Modal */}
       {showModal && selectedDistribution && (
-        <div className={styles.modalOverlay} onClick={() => setShowModal(false)}>
+        <div className={styles.modal} onClick={closeModal}>
           <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
             <div className={styles.modalHeader}>
-              <h2>{selectedDistribution.distributionTitle}</h2>
-              <button 
+              <h2 className={styles.modalTitle}>
+                {formatMonth(selectedDistribution.distributionMonth)} Rice Distribution
+              </h2>
+              <span className={getStatusBadgeClass(selectedDistribution.status)}>
+                {selectedDistribution.status}
+              </span>
+              <button
+                onClick={closeModal}
                 className={styles.closeBtn}
-                onClick={() => setShowModal(false)}
               >
-                ×
+                <X size={24} />
               </button>
             </div>
-
+            
             <div className={styles.modalBody}>
-              {/* Basic Information */}
-              <div className={styles.modalSection}>
-                <h3>Distribution Information</h3>
-                <div className={styles.modalInfoGrid}>
-                  <div className={styles.modalInfoItem}>
-                    <span className={styles.modalLabel}>Month:</span>
-                    <span>{formatMonth(selectedDistribution.distributionMonth)}</span>
+              {/* Overview */}
+              <div className={styles.section}>
+                <h4>Distribution Overview</h4>
+                <div className={styles.overview}>
+                  <div className={styles.overviewItem}>
+                    <span className={styles.overviewLabel}>Total Barangays:</span>
+                    <span className={styles.overviewValue}>{selectedDistribution.selectedBarangays.length}</span>
                   </div>
-                  <div className={styles.modalInfoItem}>
-                    <span className={styles.modalLabel}>Status:</span>
-                    <span className={`${styles.statusBadge} ${styles[selectedDistribution.status]}`}>
-                      {selectedDistribution.status}
-                    </span>
+                  <div className={styles.overviewItem}>
+                    <span className={styles.overviewLabel}>Total Schedules:</span>
+                    <span className={styles.overviewValue}>{selectedDistribution.distributionSchedule.length}</span>
                   </div>
-                  <div className={styles.modalInfoItem}>
-                    <span className={styles.modalLabel}>Total Rice:</span>
-                    <span>{selectedDistribution.riceDetails.totalKilos} kg</span>
+                  <div className={styles.overviewItem}>
+                    <span className={styles.overviewLabel}>Status:</span>
+                    <span className={styles.overviewValue}>{selectedDistribution.status}</span>
                   </div>
-                  <div className={styles.modalInfoItem}>
-                    <span className={styles.modalLabel}>Per Family:</span>
-                    <span>{selectedDistribution.riceDetails.kilosPerFamily} kg</span>
-                  </div>
+                  {selectedDistribution.riceDetails && (
+                    <>
+                      <div className={styles.overviewItem}>
+                        <span className={styles.overviewLabel}>Total Rice:</span>
+                        <span className={styles.overviewValue}>{selectedDistribution.riceDetails.totalKilos} kg</span>
+                      </div>
+                      <div className={styles.overviewItem}>
+                        <span className={styles.overviewLabel}>Per Family:</span>
+                        <span className={styles.overviewValue}>{selectedDistribution.riceDetails.kilosPerFamily} kg</span>
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
 
               {/* Selected Barangays */}
-              <div className={styles.modalSection}>
-                <h3>Selected Barangays ({selectedDistribution.selectedBarangays.length})</h3>
-                <div className={styles.barangaysList}>
+              <div className={styles.section}>
+                <h4>Selected Barangays</h4>
+                <div className={styles.barangayGrid}>
                   {selectedDistribution.selectedBarangays.map((barangay, index) => (
-                    <span 
-                      key={index} 
-                      className={`${styles.barangayTag} ${
-                        user?.barangay?.toLowerCase() === barangay.toLowerCase() ? styles.userBarangayTag : ''
-                      }`}
-                    >
+                    <span key={index} className={styles.barangayTag}>
                       {barangay}
-                      {user?.barangay?.toLowerCase() === barangay.toLowerCase() && ' (You)'}
                     </span>
                   ))}
                 </div>
               </div>
 
               {/* Distribution Schedule */}
-              <div className={styles.modalSection}>
-                <h3>Distribution Schedule</h3>
+              <div className={styles.section}>
+                <h4>Distribution Schedule</h4>
                 <div className={styles.scheduleList}>
                   {selectedDistribution.distributionSchedule
                     .sort((a, b) => new Date(a.date) - new Date(b.date))
-                    .map((schedule, index) => (
-                    <div 
-                      key={index} 
-                      className={`${styles.scheduleItem} ${
-                        user?.barangay?.toLowerCase() === schedule.barangay.toLowerCase() ? styles.userSchedule : ''
-                      }`}
-                    >
-                      <div className={styles.scheduleHeader}>
-                        <span className={styles.scheduleBarangay}>
-                          {schedule.barangay}
-                          {user?.barangay?.toLowerCase() === schedule.barangay.toLowerCase() && ' (Your barangay)'}
-                        </span>
-                        <span className={styles.scheduleDate}>
-                          {formatDate(schedule.date)}
-                        </span>
-                      </div>
-                      <div className={styles.scheduleLocation}>
-                        📍 {schedule.location}
-                      </div>
-                      {schedule.contactPerson && (
-                        <div className={styles.scheduleContact}>
-                          👤 {schedule.contactPerson.name}
-                          {schedule.contactPerson.phone && (
-                            <span> • 📞 {schedule.contactPerson.phone}</span>
-                          )}
+                    .map((schedule, index) => {
+                      const isUserSchedule = user?.barangay && 
+                        schedule.barangay.toLowerCase() === user.barangay.toLowerCase();
+                      
+                      return (
+                        <div
+                          key={index}
+                          className={`${styles.scheduleItem} ${isUserSchedule ? styles.userSchedule : ''}`}
+                        >
+                          <div className={styles.scheduleHeader}>
+                            <span className={styles.scheduleBarangay}>
+                              {schedule.barangay}
+                            </span>
+                            <span className={styles.scheduleDate}>
+                              {formatDate(schedule.date)}
+                            </span>
+                          </div>
+                          <div className={styles.scheduleDetails}>
+                            <div className={styles.scheduleLocation}>
+                              <MapPin size={14} />
+                              Location: {schedule.location}
+                            </div>
+                            {schedule.contactPerson?.name && (
+                              <div className={styles.scheduleContact}>
+                                <Users size={14} />
+                                Contact: {schedule.contactPerson.name}
+                                {schedule.contactPerson.phone && ` - ${schedule.contactPerson.phone}`}
+                              </div>
+                            )}
+                          </div>
                         </div>
-                      )}
-                    </div>
-                  ))}
+                      );
+                    })}
                 </div>
               </div>
 
-              {/* SMS Notification Info */}
-              <div className={styles.modalSection}>
+              {/* Notification Info */}
+              {user?.barangay && isUserBarangayIncluded(selectedDistribution) && (
                 <div className={styles.notificationInfo}>
-                  <h4>📱 SMS Notifications</h4>
-                  <p>
-                    Residents of selected barangays will receive automatic SMS notifications 
-                    with distribution details and reminders.
-                  </p>
+                  <h4>SMS Notification</h4>
+                  <p>You will receive an SMS notification closer to your scheduled distribution date with specific details and any updates.</p>
                 </div>
-              </div>
+              )}
             </div>
           </div>
         </div>
