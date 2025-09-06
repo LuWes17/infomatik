@@ -12,7 +12,10 @@
   border-radius: 2rem;
   display: flex;
   box-shadow: 0 16px 40px #9AAACF;
-  max-width: 100%; /* Prevent overflow on smaller screens */
+  max-width: 100%;
+  /* Add max-height constraint */
+  max-height: 90vh;
+  overflow: hidden; /* Prevent content overflow */
 }
 
 .welcomeContainer {
@@ -319,7 +322,7 @@
 /* Container for the "Don't have an account?" text */
 .authPrompt {
   text-align: center;
-  margin-top: 1rem;
+  margin-top: 0.5rem;
   color: gray;
   font-size: 0.9rem;
 }
@@ -334,10 +337,13 @@
 .inputIcon {
   position: absolute;
   left: 1rem;
-  color: #999;
-  z-index: 1;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #6b7280;
+  z-index: 2;
   pointer-events: none;
-  height: 1.15rem;
+  width: 16px; /* Consistent icon width */
+  height: 16px; /* Consistent icon height */
 }
 
 .inputWithIcon {
@@ -404,6 +410,148 @@
   color: #666;
 }
 
+/* CUSTOM BARANGAY DROPDOWN STYLES - Matching SolicitationRequest */
+.customDropdown {
+  position: relative;
+  width: 100%;
+}
+
+.customDropdownButton {
+  width: 100%;
+  padding: 0.875rem 1rem 0.875rem 3rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 16px;
+  background: white;
+  color: #1f2937;
+  font-size: 0.9rem;
+  font-weight: 400;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  text-align: left;
+  box-sizing: border-box;
+  height: 44px; /* Match input height */
+  min-height: 50px; /* Ensure consistent height */
+  font-family: inherit;
+}
+
+
+.customDropdownButton:focus {
+  outline: none;
+  border-color: #1c62bb;
+  box-shadow: 0 0 0 0.2rem rgba(28, 98, 187, 0.25);
+}
+
+.customDropdownButton.active {
+  border-color: #1c62bb;
+  box-shadow: 0 0 0 0.2rem rgba(28, 98, 187, 0.25);
+}
+
+.customDropdownButton.placeholder {
+  color: #9ca3af !important;
+  font-weight: 400;
+}
+
+.customDropdownButton.placeholder span {
+  color: #9ca3af;
+  font-weight: 400;
+}
+
+.customDropdownButton.error {
+  border-color: #ef4444;
+  background-color: #fef2f2;
+}
+
+.customDropdownButton.success {
+  border-color: #28a745;
+}
+
+.dropdownArrow {
+  transition: transform 0.3s ease;
+  flex-shrink: 0;
+  width: 16px; /* Match icon size */
+  height: 16px; /* Match icon size */
+}
+
+.dropdownArrow.open {
+  transform: rotate(180deg);
+}
+
+.customDropdownContent {
+  position: absolute;
+  top: 110%;
+  left: 0;
+  right: 0;
+  background: white;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  padding: 8px 0;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  transition: all 0.3s ease;
+  z-index: 200;
+  border: 1px solid #e2e8f0;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.customDropdownContent.show {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.customDropdownItem {
+  display: block;
+  padding: 10px 16px;
+  color: #374151;
+  text-decoration: none;
+  font-weight: 400;
+  transition: background-color 0.2s ease;
+  white-space: nowrap;
+  font-size: 0.9rem;
+  cursor: pointer;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+}
+
+.customDropdownItem:hover {
+  background-color: #f8fafc;
+  color: #1c62bb;
+  font-weight: 500;
+}
+
+.customDropdownItem.active {
+  background-color: #1c62bb;
+  color: white;
+  font-weight: 600;
+}
+
+/* Custom scrollbar for barangay dropdown */
+.customDropdownContent::-webkit-scrollbar {
+  width: 6px;
+}
+
+.customDropdownContent::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 3px;
+}
+
+.customDropdownContent::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+.customDropdownContent::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
 /* ============================================
    RESPONSIVE BREAKPOINTS
    ============================================ */
@@ -419,11 +567,15 @@
     max-width: 50rem;
     height: auto;
     min-height: 32rem;
+    max-height: 85vh; /* Constrain maximum height */
+    box-shadow: 0 16px 40px #9AAACF;
   }
   
   .welcomeContainer {
     width: 45%;
     min-width: 20rem;
+    height: auto;
+    min-height: 30rem;
   }
   
   .formContainer {
@@ -454,6 +606,9 @@
     max-width: 45rem;
     height: auto;
     min-height: 30rem;
+    max-height: 80vh; /* Further constrain height */
+    overflow-y: auto; /* Allow scrolling if content exceeds height */
+    box-shadow: 0 12px 30px #9AAACF;
   }
   
   .welcomeContainer {
@@ -509,20 +664,25 @@
   .cardContainer {
     width: 100%;
     height: auto;
+    /* Set reasonable constraints for mobile */
     min-height: calc(100vh - 2rem);
+    max-height: calc(100vh - 2rem);
     flex-direction: column;
     border-radius: 1rem;
     box-shadow: 0 8px 25px rgba(154, 170, 207, 0.3);
+    overflow-y: auto; 
   }
   
-  .welcomeContainer {
+ .welcomeContainer {
     width: 100%;
-    height: 25vh;
-    min-height: 200px;
+    height: auto; /* Change from fixed height */
+    min-height: 200px; /* Minimum height */
+    max-height: 25vh; /* Maximum height constraint */
     border-radius: 1rem 1rem 0 0;
     justify-content: center;
     align-items: center;
     text-align: center;
+    flex-shrink: 0; /* Prevent shrinking */
   }
   
   .imageContainer {
@@ -548,16 +708,20 @@
   
   .formContainer {
     width: 100%;
-    height: auto;
-    min-height: 75vh;
+    height: auto; /* Change from fixed height */
+    min-height: 0; /* Allow flexible sizing */
+    flex: 1; /* Take remaining space */
     border-radius: 0 0 1rem 1rem;
     background-color: white;
+    overflow-y: auto; /* Allow form content to scroll if needed */
   }
   
   .formContent {
     padding: 2rem 1rem;
-    height: 100%;
+    height: auto; /* Change from 100% */
+    min-height: 100%; /* Ensure it fills the container */
     justify-content: flex-start;
+    overflow-y: visible; /* Allow content to be visible */
   }
   
   .tabContainer {
@@ -588,11 +752,6 @@
   
   .phoneInputWithIcon {
     padding-left: 6rem !important;
-  }
-  
-  .phonePrefix {
-    left: 3.5rem;
-    font-size: 1rem;
   }
   
   .phoneInputFocused {
@@ -648,7 +807,7 @@
   }
   
   .phoneInputWithIcon {
-    padding-left: 4rem !important;
+    padding-left: 4.5rem !important;
   }
 }
 
@@ -661,12 +820,15 @@
   .cardContainer {
     border-radius: 0.5rem;
     min-height: 100vh;
+    max-height: 100vh; /* Full viewport height */
     margin: 0;
+    box-shadow: 0 16px 40px #9AAACF;
   }
   
   .welcomeContainer {
-    height: 20vh;
-    min-height: 180px;
+    height: auto;
+    min-height: 160px; /* Smaller minimum for very small screens */
+    max-height: 20vh;
     border-radius: 0.5rem 0.5rem 0 0;
   }
   
@@ -680,14 +842,23 @@
   }
   
   .formContainer {
-    min-height: 80vh;
+    min-height: 0;
+    flex: 1;
     border-radius: 0 0 0.5rem 0.5rem;
+    width: 100%;
+    height: auto; /* Change from fixed height */
+    background-color: white;
+    overflow-y: auto;
   }
   
   .formContent {
     padding: 1.5rem 0.75rem;
+    height: auto; /* Change from 100% */
+    min-height: 100%; /* Ensure it fills the container */
+    justify-content: flex-start;
+    overflow-y: visible; /* Allow content to be visible */
   }
-  
+
   .form {
     gap: 0.75rem;
   }
@@ -711,20 +882,28 @@
   }
   
   .cardContainer {
-    flex-direction: row;
+    flex-direction: row; /* Keep horizontal layout in landscape */
     min-height: calc(100vh - 2rem);
+    max-height: calc(100vh - 2rem);
     height: auto;
+    width: 100%;
+    max-width: none;
+    box-shadow: 0 16px 40px #9AAACF;
   }
   
+  
   .welcomeContainer {
-    width: 35%;
-    height: 100%;
+    width: 40%;
+    height: auto;
+    min-height: calc(100vh - 2rem);
+    max-height: none; /* Remove height constraint in landscape */
     border-radius: 1rem 0 0 1rem;
   }
   
   .formContainer {
-    width: 65%;
-    height: 100%;
+    width: 60%;
+    height: auto;
+    min-height: calc(100vh - 2rem);
     border-radius: 0 1rem 1rem 0;
   }
   

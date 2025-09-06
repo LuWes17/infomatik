@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Edit3, Trash2, Eye, Calendar, MapPin, Pin, PinOff, Image, X } from 'lucide-react';
+import { Plus, Edit3, Trash2, Eye, Calendar, MapPin, Pin, PinOff, Image, X, Megaphone } from 'lucide-react';
 import styles from './styles/AdminAnnouncements.module.css';
 const API_BASE = import.meta.env.VITE_API_URL; 
 
