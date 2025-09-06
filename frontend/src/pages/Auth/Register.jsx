@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import styles from './Auth.module.css';
 import infomatiklogo from '../../assets/infomatik-logo.png';
-import { UserRound, Phone, Lock, Eye, EyeOff, MapPin, CheckCircle } from 'lucide-react';
+import { UserRound, Phone, Lock, Eye, EyeOff, MapPin, CheckCircle, ChevronDown } from 'lucide-react';
 import OTPVerificationPopup from '../../components/OTP/OTPVerificationPopup';
 
 const Register = () => {
@@ -19,6 +19,8 @@ const Register = () => {
   const [otpError, setOtpError] = useState('');
   const [maskedNumber, setMaskedNumber] = useState('');
   const [registrationSuccess, setRegistrationSuccess] = useState(false);
+  const [barangayDropdownOpen, setBarangayDropdownOpen] = useState(false);
+  const barangayDropdownRef = useRef(null);
   
   useEffect(() => {
     if (isAuthenticated && !authLoading) {
@@ -313,6 +315,48 @@ const handleResendOTP = async () => {
   }
 };
 
+// Handle barangay dropdown
+const toggleBarangayDropdown = () => {
+  setBarangayDropdownOpen(!barangayDropdownOpen);
+};
+
+const handleBarangayChange = (barangay) => {
+  setFormData({ ...formData, barangay });
+  setBarangayDropdownOpen(false);
+  if (touched.barangay) {
+    validateField('barangay', barangay);
+  }
+};
+
+const formatBarangayName = (barangay) => {
+  return barangay.split(' ').map(word => 
+    word.charAt(0).toUpperCase() + word.slice(1)
+  ).join(' ');
+};
+
+
+const getDropdownButtonClass = () => {
+  let classes = styles.customDropdownButton;
+  
+  if (barangayDropdownOpen) {
+    classes += ` ${styles.active}`;
+  }
+  
+  if (!formData?.barangay) {
+    classes += ` ${styles.placeholder}`;
+  }
+  
+  if (touched?.barangay) {
+    if (error?.barangay) {
+      classes += ` ${styles.error}`;
+    } else if (formData?.barangay) { // Only add success class if barangay is selected
+      classes += ` ${styles.success}`;
+    }
+  }
+  
+  return classes;
+};
+
 // NEW FUNCTION - Close OTP popup
   const handleCloseOTPPopup = () => {
     setShowOTPPopup(false);
@@ -433,26 +477,40 @@ const handleResendOTP = async () => {
                 />
               </div>
 
-              <div className={styles.inputWrapper}>
-                <MapPin className={styles.inputIcon}/>
-                <select
-                  name="barangay"
-                  value={formData.barangay}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  className={`${getInputClass('barangay')} ${styles.inputWithIcon} ${!formData.barangay ? styles.selectPlaceholder : ''}`}
-                  required
+              <div className={styles.customDropdown} ref={barangayDropdownRef}>
+                <MapPin className={styles.inputIcon} />
+                <button
+                  type="button"
+                  onClick={toggleBarangayDropdown}
+                  className={getDropdownButtonClass()}
                   disabled={authLoading}
+                  onBlur={() => {
+                    if (!barangayDropdownOpen) {
+                      setTouched(prev => ({ ...prev, barangay: true }));
+                      validateField('barangay', formData.barangay);
+                    }
+                  }}
                 >
-                  <option value="">Select Barangay</option>
+                 <span>
+                    {formData?.barangay ? formatBarangayName(formData.barangay) : 'Select Barangay'}
+                  </span>
+                  <ChevronDown 
+                    size={16} 
+                    className={`${styles.dropdownArrow} ${barangayDropdownOpen ? styles.open : ''}`} 
+                  />
+                </button>
+                <div className={`${styles.customDropdownContent} ${barangayDropdownOpen ? styles.show : ''}`}>
                   {barangays.map((barangay) => (
-                    <option key={barangay} value={barangay}>
-                      {barangay.split(' ').map(word => 
-                        word.charAt(0).toUpperCase() + word.slice(1)
-                      ).join(' ')}
-                    </option>
+                    <button
+                      key={barangay}
+                      type="button"
+                      onClick={() => handleBarangayChange(barangay)}
+                      className={`${styles.customDropdownItem} ${formData?.barangay === barangay ? styles.active : ''}`}
+                    >
+                      {formatBarangayName(barangay)}
+                    </button>
                   ))}
-                </select>
+                </div>
               </div>
 
               <div className={styles.passwordWrapper}>
