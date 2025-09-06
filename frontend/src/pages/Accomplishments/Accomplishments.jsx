@@ -262,10 +262,7 @@ const Accomplishments = () => {
                   
                   {/* Description */}
                   <p className={styles.cardDescription}>
-                    {accomplishment.description.length > 100 
-                      ? `${accomplishment.description.substring(0, 100)}...` 
-                      : accomplishment.description
-                    }
+                    {accomplishment.description}
                   </p>
 
                   {/* Footer with date and button */}

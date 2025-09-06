@@ -543,8 +543,6 @@
   background: #94a3b8;
 }
 
-/* Image Gallery in Modal - New styles matching accomplishments */
-
 /* Main Image Container */
 .mainImageContainer {
   position: relative;
@@ -677,10 +675,9 @@
   font-size: 1rem;
   color: var(--gray-700);
   margin: 0 0 2rem 0;
-  /* Ensure long text wraps properly */
   word-wrap: break-word;
   overflow-wrap: break-word;
-  white-space: pre-wrap; /* Preserve formatting but allow wrapping */
+  white-space: pre-wrap;
   hyphens: auto;
 }
 

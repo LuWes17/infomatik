@@ -338,10 +338,8 @@
   padding: 1.5rem;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
   flex: 1;
-  min-width: 0; /* Critical for text truncation in flex containers */
-  height: 240px;
+  min-width: 0;
   overflow: hidden;
 }
 
@@ -352,9 +350,8 @@
   color: var(--gray-900);
   margin: 0;
   line-height: 1.3;
-  /* Text truncation with ellipsis - limit to 2 lines */
   display: -webkit-box;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 1;
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -373,17 +370,14 @@
 .cardDescription {
   color: var(--gray-600);
   line-height: 1.4;
-  margin: 0;
+  margin: 0.75rem 0;
   font-size: 0.9rem;
-  flex: 1;
-  /* Text truncation with ellipsis - limit to 3 lines */
   display: -webkit-box;
-  -webkit-line-clamp: 3;
+  -webkit-line-clamp: 4;
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
-  word-wrap: break-word;
-  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 /* Card Footer - Bottom aligned */
@@ -405,7 +399,7 @@
 
 .publishDate {
   color: var(--gray-500);
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   overflow: hidden;
   max-width: 200px;
 }
@@ -431,6 +425,31 @@
   border: 2px solid var(--primary-color);
   transform: translateY(-1px);
   box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
+}
+
+/* No Results Section */
+.noResults {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: var(--gray-500);
+}
+
+.noResultsIcon {
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
+
+.noResults h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: var(--gray-700);
+}
+
+.noResults p {
+  font-size: 1rem;
+  max-width: 400px;
+  margin: 0 auto;
 }
 
 /* Modal Styles - Updated with proper text handling */
@@ -513,7 +532,7 @@
 }
 
 .modalContent {
-  padding: 0 2rem 2rem;
+  padding: 2rem 2rem 2rem;
   overflow-y: auto;
   max-height: calc(90vh - 120px);
   flex: 1;
@@ -541,9 +560,9 @@
   background: #94a3b8;
 }
 
-/* Image Gallery in Modal */
+/* Image Gallery Styles */
 .imageGallery {
-  margin: 1.5rem 0;
+  margin-bottom: 2rem;
 }
 
 /* Main Image Container */
@@ -614,7 +633,7 @@
   display: flex;
   gap: 0.5rem;
   overflow-x: auto;
-  padding: 0.5rem 0;
+  padding: 0.5rem 0.5rem;;
 }
 
 .thumbnail {
@@ -701,7 +720,6 @@
   flex-direction: column;
   gap: 0.25rem;
   font-size: 0.7rem;
-  /* Allow metadata to wrap if needed */
   flex: 1;
   min-width: 200px;
 }
