@@ -128,12 +128,12 @@ const Home = () => {
       {/* Quick Links Section */}
       <div className={styles.quickLinks}>
         <div className={styles.quickLinksContainer}>
-          <Link to="/announcements" className={styles.quickLinkCard}>
+          <Link to="/announcements?filter=Event" className={styles.quickLinkCard}>
             <CalendarDays size={48} />
             <h3>Events</h3>
           </Link>
-          
-          <Link to="/announcements" className={styles.quickLinkCard}>
+
+          <Link to="/announcements?filter=Update" className={styles.quickLinkCard}>
             <BellRing size={48} />
             <h3>Updates</h3>
           </Link>

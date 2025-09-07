@@ -151,16 +151,13 @@
 
 .imageCount {
   position: absolute;
-  top: 0.75rem;
-  right: 0.75rem;
-  background: rgba(0, 0, 0, 0.7);
+  bottom: 0.5rem;
+  right: 0.5rem;
+  background: var(--gray-500);
   color: white;
   padding: 0.25rem 0.5rem;
-  border-radius: 12px;
-  font-size: 0.75rem;
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
+  border-radius: 16px;
+  font-size: 0.65rem;
   backdrop-filter: blur(4px);
 }
 
@@ -258,6 +255,7 @@
   justify-content: space-between;
   align-items: center;
   margin-top: auto;
+  gap: 1rem;
 }
 
 .date {
@@ -270,13 +268,26 @@
 }
 
 .readMore {
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-  color: var(--primary-color, #1c62bb);
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  padding: 0.5rem 1.25rem;
+  border-radius: 20px;
   font-size: 0.875rem;
-  font-weight: 600;
-  transition: gap 0.3s ease;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.1s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.readMore:hover {
+  background: #f8fafc;
+  color: var(--primary-color);
+  border: 2px solid var(--primary-color);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
 }
 
 .accomplishmentCard:hover .readMore {

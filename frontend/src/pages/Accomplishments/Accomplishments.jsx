@@ -4,6 +4,8 @@ import { ClipboardCheck, Search, Filter, Calendar, MapPin, Eye, ChevronLeft, Che
 
 const API_BASE = import.meta.env.VITE_API_URL; // e.g. http://localhost:4000/api
 
+import { useSearchParams, useLocation } from 'react-router-dom';
+
 const Accomplishments = () => {
   const [accomplishments, setAccomplishments] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -17,6 +19,8 @@ const Accomplishments = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
   const [fullscreenImage, setFullscreenImage] = useState(null);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const location = useLocation();
 
 
   // Project types for filtering
@@ -84,6 +88,34 @@ const Accomplishments = () => {
   setFilteredAccomplishments(filtered);
 }, [accomplishments, selectedFilter, searchTerm]);
 
+useEffect(() => {
+  const filterParam = searchParams.get('filter');
+  const highlightParam = searchParams.get('highlight');
+  
+  // Set filter based on URL parameter
+  if (filterParam && categories.includes(filterParam)) {
+    setSelectedFilter(filterParam);
+  } else if (filterParam === null) {
+    // No filter parameter in URL, keep current filter
+  } else {
+    // Invalid filter parameter, reset to 'All'
+    setSelectedFilter('All');
+  }
+
+  // Handle highlight parameter (for specific announcement highlighting)
+  if (highlightParam && accomplishments.length > 0) {
+    const highlightedAccomplishment = accomplishments.find(
+      accomplishment => accomplishment._id === highlightParam
+    );
+    if (highlightedAccomplishment) {
+      // Auto-open the modal for the highlighted accomplishment
+      setTimeout(() => {
+        openModal(highlightedAccomplishment);
+      }, 500);
+    }
+  }
+}, [searchParams, accomplishments, location]);
+
 
   // Helper function to get CSS class name for project type
   const getProjectTypeClass = (projectType) => {
@@ -105,6 +137,12 @@ const Accomplishments = () => {
     setSelectedAccomplishment(null);
     setCurrentImageIndex(0);
     document.body.style.overflow = "auto";
+
+    const newSearchParams = new URLSearchParams(searchParams);
+    if (newSearchParams.has('highlight')) {
+      newSearchParams.delete('highlight');
+      setSearchParams(newSearchParams);
+    }
   };
 
   // Navigate through images in modal
@@ -137,6 +175,14 @@ const Accomplishments = () => {
   const handleFilterChange = (filter) => {
     setSelectedFilter(filter);
     setDropdownOpen(false);
+
+    const newSearchParams = new URLSearchParams(searchParams);
+    if (filter === 'All') {
+      newSearchParams.delete('filter');
+    } else {
+      newSearchParams.set('filter', filter);
+    }
+    setSearchParams(newSearchParams);
   };
 
   const toggleDropdown = () => {

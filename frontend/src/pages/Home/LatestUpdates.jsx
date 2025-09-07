@@ -39,8 +39,10 @@ const LatestUpdates = () => {
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
-      month: 'short',
-      day: 'numeric'
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
     });
   };
 
@@ -115,8 +117,7 @@ const LatestUpdates = () => {
                       />
                       {update.photos.length > 1 && (
                         <div className={styles.imageCount}>
-                          <Image size={12} />
-                          {update.photos.length}
+                         +{update.photos.length - 1} more
                         </div>
                       )}
                     </>
@@ -129,10 +130,6 @@ const LatestUpdates = () => {
 
                 {/* Card Content */}
                 <div className={styles.cardContent}>
-                  {/* Category Badge */}
-                  <div className={styles.categoryBadge}>
-                    <span className={styles.category}>Update</span>
-                  </div>
 
                   {/* Title */}
                   <h3 className={styles.cardTitle}>{update.title}</h3>
@@ -145,12 +142,10 @@ const LatestUpdates = () => {
                   {/* Footer */}
                   <div className={styles.cardFooter}>
                     <div className={styles.date}>
-                      <Calendar size={14} />
                       {formatDate(update.createdAt)}
                     </div>
                     <div className={styles.readMore}>
                       Read More
-                      <ArrowRight size={14} />
                     </div>
                   </div>
                 </div>

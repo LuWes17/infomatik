@@ -3,6 +3,7 @@ import styles from './Announcements.module.css'
 import { Megaphone, Search, Filter, Calendar, MapPin, Eye, ChevronLeft, ChevronRight, ChevronDown } from 'lucide-react';
 import megaphone from '../../assets/announcement/megaphone.png'
 const API_BASE = import.meta.env.VITE_API_URL; // e.g. http://localhost:4000/api
+import { useSearchParams, useLocation } from 'react-router-dom';
 
 const PublicAnnouncements = () => {
   const [announcements, setAnnouncements] = useState([]);
@@ -17,6 +18,8 @@ const PublicAnnouncements = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [fullscreenImage, setFullscreenImage] = useState(null);
   const dropdownRef = useRef(null);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const location = useLocation();
 
   // Categories for filtering
   const categories = ['All', 'Update', 'Event'];
@@ -77,6 +80,34 @@ const PublicAnnouncements = () => {
     setFilteredAnnouncements(filtered);
   }, [announcements, selectedFilter, searchTerm]);
 
+  useEffect(() => {
+  const filterParam = searchParams.get('filter');
+  const highlightParam = searchParams.get('highlight');
+  
+  // Set filter based on URL parameter
+  if (filterParam && categories.includes(filterParam)) {
+    setSelectedFilter(filterParam);
+  } else if (filterParam === null) {
+    // No filter parameter in URL, keep current filter
+  } else {
+    // Invalid filter parameter, reset to 'All'
+    setSelectedFilter('All');
+  }
+
+  // Handle highlight parameter (for specific announcement highlighting)
+  if (highlightParam && announcements.length > 0) {
+    const highlightedAnnouncement = announcements.find(
+      announcement => announcement._id === highlightParam
+    );
+    if (highlightedAnnouncement) {
+      // Auto-open the modal for the highlighted announcement
+      setTimeout(() => {
+        openViewModal(highlightedAnnouncement);
+      }, 500);
+    }
+  }
+}, [searchParams, announcements, location]);
+
   const openViewModal = (announcement) => {
     setSelectedAnnouncement(announcement);
     setCurrentImageIndex(0);
@@ -89,6 +120,12 @@ const PublicAnnouncements = () => {
     setSelectedAnnouncement(null);
     setCurrentImageIndex(0);
     document.body.style.overflow = "auto";
+
+    const newSearchParams = new URLSearchParams(searchParams);
+    if (newSearchParams.has('highlight')) {
+      newSearchParams.delete('highlight');
+      setSearchParams(newSearchParams);
+    }
   };
 
   // Navigate through images in modal
@@ -121,7 +158,15 @@ const PublicAnnouncements = () => {
   const handleFilterChange = (filter) => {
     setSelectedFilter(filter);
     setDropdownOpen(false);
-  };
+
+    const newSearchParams = new URLSearchParams(searchParams);
+    if (filter === 'All') {
+      newSearchParams.delete('filter');
+    } else {
+      newSearchParams.set('filter', filter);
+    }
+    setSearchParams(newSearchParams);
+};
 
   const toggleDropdown = () => {
     setDropdownOpen(!dropdownOpen);

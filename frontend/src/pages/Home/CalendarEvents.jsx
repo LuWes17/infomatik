@@ -137,13 +137,10 @@ const CalendarEvents = () => {
         {/* Header */}
         <div className={styles.header}>
           <div className={styles.headerContent}>
-            <div className={styles.headerIcon}>
-              <Calendar size={40} />
-            </div>
             <div className={styles.headerText}>
               <h2 className={styles.title}>Calendar of Events</h2>
               <p className={styles.subtitle}>
-                Stay updated with upcoming community events and activities
+                Manatiling updated sa mga paparating na kaganapan at aktibidad ng komunidad
               </p>
             </div>
           </div>
@@ -217,10 +214,10 @@ const CalendarEvents = () => {
 
             {!error && events.length > 0 && (
               <div className={styles.eventsList}>
-                {events.slice(0, 5).map((event) => (
+                {events.slice(0, 3).map((event) => (
                   <Link 
                     key={event._id} 
-                    to={`/announcements/${event._id}`}
+                    to={`/announcements/?highlight=${event._id}`}
                     className={styles.eventCard}
                   >
                     <div className={styles.eventDate}>
@@ -255,10 +252,10 @@ const CalendarEvents = () => {
             )}
             
 
-            {events.length > 5 && (
+            {events.length > 3 && (
               <div className={styles.viewMoreContainer}>
-                <Link to="/announcements?category=Event" className={styles.viewMoreBtn}>
-                  View {events.length - 5} More Events
+                <Link to="/announcements?filter=Event" className={styles.viewMoreBtn}>
+                  View All Events
                   <ArrowRight size={16} />
                 </Link>
               </div>

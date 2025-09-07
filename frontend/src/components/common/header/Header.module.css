@@ -35,12 +35,13 @@
 }
 
 .navLink {
-  color: var(--white);
+  color: var(--gray-50);
   font-weight: 500;
   transition: color 0.2s ease;
   padding: var(--spacing-sm) 0;
   display: block;
   text-decoration: none;
+  position: relative;
 }
 
 .navLink:hover {
@@ -146,6 +147,97 @@
   background-color: rgba(255, 255, 255, 0.1);
 }
 
+.activeNavLink {
+  color: var(--white) !important;
+  font-weight: 600;
+}
+
+.activeNavLink::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--white);
+  border-radius: 2px;
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* Active Dropdown Styles */
+.activeDropdown .navLink {
+  color: var(--white);
+  font-weight: 600;
+}
+
+.activeDropdown .navLink::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--white);
+  border-radius: 2px;
+  animation: slideIn 0.3s ease-out;
+}
+
+.activeSidebarNavLink {
+  background-color: var(--primary-color) !important;
+  color: white !important;
+  font-weight: 600;
+}
+
+.activeSidebarNavLink::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  background: white;
+}
+
+/* Active Sidebar Dropdown Styles */
+.activeSidebarDropdown > .sidebarDropdownHeader .sidebarNavLink {
+  background-color: var(--primary-color) !important;
+  color: white !important;
+  font-weight: 600;
+}
+
+.activeSidebarDropdown > .sidebarDropdownHeader .sidebarNavLink::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  background: white;
+}
+
+/* Active Sidebar Dropdown Link Styles */
+.activeSidebarDropdownLink {
+  background-color: var(--primary-color) !important;
+  color: white !important;
+  font-weight: 600;
+}
+
+.activeSidebarDropdownLink::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  background: white;
+}
+
 /* Sidebar Styles */
 .noScroll {
   overflow: hidden;
@@ -223,6 +315,7 @@
   font-weight: 500;
   transition: all 0.2s ease;
   font-size: 12px;
+  position: relative;
 }
 
 .sidebarNavLink:hover {
@@ -276,6 +369,7 @@
   font-weight: 400;
   font-size: 10px;
   transition: all 0.2s ease;
+  position: relative;
 }
 
 .sidebarDropdownLink:hover {
