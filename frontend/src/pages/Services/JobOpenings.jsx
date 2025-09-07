@@ -355,19 +355,19 @@ const JobOpenings = () => {
                 onClick={() => handleFilterChange('open')}
                 className={`${styles.dropdownItem} ${filterStatus === 'open' ? styles.active : ''}`}
               >
-                Open ({jobs.filter(job => job.status === 'open').length})
+                Open 
               </button>
               <button
                 onClick={() => handleFilterChange('closed')}
                 className={`${styles.dropdownItem} ${filterStatus === 'closed' ? styles.active : ''}`}
               >
-                Closed ({jobs.filter(job => job.status === 'closed').length})
+                Closed 
               </button>
               <button
                 onClick={() => handleFilterChange('all')}
                 className={`${styles.dropdownItem} ${filterStatus === 'all' ? styles.active : ''}`}
               >
-                All ({jobs.length})
+                All
               </button>
             </div>
           </div>
@@ -444,12 +444,11 @@ const JobOpenings = () => {
                   
                   {job.status === 'open' && !isDeadlinePassed(job.applicationDeadline) && (
                     hasUserApplied(job._id) ? (
-                      <button 
+                      <div 
                         className={styles.appliedBtn}
-                        onClick={(e) => handleApplyClick(e, job)}
                       >
                         Already Applied
-                      </button>
+                      </div>
                     ) : (
                       <button 
                         className={styles.applyBtn}
@@ -536,12 +535,11 @@ const JobOpenings = () => {
               {selectedJob.status === 'open' && !isDeadlinePassed(selectedJob.applicationDeadline) && (
                 <div className={styles.modalActions}>
                   {hasUserApplied(selectedJob._id) ? (
-                    <button 
+                    <div
                       className={styles.appliedBtn}
-                      onClick={() => handleApplyClick({stopPropagation: () => {}}, selectedJob)}
                     >
                       Already Applied
-                    </button>
+                    </div>
                   ) : (
                     <button 
                       className={styles.applyBtn}
