@@ -82,8 +82,8 @@ const Leadership = () => {
                 <div className={styles.placeholderIcon}>👤</div>
               </div>
               <div className={styles.staffInfo}>
-                <h4 className={styles.staffName}>Staff Member 1</h4>
-                <p className={styles.staffPosition}>Position</p>
+                <h4 className={styles.staffName}>Richard Almonte</h4>
+                
               </div>
             </div>
 
@@ -92,8 +92,8 @@ const Leadership = () => {
                 <div className={styles.placeholderIcon}>👤</div>
               </div>
               <div className={styles.staffInfo}>
-                <h4 className={styles.staffName}>Staff Member 2</h4>
-                <p className={styles.staffPosition}>Position</p>
+                <h4 className={styles.staffName}>Klaizer Jay Amper</h4>
+                
               </div>
             </div>
 
@@ -102,8 +102,8 @@ const Leadership = () => {
                 <div className={styles.placeholderIcon}>👤</div>
               </div>
               <div className={styles.staffInfo}>
-                <h4 className={styles.staffName}>Staff Member 3</h4>
-                <p className={styles.staffPosition}>Position</p>
+                <h4 className={styles.staffName}>Ma. Elisa Ballarbare</h4>
+                
               </div>
             </div>
             
@@ -112,8 +112,8 @@ const Leadership = () => {
                 <div className={styles.placeholderIcon}>👤</div>
               </div>
               <div className={styles.staffInfo}>
-                <h4 className={styles.staffName}>Staff Member 2</h4>
-                <p className={styles.staffPosition}>Position</p>
+                <h4 className={styles.staffName}>Danilo Bellen</h4>
+                
               </div>
             </div>
             
@@ -122,8 +122,8 @@ const Leadership = () => {
                 <div className={styles.placeholderIcon}>👤</div>
               </div>
               <div className={styles.staffInfo}>
-                <h4 className={styles.staffName}>Staff Member 2</h4>
-                <p className={styles.staffPosition}>Position</p>
+                <h4 className={styles.staffName}>Joan Berces</h4>
+                
               </div>
             </div>
             
@@ -132,8 +132,8 @@ const Leadership = () => {
                 <div className={styles.placeholderIcon}>👤</div>
               </div>
               <div className={styles.staffInfo}>
-                <h4 className={styles.staffName}>Staff Member 2</h4>
-                <p className={styles.staffPosition}>Position</p>
+                <h4 className={styles.staffName}>Mark Jayson Betito</h4>
+                
               </div>
             </div>
             
@@ -142,8 +142,8 @@ const Leadership = () => {
                 <div className={styles.placeholderIcon}>👤</div>
               </div>
               <div className={styles.staffInfo}>
-                <h4 className={styles.staffName}>Staff Member 2</h4>
-                <p className={styles.staffPosition}>Position</p>
+                <h4 className={styles.staffName}>Lorenzo Bonaobra</h4>
+                
               </div>
             </div>
             
@@ -152,8 +152,8 @@ const Leadership = () => {
                 <div className={styles.placeholderIcon}>👤</div>
               </div>
               <div className={styles.staffInfo}>
-                <h4 className={styles.staffName}>Staff Member 2</h4>
-                <p className={styles.staffPosition}>Position</p>
+                <h4 className={styles.staffName}>Edilberto Bongat</h4>
+                
               </div>
             </div>
             
@@ -162,8 +162,8 @@ const Leadership = () => {
                 <div className={styles.placeholderIcon}>👤</div>
               </div>
               <div className={styles.staffInfo}>
-                <h4 className={styles.staffName}>Staff Member 2</h4>
-                <p className={styles.staffPosition}>Position</p>
+                <h4 className={styles.staffName}>Joseph Bos</h4>
+                
               </div>
             </div>
             
@@ -172,8 +172,8 @@ const Leadership = () => {
                 <div className={styles.placeholderIcon}>👤</div>
               </div>
               <div className={styles.staffInfo}>
-                <h4 className={styles.staffName}>Staff Member 2</h4>
-                <p className={styles.staffPosition}>Position</p>
+                <h4 className={styles.staffName}>Jayar Broña</h4>
+                
               </div>
             </div>
             
@@ -182,8 +182,8 @@ const Leadership = () => {
                 <div className={styles.placeholderIcon}>👤</div>
               </div>
               <div className={styles.staffInfo}>
-                <h4 className={styles.staffName}>Staff Member 2</h4>
-                <p className={styles.staffPosition}>Position</p>
+                <h4 className={styles.staffName}>Merlinda Campit</h4>
+                
               </div>
             </div>
             
@@ -192,8 +192,68 @@ const Leadership = () => {
                 <div className={styles.placeholderIcon}>👤</div>
               </div>
               <div className={styles.staffInfo}>
-                <h4 className={styles.staffName}>Staff Member 2</h4>
-                <p className={styles.staffPosition}>Position</p>
+                <h4 className={styles.staffName}>Julie Ann Casero</h4>
+
+              </div>
+            </div>
+
+            <div className={styles.staffCard}>
+              <div className={styles.staffImagePlaceholder}>
+                <div className={styles.placeholderIcon}>👤</div>
+              </div>
+              <div className={styles.staffInfo}>
+                <h4 className={styles.staffName}>Kenneth Gueriba</h4>
+
+              </div>
+            </div>
+
+            <div className={styles.staffCard}>
+              <div className={styles.staffImagePlaceholder}>
+                <div className={styles.placeholderIcon}>👤</div>
+              </div>
+              <div className={styles.staffInfo}>
+                <h4 className={styles.staffName}>Alan Lorio</h4>
+
+              </div>
+            </div>
+
+            <div className={styles.staffCard}>
+              <div className={styles.staffImagePlaceholder}>
+                <div className={styles.placeholderIcon}>👤</div>
+              </div>
+              <div className={styles.staffInfo}>
+                <h4 className={styles.staffName}>Glenda Magdasal</h4>
+
+              </div>
+            </div>
+
+            <div className={styles.staffCard}>
+              <div className={styles.staffImagePlaceholder}>
+                <div className={styles.placeholderIcon}>👤</div>
+              </div>
+              <div className={styles.staffInfo}>
+                <h4 className={styles.staffName}>Virginia Rosales</h4>
+
+              </div>
+            </div>
+
+            <div className={styles.staffCard}>
+              <div className={styles.staffImagePlaceholder}>
+                <div className={styles.placeholderIcon}>👤</div>
+              </div>
+              <div className={styles.staffInfo}>
+                <h4 className={styles.staffName}>Jennylyn Sabilala</h4>
+
+              </div>
+            </div>
+
+            <div className={styles.staffCard}>
+              <div className={styles.staffImagePlaceholder}>
+                <div className={styles.placeholderIcon}>👤</div>
+              </div>
+              <div className={styles.staffInfo}>
+                <h4 className={styles.staffName}>Mercy Torres</h4>
+
               </div>
             </div>
           </div>
