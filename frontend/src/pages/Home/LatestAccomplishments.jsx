@@ -39,8 +39,10 @@ const LatestAccomplishments = () => {
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
-      month: 'short',
-      day: 'numeric'
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
     });
   };
 
@@ -109,8 +111,7 @@ const LatestAccomplishments = () => {
                       />
                       {accomplishment.photos.length > 1 && (
                         <div className={styles.imageCount}>
-                          <ClipboardCheck size={12} />
-                          {accomplishment.photos.length}
+                          + {accomplishment.photos.length - 1} more
                         </div>
                       )}
                     </>
@@ -141,12 +142,10 @@ const LatestAccomplishments = () => {
                   {/* Footer */}
                   <div className={styles.cardFooter}>
                     <div className={styles.date}>
-                      <Calendar size={14} />
                       {formatDate(accomplishment.createdAt)}
                     </div>
                     <div className={styles.readMore}>
                       Read More
-                      <ArrowRight size={14} />
                     </div>
                   </div>
                 </div>
