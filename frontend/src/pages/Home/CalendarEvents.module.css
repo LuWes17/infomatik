@@ -3,6 +3,7 @@
 /* Main Section */
 .calendarEventsSection {
   padding: 1rem 0;
+  margin-bottom: 4rem;
   background: #f8fafc;
 }
 
@@ -102,6 +103,8 @@
   grid-template-columns: 1fr 1.5fr;
   gap: 3rem;
   align-items: start;
+  overflow: hidden;
+  width: 100%;
 }
 
 /* Calendar Widget */
@@ -111,13 +114,14 @@
   padding: 2rem;
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
   border: 1px solid rgba(28, 98, 187, 0.1);
+  min-width: 0;
+  width: 100%;
 }
 
 .calendarHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1.5rem;
   padding-bottom: 1rem;
   border-bottom: 2px solid #f1f5f9;
 }
@@ -167,8 +171,6 @@
   color: var(--gray-600, #475569);
   padding: 0.75rem 0.5rem;
   font-size: 0.875rem;
-  border-bottom: 1px solid #e2e8f0;
-  margin-bottom: 0.5rem;
 }
 
 .calendarDay {
@@ -225,6 +227,9 @@
   padding: 2rem;
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
   border: 1px solid rgba(28, 98, 187, 0.1);
+  min-width: 0;
+  width: 100%;
+  overflow: hidden;
 }
 
 .upcomingTitle {
@@ -253,6 +258,10 @@
   color: inherit;
   transition: all 0.3s ease;
   border: 2px solid transparent;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .eventCard:hover {
@@ -294,6 +303,8 @@
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .eventTitle {
@@ -307,6 +318,9 @@
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
 }
 
 .eventMeta {
@@ -314,6 +328,7 @@
   gap: 1rem;
   align-items: center;
   flex-wrap: wrap;
+  min-width: 0;
 }
 
 .eventTime,
@@ -324,6 +339,8 @@
   color: var(--gray-600, #475569);
   font-size: 0.875rem;
   font-weight: 500;
+  min-width: 0;
+  flex-shrink: 1;
 }
 
 .eventDescription {
@@ -332,10 +349,22 @@
   line-height: 1.5;
   margin: 0;
   display: -webkit-box;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
+}
+
+.eventTime span,
+.eventLocation span {
+  /* FIXED: Truncate long location names */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
 }
 
 /* View More Button */
@@ -487,6 +516,11 @@
     align-items: flex-start;
     gap: 0.5rem;
   }
+
+  .eventTime span,
+  .eventLocation span {
+    max-width: 200px;
+  }
 }
 
 @media (max-width: 480px) {
@@ -508,9 +542,11 @@
     height: 4px;
   }
   
-  .eventCard {
+.eventCard {
     flex-direction: column;
     text-align: center;
+    padding: 1rem 0.75rem;
+    gap: 1rem;
   }
   
   .eventDate {
@@ -520,6 +556,10 @@
     padding: 0.75rem 1rem;
   }
   
+  .eventDetails {
+    text-align: left;
+  }
+  
   .eventDay {
     font-size: 1.25rem;
   }
@@ -527,5 +567,54 @@
   .eventMonth {
     font-size: 0.7rem;
     margin-top: 0;
+  }
+  
+  .eventTitle {
+    font-size: 1rem;
+    -webkit-line-clamp: 3;
+  }
+  
+  .eventDescription {
+    font-size: 0.85rem;
+    -webkit-line-clamp: 4;
+  }
+  
+  /* FIXED: Better mobile text truncation */
+  .eventTime span,
+  .eventLocation span {
+    max-width: 150px;
+  }
+
+}
+
+@media (max-width: 360px) {
+  .eventCard {
+    padding: 0.75rem 0.5rem;
+  }
+  
+  .eventDate {
+    padding: 0.5rem 0.75rem;
+    min-width: 50px;
+  }
+  
+  .eventDay {
+    font-size: 1.1rem;
+  }
+  
+  .eventMonth {
+    font-size: 0.65rem;
+  }
+  
+  .eventTitle {
+    font-size: 0.95rem;
+  }
+  
+  .eventDescription {
+    font-size: 0.8rem;
+  }
+  
+  .eventTime span,
+  .eventLocation span {
+    max-width: 120px;
   }
 }
