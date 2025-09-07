@@ -24,23 +24,28 @@ const Accomplishments = () => {
 
   // Fetch accomplishments from backend
   const fetchAccomplishments = async () => {
-    try {
-      setLoading(true);
-      const response = await fetch(`${API_BASE}/accomplishments`);
+  try {
+    setLoading(true);
+    const response = await fetch(`${API_BASE}/accomplishments`);
 
-      if (!response.ok) {
-        throw new Error('Failed to fetch accomplishments');
-      }
-
-      const data = await response.json();
-      setAccomplishments(data.data || data);
-      setFilteredAccomplishments(data.data || data);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
+    if (!response.ok) {
+      throw new Error('Failed to fetch accomplishments');
     }
-  };
+
+    const data = await response.json();
+    // Sort by createdAt in descending order (newest first)
+    const sortedData = (data.data || data).sort((a, b) => 
+      new Date(b.createdAt) - new Date(a.createdAt)
+    );
+    
+    setAccomplishments(sortedData);
+    setFilteredAccomplishments(sortedData);
+  } catch (err) {
+    setError(err.message);
+  } finally {
+    setLoading(false);
+  }
+};
 
   useEffect(() => {
     fetchAccomplishments();
