@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Calendar, Filter, Plus, X, Upload, Search, Eye, Building2, Phone, MapPin, FileText, Calendar as CalendarIcon, User, Type, DollarSign, Users, Mail, ChevronDown } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import styles from './SolicitationRequests.module.css';
+import { useNotification } from '../../contexts/NotificationContext'
 
 const SolicitationRequests = () => {
   // Auth context
@@ -30,6 +31,8 @@ const SolicitationRequests = () => {
   const organizationTypeDropdownRef = useRef(null);
   const requestTypeDropdownRef = useRef(null);
 
+  const { showSuccess, showError, showWarning, showInfo } = useNotification();
+
   // Barangays list
   const barangays = [
     'agnas', 'bacolod', 'bangkilingan', 'bantayan', 'baranghawon', 'basagan', 
@@ -51,7 +54,6 @@ const SolicitationRequests = () => {
     organizationName: '',
     street: '',
     barangay: '',
-    city: '',
     eventDate: '',
     requestType: '',
     requestedAssistanceDetails: '',
@@ -172,7 +174,7 @@ const SolicitationRequests = () => {
       submitData.append('organizationName', formData.organizationName);
       submitData.append('organizationType', formData.organizationType);
       submitData.append('contactNumber', formData.contactNumber);
-      submitData.append('address', `${formData.street}, ${formData.barangay}, ${formData.city}`);
+      submitData.append('address', `${formData.street}, ${formData.barangay}`);
       submitData.append('requestType', formData.requestType);
       submitData.append('requestedAssistanceDetails', formData.requestedAssistanceDetails);
       submitData.append('purpose', formData.purpose);
@@ -189,15 +191,16 @@ const SolicitationRequests = () => {
       if (response.ok) {
         setShowRequestForm(false);
         resetForm();
-        alert('Solicitation request submitted successfully!');
+        showSuccess('Solicitation request submitted successfully!');
         fetchSolicitationRequests();
       } else {
         const error = await response.json();
-        alert(`Error: ${error.message || 'Failed to submit request'}`);
+        console.log(`Error: ${error.message}`)
+        showError('Failed to submit solicitation request');
       }
     } catch (error) {
       console.error('Error submitting form:', error);
-      alert('Failed to submit request. Please try again.');
+      showError('Failed to submit solicitation request. Please try again.');
     }
   };
 
@@ -210,7 +213,6 @@ const SolicitationRequests = () => {
       organizationName: '',
       street: '',
       barangay: '',
-      city: '',
       eventDate: '',
       requestType: '',
       requestedAssistanceDetails: '',
@@ -334,7 +336,7 @@ const SolicitationRequests = () => {
           <Mail size={92} className={styles.icon} />
           <div className={styles.headerContent}>
             <h1>Solicitation Requests</h1>
-            <p>View approved solicitation requests and submit your own request for assistance.</p>
+            <p>View completed solicitation requests and submit your own request for assistance.</p>
           </div>
         </div>
 
@@ -570,6 +572,7 @@ const SolicitationRequests = () => {
                           type="button"
                           onClick={toggleOrganizationTypeDropdown}
                           className={`${styles.customDropdownButton} ${organizationTypeDropdownOpen ? styles.active : ''} ${!formData.organizationType ? styles.placeholder : ''}`}
+                          required
                         >
                           <span>
                             {formData.organizationType || 'Select organization type'}
@@ -658,24 +661,6 @@ const SolicitationRequests = () => {
                     </div>
                   </div>
 
-                  {/* City */}
-                  <div className={styles.formGroup}>
-                    <label>City *</label>
-                    <div className={styles.inputWrapper}>
-                      <MapPin size={16} className={styles.inputIcon} />
-                      <input
-                        type="text"
-                        value={formData.city}
-                        onChange={(e) => setFormData({...formData, city: e.target.value})}
-                        required
-                        placeholder="City"
-                        className={styles.inputWithIcon}
-                        maxLength={100}
-                      />
-                    </div>
-                  </div>
-
-
                   {/* Request Type - Custom Dropdown */}
                   <div className={styles.formGroup}>
                     <label>Request Type *</label>
@@ -686,6 +671,7 @@ const SolicitationRequests = () => {
                           type="button"
                           onClick={toggleRequestTypeDropdown}
                           className={`${styles.customDropdownButton} ${requestTypeDropdownOpen ? styles.active : ''} ${!formData.requestType ? styles.placeholder : ''}`}
+                          required
                         >
                           <span>
                             {formData.requestType || 'Select request type'}

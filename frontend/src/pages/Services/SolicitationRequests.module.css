@@ -222,36 +222,6 @@
   box-shadow: 0 0 0 3px rgba(28, 98, 187, 0.1);
 }
 
-/* Submit Section */
-.submitSection {
-  padding: 0 3rem;
-  margin-bottom: 2rem;
-  display: flex;
-  justify-content: flex-end;
-}
-
-.submitBtn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.5rem;
-  background: var(--primary-color);
-  color: white;
-  border: none;
-  border-radius: 25px;
-  font-size: 0.9rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.submitBtn:hover {
-  background: var(--primary-dark);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-}
-
 /* Content Section */
 .content {
   padding: 0 3rem;
@@ -1077,6 +1047,8 @@
   transition: all 0.3s ease;
   min-width: 150px;
   font-size: 0.9rem;
+  display: flex;
+  justify-content: center;
 }
 
 .submitBtn:hover {
@@ -1531,7 +1503,7 @@
   }
 
   .modalHeader {
-    padding: 1rem 2.5rem 1rem 1rem;
+    padding: 1rem 2.5rem 0rem 1rem;
   }
 
   .modalTitle {
