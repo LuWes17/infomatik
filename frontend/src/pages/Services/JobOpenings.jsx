@@ -6,11 +6,8 @@ import {
   BriefcaseBusiness, 
   Filter, 
   X, 
-  Eye,
   User,
   Phone,
-  FileText,
-  Clock,
   Upload,
   MapPin as LocationIcon,
   Calendar as CalendarIcon,
@@ -40,22 +37,6 @@ const JobOpenings = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
-  
-  // Barangay dropdown states
-  const [barangayDropdownOpen, setBarangayDropdownOpen] = useState(false);
-  const barangayDropdownRef = useRef(null);
-  
-  // Barangays list for dropdown
-  const barangays = [
-    'agnas', 'bacolod', 'bangkilingan', 'bantayan', 'baranghawon', 'basagan', 
-    'basud', 'bognabong', 'bombon', 'bonot', 'san isidro', 'buang', 'buhian', 
-    'cabagnan', 'cobo', 'comon', 'cormidal', 'divino rostro', 'fatima', 
-    'guinobat', 'hacienda', 'magapo', 'mariroc', 'matagbac', 'oras', 'oson', 
-    'panal', 'pawa', 'pinagbobong', 'quinale cabasan', 'quinastillojan', 'rawis', 
-    'sagurong', 'salvacion', 'san antonio', 'san carlos', 'san juan', 'san lorenzo', 
-    'san ramon', 'san roque', 'san vicente', 'santo cristo', 'sua-igot', 'tabiguian', 
-    'tagas', 'tayhi', 'visita'
-  ];
   
   const [applicationData, setApplicationData] = useState({
     firstName: '',
