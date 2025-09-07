@@ -76,17 +76,27 @@ const JobOpenings = () => {
       const token = localStorage.getItem('token');
       const response = await fetch('http://localhost:4000/api/jobs/my/applications', {
         headers: {
-          'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
         }
       });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
       const data = await response.json();
       
-      if (data.success) {
-        const appliedJobIds = new Set(data.applications.map(app => app.jobId));
+      if (data.success && data.data) {
+        // Fix: Use data.data instead of data.applications, and handle potential undefined
+        const appliedJobIds = new Set(
+          data.data.map(app => app.jobPosting?._id || app.jobPosting).filter(Boolean)
+        );
         setUserApplications(appliedJobIds);
       }
     } catch (error) {
       console.error('Error fetching user applications:', error);
+      // Don't throw error, just log it and continue
     }
   };
 
@@ -246,7 +256,7 @@ const JobOpenings = () => {
       const data = await response.json();
       
       if (data.success) {
-        showSuccess('Application submitted successfully. You will be notified via SMS for status regarding your application.')
+        showSuccess('Application submitted successfully. You will be notified via SMS for status regarding your application.', 5000)
         setShowApplicationForm(false);
         // Add the job to user applications set
         setUserApplications(prev => new Set(prev.add(selectedJob._id)));
