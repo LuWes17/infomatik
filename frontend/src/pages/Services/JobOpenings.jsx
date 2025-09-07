@@ -1,4 +1,3 @@
-// frontend/src/pages/JobOpenings/JobOpenings.jsx
 import React, { useState, useEffect, useRef } from 'react';
 import { 
   Calendar, 
@@ -28,7 +27,6 @@ const JobOpenings = () => {
   const [showJobDetails, setShowJobDetails] = useState(false);
   const [showApplicationForm, setShowApplicationForm] = useState(false);
   const [showAuthPrompt, setShowAuthPrompt] = useState(false);
-  const [showAlreadyAppliedPopup, setShowAlreadyAppliedPopup] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [userApplications, setUserApplications] = useState(new Set());
   const { showSuccess, showError, showWarning, showInfo } = useNotification();
@@ -112,9 +110,6 @@ const JobOpenings = () => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setDropdownOpen(false);
       }
-      if (barangayDropdownRef.current && !barangayDropdownRef.current.contains(event.target)) {
-        setBarangayDropdownOpen(false);
-      }
     };
 
     document.addEventListener('mousedown', handleClickOutside);
@@ -190,7 +185,6 @@ const JobOpenings = () => {
     // Check if user already applied for this job
     if (userApplications.has(job._id)) {
       setSelectedJob(job);
-      setShowAlreadyAppliedPopup(true);
       return;
     }
     
@@ -269,10 +263,7 @@ const JobOpenings = () => {
     setShowJobDetails(false);
     setShowApplicationForm(false);
     setShowAuthPrompt(false);
-    setShowAlreadyAppliedPopup(false);
     setSelectedJob(null);
-    setBarangayDropdownOpen(false);
-    setShowDetailsModal(false);
     // Unfreeze background when any modal closes
     document.body.style.overflow = "auto";
   };
@@ -285,23 +276,6 @@ const JobOpenings = () => {
 
   const toggleDropdown = () => {
     setDropdownOpen(!dropdownOpen);
-  };
-
-  // Barangay dropdown handlers
-  const handleBarangayChange = (barangay) => {
-    setApplicationData({...applicationData, barangay: barangay});
-    setBarangayDropdownOpen(false);
-  };
-
-  const toggleBarangayDropdown = () => {
-    setBarangayDropdownOpen(!barangayDropdownOpen);
-  };
-
-  // Format barangay name for display
-  const formatBarangayName = (barangay) => {
-    return barangay.split(' ').map(word => 
-      word.charAt(0).toUpperCase() + word.slice(1)
-    ).join(' ');
   };
 
   if (loading) {
@@ -443,21 +417,22 @@ const JobOpenings = () => {
                   </button>
                   
                   {job.status === 'open' && !isDeadlinePassed(job.applicationDeadline) && (
-                    hasUserApplied(job._id) ? (
-                      <div 
-                        className={styles.appliedBtn}
-                      >
-                        Already Applied
-                      </div>
-                    ) : (
-                      <button 
-                        className={styles.applyBtn}
-                        onClick={(e) => handleApplyClick(e, job)}
-                      >
-                        Apply Now
-                      </button>
-                    )
-                  )}
+                  hasUserApplied(job._id) ? (
+                    <div 
+                      className={styles.appliedBtn}
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      Already Applied
+                    </div>
+                  ) : (
+                    <button 
+                      className={styles.applyBtn}
+                      onClick={(e) => handleApplyClick(e, job)}
+                    >
+                      Apply Now
+                    </button>
+                  )
+                )}
                 </div>
               </div>
             ))}
@@ -470,16 +445,14 @@ const JobOpenings = () => {
         <div className={styles.modal} onClick={closeAllModals}>
           <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
             <div className={styles.modalHeader}>
-              <h2>{selectedJob.title}</h2>
-              {/* Job Status Badge - moved to header */}
-              <div className={`${styles.statusBadge} ${styles[selectedJob.status]} ${styles.large}`}>
-                {selectedJob.status === 'open' ? 'Open Position' : 'Position Closed'}
+              <div className={styles.modalTitle}>
+                <h2>{selectedJob.title}</h2>
+                <span className={`${styles.statusBadge} ${styles[selectedJob.status]}`}>
+                  {selectedJob.status === 'open' ? 'Open' : 'Closed'}
+                </span>
               </div>
-              <button
-                onClick={() => setShowJobDetails(false)}
-                className={styles.closeBtn}
-              >
-                <X size={24} />
+              <button onClick={closeAllModals} className={styles.closeButton}>
+                ×
               </button>
             </div>
             
@@ -555,7 +528,7 @@ const JobOpenings = () => {
         </div>
       )}
 
-      {/* Application Form Modal - UPDATED WITH CUSTOM BARANGAY DROPDOWN */}
+      {/* Application Form Modal */}
       {showApplicationForm && selectedJob && (
         <div className={styles.modal} onClick={closeAllModals}>
           <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
@@ -563,7 +536,7 @@ const JobOpenings = () => {
               <div className={styles.modalTitle}>
                 <h2>Apply for {selectedJob.title}</h2>
               </div>
-              <button className={styles.closeBtn} onClick={closeAllModals}>
+              <button className={styles.closeButton} onClick={closeAllModals}>
                 ×
               </button>
             </div>
@@ -677,7 +650,7 @@ const JobOpenings = () => {
                     </div>
                   </div>
 
-                  {/* Custom Barangay Dropdown */}
+                  {/* Barangay Dropdown */}
                   <div className={styles.formGroup}>
                     <label>
                       Barangay *
@@ -696,7 +669,7 @@ const JobOpenings = () => {
                     </div>
                   </div>
 
-                  {/* City Input (Pre-filled and readonly) */}
+                  {/* City */}
                   <div className={styles.formGroup}>
                     <label>
                       City *
@@ -724,18 +697,18 @@ const JobOpenings = () => {
                       <input
                         type="file"
                         id="cvFile"
-                        accept=".pdf,.doc,.docx"
+                        accept=".pdf"
                         onChange={(e) => setApplicationData({...applicationData, cvFile: e.target.files[0]})}
                         required
                         className={styles.fileInput}
                       />
                       <label htmlFor="cvFile" className={styles.fileLabel}>
                         <Upload size={18} />
-                        {applicationData.cvFile ? applicationData.cvFile.name : 'Choose CV file (PDF, DOC, DOCX)'}
+                        {applicationData.cvFile ? applicationData.cvFile.name : 'Choose CV file (PDF only)'}
                       </label>
                     </div>
                     <small className={styles.fileHint}>
-                      Maximum file size: 5MB. Accepted formats: PDF, DOC, DOCX
+                      Maximum file size: 5MB. Accepted format: PDF only.
                     </small>
                   </div>
                 </div>
@@ -758,27 +731,6 @@ const JobOpenings = () => {
                   </button>
                 </div>
               </form>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Already Applied Popup Modal */}
-      {showAlreadyAppliedPopup && selectedJob && (
-        <div className={styles.modal} onClick={closeAllModals}>
-          <div className={styles.alreadyAppliedPopup} onClick={(e) => e.stopPropagation()}>
-            <div className={styles.alreadyAppliedHeader}>
-              <BriefcaseBusiness size={32} />
-              <h3>Application Already Submitted</h3>
-            </div>
-            <p>You have already applied for the position "<strong>{selectedJob.title}</strong>". Your application is currently being reviewed.</p>
-            <div className={styles.alreadyAppliedActions}>
-              <button 
-                className={styles.okBtn}
-                onClick={closeAllModals}
-              >
-                OK
-              </button>
             </div>
           </div>
         </div>
