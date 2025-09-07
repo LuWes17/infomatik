@@ -192,9 +192,11 @@
 }
 
 .activeSidebarNavLink {
-  background-color: var(--primary-color) !important;
-  color: white !important;
+  background-color: #f1f5f9 !important;
+  color: var(--primary-color) !important;
   font-weight: 600;
+  border-radius: 20px;
+  margin: 0 0.5rem;
 }
 
 .activeSidebarNavLink::before {
@@ -207,10 +209,12 @@
 }
 
 /* Active Sidebar Dropdown Styles */
-.activeSidebarDropdown > .sidebarDropdownHeader .sidebarNavLink {
-  background-color: var(--primary-color) !important;
-  color: white !important;
+.activeSidebarDropdown > .sidebarDropdownHeader{
+  background-color: #f1f5f9 !important;
+  color: var(--primary-color) !important;
   font-weight: 600;
+  border-radius: 20px;
+  margin: 0 0.5rem;
 }
 
 .activeSidebarDropdown > .sidebarDropdownHeader .sidebarNavLink::before {
@@ -224,8 +228,7 @@
 
 /* Active Sidebar Dropdown Link Styles */
 .activeSidebarDropdownLink {
-  background-color: var(--primary-color) !important;
-  color: white !important;
+  color: var(--primary-color) !important;
   font-weight: 600;
 }
 
@@ -247,20 +250,20 @@
 .sidebar {
   position: fixed;
   top: 0;
-  right: -100%;
+  left: -100%;
   width: 300px;
   height: 100vh;
   background: var(--white);
   z-index: 1002;
-  transition: right 0.3s ease;
+  transition: left 0.3s ease;
   overflow-y: auto;
-  box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
-  border-top-left-radius: 10px; /* Add rounded top-left corner */
-  border-bottom-left-radius: 10px; /* Add rounded bottom-left corner */
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+  border-top-right-radius: 10px; /* Changed from top-left */
+  border-bottom-right-radius: 10px; /* Add rounded bottom-left corner */
 }
 
 .sidebarOpen {
-  right: 0;
+  left: 0;
 }
 
 .sidebarHeader {
@@ -270,7 +273,7 @@
   padding: 1rem;
   background: var(--primary-color);
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  border-top-left-radius: 10px;
+  border-top-right-radius: 10px; 
 }
 
 .sidebarLogo {
@@ -303,9 +306,6 @@
   padding: 0;
 }
 
-.sidebarNavList > li {
-  border-bottom: 1px solid #f0f0f0;
-}
 
 .sidebarNavLink {
   display: block;
@@ -354,7 +354,6 @@
   max-height: 0;
   overflow: hidden;
   transition: max-height 0.3s ease;
-  background-color: #f8f9fa;
 }
 
 .sidebarDropdownContentOpen {
@@ -367,7 +366,7 @@
   color: var(--text-color, #666);
   text-decoration: none;
   font-weight: 400;
-  font-size: 10px;
+  font-size: 12px;
   transition: all 0.2s ease;
   position: relative;
 }
@@ -486,11 +485,16 @@
 @media (max-width: 768px) {
   .nav {
     padding: 0.5rem 1rem;
+    display: grid;
+    grid-template-columns: 44px 1fr 44px; /* Left space, center, right button */
+    align-items: center;
   }
   
-  .logoContainer {
-    margin-right: auto;
-    margin-left: 0;
+ .logoContainer {
+    position: absolute; /* Add this */
+    left: 50%; /* Add this */
+    transform: translateX(-50%); /* Add this */
+    margin: 0; /* Remove existing margins */
   }
   
   .logoImg {
@@ -508,6 +512,7 @@
   
   .mobileMenuBtn {
     display: block;
+    margin-left: auto; /* Push to right side */
   }
 }
 
