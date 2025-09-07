@@ -481,6 +481,21 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
+.appliedBtn {
+  flex: 1;
+  padding: 0.5rem 1rem;
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  display: flex;
+  justify-content: center;
+}
+
 .applyBtn:hover {
   background: #f8fafc;
   color: var(--primary-color);
@@ -531,6 +546,8 @@
 .modalHeader .statusBadge.open,
 .modalHeader .statusBadge.closed {
   font-size: .75rem;
+  margin-right: 3rem;
+  margin-top: 1rem;
 }
 
 .modalHeader h2 {
