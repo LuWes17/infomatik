@@ -731,6 +731,35 @@
   opacity: 0.8;
 }
 
+/* Modal Metadata */
+.modalMetadata {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  margin-top: 2rem;
+  padding: 1.5rem;
+  background: #f8fafc;
+  border-radius: 12px;
+}
+
+.metaItem {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.7rem;
+  /* Allow metadata to wrap if needed */
+  flex: 1;
+  min-width: 200px;
+}
+
+.metaItem strong {
+  font-weight: 600;
+  color: var(--gray-700);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
 /* Application Form - Updated to match registration form style */
 .applicationForm {
   width: 100%;

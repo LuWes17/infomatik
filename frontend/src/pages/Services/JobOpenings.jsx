@@ -153,13 +153,26 @@ const JobOpenings = () => {
   }, [showApplicationForm, isAuthenticated, user]);
 
   // Format date
-  const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
+  function formatDate(dateString) {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
     });
-  };
+  }
+  
+  function formatDateTime(dateString) {
+    const date = new Date(dateString);
+    return date.toLocaleString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  }
+
 
   // Check if deadline passed
   const isDeadlinePassed = (deadline) => {
@@ -523,6 +536,17 @@ const JobOpenings = () => {
                   )}
                 </div>
               )}
+              
+                <div className={styles.modalMetadata}>
+                  <div className={styles.metaItem}>
+                    <strong>Published:</strong> {formatDateTime(selectedJob.createdAt)}
+                  </div>
+                  {selectedJob.updatedAt !== selectedJob.createdAt && (
+                    <div className={styles.metaItem}>
+                      <strong>Last Updated:</strong> {formatDateTime(selectedJob.updatedAt)}
+                    </div>
+                  )}
+                </div>
             </div>
           </div>
         </div>
