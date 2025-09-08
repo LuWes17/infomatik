@@ -124,12 +124,6 @@ const LatestAccomplishments = () => {
 
                 {/* Card Content */}
                 <div className={styles.cardContent}>
-                  {/* Category Badge */}
-                  <div className={styles.categoryBadge}>
-                    <span className={`${styles.category} ${styles[getProjectTypeClass(accomplishment.projectType)]}`}>
-                      {accomplishment.projectType || 'General'}
-                    </span>
-                  </div>
 
                   {/* Title */}
                   <h3 className={styles.cardTitle}>{accomplishment.title}</h3>

@@ -191,7 +191,7 @@ const Header = () => {
             onClick={toggleSidebar}
             aria-label="Toggle navigation menu"
           >
-            <Menu size={24} />
+            <Menu size={20} />
           </button>
         </nav>
       </div>

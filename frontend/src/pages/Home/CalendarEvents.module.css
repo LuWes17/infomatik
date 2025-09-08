@@ -100,11 +100,12 @@
 /* Calendar Container */
 .calendarContainer {
   display: grid;
-  grid-template-columns: 1fr 1.5fr;
+  grid-template-columns: 1fr 1fr;
   gap: 3rem;
-  align-items: start;
+  align-items: stretch;
   overflow: hidden;
   width: 100%;
+  height: 35rem;
 }
 
 /* Calendar Widget */
@@ -116,6 +117,9 @@
   border: 1px solid rgba(28, 98, 187, 0.1);
   min-width: 0;
   width: 100%;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
 .calendarHeader {
@@ -124,6 +128,7 @@
   align-items: center;
   padding-bottom: 1rem;
   border-bottom: 2px solid #f1f5f9;
+  margin-bottom: 2rem;
 }
 
 .monthTitle {
@@ -230,6 +235,9 @@
   min-width: 0;
   width: 100%;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
 .upcomingTitle {
@@ -245,13 +253,35 @@
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+  padding-right: 0.5rem;
+}
+
+.eventsList::-webkit-scrollbar{
+  width: 6px;
+}
+
+.eventsList::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 3px;
+}
+
+.eventsList::-webkit-scrollbar-thumb {
+  background: rgba(28, 98, 187, 0.3);
+  border-radius: 3px;
+}
+
+.eventsList::-webkit-scrollbar-thumb:hover {
+  background: rgba(28, 98, 187, 0.5);
 }
 
 /* Event Cards */
 .eventCard {
   display: flex;
-  gap: 1rem;
-  padding: 1.5rem;
+  gap: 0.75rem;
+  padding: 1rem;
   background: #f8fafc;
   border-radius: 16px;
   text-decoration: none;
@@ -262,6 +292,7 @@
   min-width: 0;
   max-width: 100%;
   box-sizing: border-box;
+  flex-shrink: 0;
 }
 
 .eventCard:hover {
@@ -279,13 +310,13 @@
   background: var(--primary-color, #1c62bb);
   color: var(--white, #ffffff);
   border-radius: 12px;
-  padding: 1rem 0.75rem;
-  min-width: 60px;
+  padding: 0.75rem 0.5rem;
+  min-width: 50px;
   flex-shrink: 0;
 }
 
 .eventDay {
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   font-weight: 700;
   line-height: 1;
 }
@@ -308,7 +339,7 @@
 }
 
 .eventTitle {
-  font-size: 1.125rem;
+  font-size: 1rem;
   font-weight: 600;
   color: var(--gray-900, #111827);
   margin: 0;
@@ -325,7 +356,7 @@
 
 .eventMeta {
   display: flex;
-  gap: 1rem;
+  gap: 0.75rem;
   align-items: center;
   flex-wrap: wrap;
   min-width: 0;
@@ -337,19 +368,19 @@
   align-items: center;
   gap: 0.25rem;
   color: var(--gray-600, #475569);
-  font-size: 0.875rem;
+  font-size: 0.8rem;
   font-weight: 500;
   min-width: 0;
   flex-shrink: 1;
 }
 
 .eventDescription {
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   color: var(--gray-600, #475569);
   line-height: 1.5;
   margin: 0;
   display: -webkit-box;
-  -webkit-line-clamp: 3;
+  -webkit-line-clamp: 1;
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -365,6 +396,7 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   min-width: 0;
+  max-width: 120px;
 }
 
 /* View More Button */
@@ -373,6 +405,7 @@
   padding-top: 1rem;
   border-top: 1px solid #e2e8f0;
   text-align: center;
+  flex-shrink: 0;
 }
 
 .viewMoreBtn {
@@ -461,6 +494,16 @@
   .calendarContainer {
     grid-template-columns: 1fr;
     gap: 2rem;
+    height: auto;
+  }
+
+  .upcomingEvents {
+    height: auto; /* Allow natural height on mobile */
+    min-height: 400px; /* Set minimum height */
+  }
+ 
+  .eventsList {
+    max-height: 300px; /* Limit scroll height on mobile */
   }
   
   .header {
@@ -482,6 +525,19 @@
   
   .calendarEventsSection {
     padding: 2rem 0;
+  }
+
+  .calendarContainer {
+    height: auto; /* Ensure auto height */
+  }
+ 
+  .upcomingEvents {
+    height: auto;
+    min-height: 350px;
+  }
+ 
+ .eventsList {
+    max-height: 250px;
   }
   
   .headerContent {
@@ -524,6 +580,15 @@
 }
 
 @media (max-width: 480px) {
+  .upcomingEvents {
+    height: auto;
+    min-height: 300px;
+  }
+ 
+  .eventsList {
+    max-height: 200px;
+  }
+
   .calendarGrid {
     gap: 0.125rem;
   }
@@ -550,7 +615,7 @@
   }
   
   .eventDate {
-    align-self: center;
+    align-self: baseline;
     flex-direction: row;
     gap: 0.5rem;
     padding: 0.75rem 1rem;
@@ -588,6 +653,14 @@
 }
 
 @media (max-width: 360px) {
+  .upcomingEvents {
+    min-height: 280px;
+  }
+ 
+  .eventsList {
+    max-height: 180px;
+  }
+
   .eventCard {
     padding: 0.75rem 0.5rem;
   }
