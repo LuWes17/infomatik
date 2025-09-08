@@ -260,6 +260,8 @@
   box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
   border-top-right-radius: 10px; /* Changed from top-left */
   border-bottom-right-radius: 10px; /* Add rounded bottom-left corner */
+  display: flex;
+  flex-direction: column;
 }
 
 .sidebarOpen {
@@ -274,12 +276,60 @@
   background: var(--primary-color);
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   border-top-right-radius: 10px; 
+  flex-shrink: 0;
 }
 
 .sidebarLogo {
   height: 2.5rem;
   width: auto;
   max-width: 8rem;
+}
+
+.sidebarProfileSection {
+  padding: 0.75rem;
+  flex-shrink: 0;
+}
+
+.sidebarProfileButton {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 0.75rem;
+  background: none;
+  border-radius: 1rem;
+  color: black;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.sidebarProfileButton:hover {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.sidebarProfileIcon {
+  flex-shrink: 0;
+}
+
+.sidebarProfileText {
+  flex: 1;
+  text-align: left;
+}
+
+.sidebarContent {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.sidebarNav {
+  flex: 1;
+  padding: 1rem 0;
+  overflow-y: auto;
 }
 
 .closeSidebarBtn {
@@ -378,9 +428,9 @@
 
 .sidebarAuthButtons {
   padding: 1rem;
-  color: var(--primary-color);
-  font-weight: 600;
-  text-align: center;
+  flex-shrink: 0;
+  display: flex;
+  justify-content: center;
 }
 
 .sidebarAuthButtons .btn {
@@ -440,18 +490,31 @@
 
 .sidebarLogoutButton {
   display: block;
-  width: 70%;
-  margin: 0 auto;
-  padding: 0.5rem;
+  width: 100%;
+  padding: 0.75rem;
   background: none;
   border: 2px solid #dc2626;
   border-radius: 1rem;
   color: #dc2626;
   font-weight: 600;
-  font-size: 12px;
+  font-size: 14px;
   transition: all 0.3s ease;
   cursor: pointer;
   text-align: center;
+}
+
+.sidebarLoginButton {
+  display: block;
+  width: 100%;
+  padding: 0.75rem;
+  border: 2px solid var(--primary-color);
+  border-radius: 1rem;
+  color: var(--primary-color);
+  font-weight: 600;
+  font-size: 14px;
+  text-decoration: none;
+  text-align: center;
+  transition: all 0.3s ease;
 }
 
 .sidebarLogoutButton:hover {

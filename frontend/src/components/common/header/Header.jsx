@@ -17,6 +17,15 @@ const Header = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
+  const handleSidebarProfileClick = () => {
+    closeSidebar();
+    if (user?.role === 'admin') {
+      navigate('/admin');
+    } else {
+      navigate('/profile');
+    }
+  };
+
   const toggleDropdown = (dropdownName) => {
     setOpenDropdowns(prev => ({
       ...prev,
@@ -209,159 +218,172 @@ const Header = () => {
           </button>
         </div>
 
-        <nav className={styles.sidebarNav}>
-          <ul className={styles.sidebarNavList}>
-            <li>
-              <Link 
-                to="/" 
-                className={`${styles.sidebarNavLink} ${isActivePath('/') ? styles.activeSidebarNavLink : ''}`} 
-                onClick={closeSidebar}
-              >
-                Home
-              </Link>
-            </li>
-            <li>
-              <Link 
-                to="/announcements" 
-                className={`${styles.sidebarNavLink} ${isActivePath('/announcements') ? styles.activeSidebarNavLink : ''}`} 
-                onClick={closeSidebar}
-              >
-                Announcements
-              </Link>
-            </li>
-            
-            {/* Services Dropdown - Mobile */}
-            <li className={`${styles.sidebarDropdown} ${isDropdownActive(['/services']) ? styles.activeSidebarDropdown : ''}`}>
-              <div className={styles.sidebarDropdownHeader} onClick={() => toggleDropdown('services')}>
-                <p className={`${styles.sidebarNavLink} ${isDropdownActive(['/services']) ? styles.activeSidebarNavLink : ''}`}>Services</p>
-                <ChevronDown 
-                  size={18} 
-                  className={`${styles.sidebarDropdownArrow} ${openDropdowns.services ? styles.sidebarDropdownArrowOpen : ''}`}
-                />
-              </div>
-              <div className={`${styles.sidebarDropdownContent} ${openDropdowns.services ? styles.sidebarDropdownContentOpen : ''}`}>
+        {/* Profile Section - Only show when authenticated */}
+        {isAuthenticated && (
+          <div className={styles.sidebarProfileSection}>
+            <button 
+              className={styles.sidebarProfileButton}
+              onClick={handleSidebarProfileClick}
+            >
+              <CircleUserRound size={24} className={styles.sidebarProfileIcon} />
+              <span className={styles.sidebarProfileText}>
+                {user?.role === 'admin' ? 'Dashboard' : 'Profile'}
+              </span>
+            </button>
+          </div>
+        )}
+      
+        <div className={styles.sidebarContent}>
+          <nav className={styles.sidebarNav}>
+            <ul className={styles.sidebarNavList}>
+              <li>
                 <Link 
-                  to="/services/job-openings" 
-                  className={`${styles.sidebarDropdownLink} ${isActivePath('/services/job-openings') ? styles.activeSidebarDropdownLink : ''}`} 
+                  to="/" 
+                  className={`${styles.sidebarNavLink} ${isActivePath('/') ? styles.activeSidebarNavLink : ''}`} 
                   onClick={closeSidebar}
                 >
-                  Job Openings
+                  Home
                 </Link>
+              </li>
+              <li>
                 <Link 
-                  to="/services/solicitation-requests" 
-                  className={`${styles.sidebarDropdownLink} ${isActivePath('/services/solicitation-requests') ? styles.activeSidebarDropdownLink : ''}`} 
+                  to="/announcements" 
+                  className={`${styles.sidebarNavLink} ${isActivePath('/announcements') ? styles.activeSidebarNavLink : ''}`} 
                   onClick={closeSidebar}
                 >
-                  Solicitation Requests
+                  Announcements
                 </Link>
-                <Link 
-                  to="/services/monthly-rice-distribution" 
-                  className={`${styles.sidebarDropdownLink} ${isActivePath('/services/monthly-rice-distribution') ? styles.activeSidebarDropdownLink : ''}`} 
-                  onClick={closeSidebar}
-                >
-                  Monthly Rice Distribution
-                </Link>
-              </div>
-            </li>
+              </li>
+              
+              {/* Services Dropdown - Mobile */}
+              <li className={`${styles.sidebarDropdown} ${isDropdownActive(['/services']) ? styles.activeSidebarDropdown : ''}`}>
+                <div className={styles.sidebarDropdownHeader} onClick={() => toggleDropdown('services')}>
+                  <p className={`${styles.sidebarNavLink} ${isDropdownActive(['/services']) ? styles.activeSidebarNavLink : ''}`}>Services</p>
+                  <ChevronDown 
+                    size={18} 
+                    className={`${styles.sidebarDropdownArrow} ${openDropdowns.services ? styles.sidebarDropdownArrowOpen : ''}`}
+                  />
+                </div>
+                <div className={`${styles.sidebarDropdownContent} ${openDropdowns.services ? styles.sidebarDropdownContentOpen : ''}`}>
+                  <Link 
+                    to="/services/job-openings" 
+                    className={`${styles.sidebarDropdownLink} ${isActivePath('/services/job-openings') ? styles.activeSidebarDropdownLink : ''}`} 
+                    onClick={closeSidebar}
+                  >
+                    Job Openings
+                  </Link>
+                  <Link 
+                    to="/services/solicitation-requests" 
+                    className={`${styles.sidebarDropdownLink} ${isActivePath('/services/solicitation-requests') ? styles.activeSidebarDropdownLink : ''}`} 
+                    onClick={closeSidebar}
+                  >
+                    Solicitation Requests
+                  </Link>
+                  <Link 
+                    to="/services/monthly-rice-distribution" 
+                    className={`${styles.sidebarDropdownLink} ${isActivePath('/services/monthly-rice-distribution') ? styles.activeSidebarDropdownLink : ''}`} 
+                    onClick={closeSidebar}
+                  >
+                    Monthly Rice Distribution
+                  </Link>
+                </div>
+              </li>
 
-            <li>
-              <Link 
-                to="/accomplishments" 
-                className={`${styles.sidebarNavLink} ${isActivePath('/accomplishments') ? styles.activeSidebarNavLink : ''}`} 
-                onClick={closeSidebar}
-              >
-                Accomplishments
-              </Link>
-            </li>
-            
-            {/* Local Policies Dropdown - Mobile */}
-            <li className={`${styles.sidebarDropdown} ${isDropdownActive(['/policies']) ? styles.activeSidebarDropdown : ''}`}>
-              <div className={styles.sidebarDropdownHeader} onClick={() => toggleDropdown('policies')}>
-                <p className={`${styles.sidebarNavLink} ${isDropdownActive(['/policies']) ? styles.activeSidebarNavLink : ''}`}>Local Policies</p>
-                <ChevronDown 
-                  size={18} 
-                  className={`${styles.sidebarDropdownArrow} ${openDropdowns.policies ? styles.sidebarDropdownArrowOpen : ''}`}
-                />
-              </div>
-              <div className={`${styles.sidebarDropdownContent} ${openDropdowns.policies ? styles.sidebarDropdownContentOpen : ''}`}>
+              <li>
                 <Link 
-                  to="/policies/ordinance" 
-                  className={`${styles.sidebarDropdownLink} ${isActivePath('/policies/ordinance') ? styles.activeSidebarDropdownLink : ''}`} 
+                  to="/accomplishments" 
+                  className={`${styles.sidebarNavLink} ${isActivePath('/accomplishments') ? styles.activeSidebarNavLink : ''}`} 
                   onClick={closeSidebar}
                 >
-                  Ordinance
+                  Accomplishments
                 </Link>
+              </li>
+              
+              {/* Local Policies Dropdown - Mobile */}
+              <li className={`${styles.sidebarDropdown} ${isDropdownActive(['/policies']) ? styles.activeSidebarDropdown : ''}`}>
+                <div className={styles.sidebarDropdownHeader} onClick={() => toggleDropdown('policies')}>
+                  <p className={`${styles.sidebarNavLink} ${isDropdownActive(['/policies']) ? styles.activeSidebarNavLink : ''}`}>Local Policies</p>
+                  <ChevronDown 
+                    size={18} 
+                    className={`${styles.sidebarDropdownArrow} ${openDropdowns.policies ? styles.sidebarDropdownArrowOpen : ''}`}
+                  />
+                </div>
+                <div className={`${styles.sidebarDropdownContent} ${openDropdowns.policies ? styles.sidebarDropdownContentOpen : ''}`}>
+                  <Link 
+                    to="/policies/ordinance" 
+                    className={`${styles.sidebarDropdownLink} ${isActivePath('/policies/ordinance') ? styles.activeSidebarDropdownLink : ''}`} 
+                    onClick={closeSidebar}
+                  >
+                    Ordinance
+                  </Link>
+                  <Link 
+                    to="/policies/resolution" 
+                    className={`${styles.sidebarDropdownLink} ${isActivePath('/policies/resolution') ? styles.activeSidebarDropdownLink : ''}`} 
+                    onClick={closeSidebar}
+                  >
+                    Resolution
+                  </Link>
+                </div>
+              </li>
+              
+              <li>
                 <Link 
-                  to="/policies/resolution" 
-                  className={`${styles.sidebarDropdownLink} ${isActivePath('/policies/resolution') ? styles.activeSidebarDropdownLink : ''}`} 
+                  to="/guide" 
+                  className={`${styles.sidebarNavLink} ${isActivePath('/guide') ? styles.activeSidebarNavLink : ''}`} 
                   onClick={closeSidebar}
                 >
-                  Resolution
+                  Citizen Guide
                 </Link>
-              </div>
-            </li>
-            
-            <li>
-              <Link 
-                to="/guide" 
-                className={`${styles.sidebarNavLink} ${isActivePath('/guide') ? styles.activeSidebarNavLink : ''}`} 
-                onClick={closeSidebar}
-              >
-                Citizen Guide
-              </Link>
-            </li>
-            
-            {/* About Us Dropdown - Mobile */}
-            <li className={`${styles.sidebarDropdown} ${isDropdownActive(['/about']) ? styles.activeSidebarDropdown : ''}`}>
-              <div className={styles.sidebarDropdownHeader} onClick={() => toggleDropdown('about')}>
-                <p className={`${styles.sidebarNavLink} ${isDropdownActive(['/about']) ? styles.activeSidebarNavLink : ''}`}>About Us</p>
-                <ChevronDown 
-                  size={18} 
-                  className={`${styles.sidebarDropdownArrow} ${openDropdowns.about ? styles.sidebarDropdownArrowOpen : ''}`}
-                />
-              </div>
-              <div className={`${styles.sidebarDropdownContent} ${openDropdowns.about ? styles.sidebarDropdownContentOpen : ''}`}>
-                <Link 
-                  to="/about/leadership" 
-                  className={`${styles.sidebarDropdownLink} ${isActivePath('/about/leadership') ? styles.activeSidebarDropdownLink : ''}`} 
-                  onClick={closeSidebar}
-                >
-                  Leadership
-                </Link>
-                <Link 
-                  to="/about/feedback" 
-                  className={`${styles.sidebarDropdownLink} ${isActivePath('/about/feedback') ? styles.activeSidebarDropdownLink : ''}`} 
-                  onClick={closeSidebar}
-                >
-                  Feedback
-                </Link>
-              </div>
-            </li>
-          </ul>
+              </li>
+              
+              {/* About Us Dropdown - Mobile */}
+              <li className={`${styles.sidebarDropdown} ${isDropdownActive(['/about']) ? styles.activeSidebarDropdown : ''}`}>
+                <div className={styles.sidebarDropdownHeader} onClick={() => toggleDropdown('about')}>
+                  <p className={`${styles.sidebarNavLink} ${isDropdownActive(['/about']) ? styles.activeSidebarNavLink : ''}`}>About Us</p>
+                  <ChevronDown 
+                    size={18} 
+                    className={`${styles.sidebarDropdownArrow} ${openDropdowns.about ? styles.sidebarDropdownArrowOpen : ''}`}
+                  />
+                </div>
+                <div className={`${styles.sidebarDropdownContent} ${openDropdowns.about ? styles.sidebarDropdownContentOpen : ''}`}>
+                  <Link 
+                    to="/about/leadership" 
+                    className={`${styles.sidebarDropdownLink} ${isActivePath('/about/leadership') ? styles.activeSidebarDropdownLink : ''}`} 
+                    onClick={closeSidebar}
+                  >
+                    Leadership
+                  </Link>
+                  <Link 
+                    to="/about/feedback" 
+                    className={`${styles.sidebarDropdownLink} ${isActivePath('/about/feedback') ? styles.activeSidebarDropdownLink : ''}`} 
+                    onClick={closeSidebar}
+                  >
+                    Feedback
+                  </Link>
+                </div>
+              </li>
+            </ul>
+          </nav>
 
           {/* Mobile Auth Section */}
-          <div className={styles.sidebarAuthButtons}>
-            {isAuthenticated ? (
-              <div className={styles.sidebarUserSection}>
-                <div className={styles.sidebarUserActions}>
-                  <button 
-                    className={styles.sidebarLogoutButton}
-                    onClick={() => {
-                      closeSidebar();
-                      logout();
-                    }}
-                  >
-                    Logout
-                  </button>
-                </div>
-              </div>
+            <div className={styles.sidebarAuthButtons}>
+              {isAuthenticated ? (
+              <button 
+                className={styles.sidebarLogoutButton}
+                onClick={() => {
+                  closeSidebar();
+                  logout();
+                }}
+              >
+                Logout
+              </button>
             ) : (
-              <Link to="/login" onClick={closeSidebar}>
+              <Link to="/login" className={styles.sidebarLoginButton} onClick={closeSidebar}>
                 Login
               </Link>
             )}
-          </div>
-        </nav>
+            </div>
+        </div>
       </div>
 
       {/* Overlay for mobile sidebar */}
