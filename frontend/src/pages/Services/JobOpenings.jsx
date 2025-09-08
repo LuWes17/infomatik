@@ -35,6 +35,8 @@ const JobOpenings = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
+  const [barangayDropdownOpen, setBarangayDropdownOpen] = useState(false);
+  const barangayDropdownRef = useRef(null);
   
   const [applicationData, setApplicationData] = useState({
     firstName: '',
@@ -46,6 +48,36 @@ const JobOpenings = () => {
     city: '',
     cvFile: null
   });
+  
+  // Barangays list
+  const barangays = [
+    'agnas', 'bacolod', 'bangkilingan', 'bantayan', 'baranghawon', 'basagan', 
+    'basud', 'bognabong', 'bombon', 'bonot', 'san isidro', 'buang', 'buhian', 
+    'cabagnan', 'cobo', 'comon', 'cormidal', 'divino rostro', 'fatima', 
+    'guinobat', 'hacienda', 'magapo', 'mariroc', 'matagbac', 'oras', 'oson', 
+    'panal', 'pawa', 'pinagbobong', 'quinale cabasan', 'quinastillojan', 'rawis', 
+    'sagurong', 'salvacion', 'san antonio', 'san carlos', 'san juan', 'san lorenzo', 
+    'san ramon', 'san roque', 'san vicente', 'santo cristo', 'sua-igot', 'tabiguian', 
+    'tagas', 'tayhi', 'visita'
+  ];
+  
+  const formatBarangayName = (barangay) => {
+  return barangay.split(' ').map(word => 
+    word.charAt(0).toUpperCase() + word.slice(1)
+  ).join(' ');
+};
+
+// Add this function to handle barangay selection
+const handleBarangayChange = (barangay) => {
+  setApplicationData({...applicationData, barangay: barangay});
+  setBarangayDropdownOpen(false);
+};
+
+// Add this function to toggle barangay dropdown
+const toggleBarangayDropdown = () => {
+  setBarangayDropdownOpen(!barangayDropdownOpen);
+};
+
 
   // Fetch user applications
   const fetchUserApplications = async () => {
@@ -151,6 +183,19 @@ const JobOpenings = () => {
       }));
     }
   }, [showApplicationForm, isAuthenticated, user]);
+  
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (barangayDropdownRef.current && !barangayDropdownRef.current.contains(event.target)) {
+        setBarangayDropdownOpen(false);
+      }
+    };
+  
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   // Format date
   function formatDate(dateString) {
@@ -676,22 +721,37 @@ const JobOpenings = () => {
 
                   {/* Barangay Dropdown */}
                   <div className={styles.formGroup}>
-                    <label>
-                      Barangay *
-                    </label>
+                    <label>Barangay *</label>
                     <div className={styles.inputWrapper}>
                       <MapPin size={16} className={styles.inputIcon} />
-                      <input
-                        type="text"
-                        value={applicationData.barangay}
-                        onChange={(e) => setApplicationData({...applicationData, barangay: e.target.value})}
-                        required
-                        placeholder="Barangay"
-                        className={styles.inputWithIcon}
-                        maxLength={100}
-                      />
+                      <div className={styles.customDropdown} ref={barangayDropdownRef}>
+                        <button
+                          type="button"
+                          onClick={toggleBarangayDropdown}
+                          className={`${styles.customDropdownButton} ${barangayDropdownOpen ? styles.active : ''} ${!applicationData.barangay ? styles.placeholder : ''}`}
+                        >
+                          <span>
+                            {applicationData.barangay ? formatBarangayName(applicationData.barangay) : 'Select Barangay'}
+                          </span>
+                          <ChevronDown size={16} className={`${styles.dropdownArrow} ${barangayDropdownOpen ? styles.open : ''}`} />
+                        </button>
+                        <div className={`${styles.customDropdownContent} ${barangayDropdownOpen ? styles.show : ''}`}>
+                          {barangays.map((barangay) => (
+                            <button
+                              key={barangay}
+                              type="button"
+                              onClick={() => handleBarangayChange(barangay)}
+                              className={`${styles.customDropdownItem} ${applicationData.barangay === barangay ? styles.active : ''}`}
+                            >
+                              {formatBarangayName(barangay)}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
                     </div>
                   </div>
+                  
+                  
 
                   {/* City */}
                   <div className={styles.formGroup}>

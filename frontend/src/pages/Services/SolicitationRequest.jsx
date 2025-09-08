@@ -247,6 +247,13 @@ const SolicitationRequests = () => {
   const openDetailsModal = (request) => {
     setSelectedRequest(request);
     setShowDetailsModal(true);
+    document.body.style.overflow = "hidden";
+  };
+
+  const closeViewModal = () => {
+    setShowDetailsModal(false);
+    setSelectedRequest(null);
+    document.body.style.overflow = "auto";
   };
 
   // Filter dropdown handlers
@@ -316,6 +323,17 @@ const SolicitationRequests = () => {
       day: 'numeric'
     });
   };
+  
+  function formatDateTime(dateString) {
+    const date = new Date(dateString);
+    return date.toLocaleString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  }
 
   if (loading || authLoading) {
     return (
@@ -368,7 +386,7 @@ const SolicitationRequests = () => {
                 onClick={() => handleFilterChange('all')}
                 className={`${styles.dropdownItem} ${categoryFilter === 'all' ? styles.active : ''}`}
               >
-                All Categories ({solicitationRequests.length})
+                All Categories
               </button>
               {requestTypes.map(type => (
                 <button
@@ -376,13 +394,76 @@ const SolicitationRequests = () => {
                   onClick={() => handleFilterChange(type)}
                   className={`${styles.dropdownItem} ${categoryFilter === type ? styles.active : ''}`}
                 >
-                  {type} ({solicitationRequests.filter(request => request.requestType === type).length})
+                  {type}
                 </button>
               ))}
             </div>
           </div>
         </div>
       </div>
+      
+      {/* View Details Modal */}
+      {showDetailsModal && selectedRequest && (
+        <div className={styles.modal} onClick={closeViewModal}>
+          <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.modalHeader}>
+              <div className={styles.modalTitle}>
+                <h2>{selectedRequest.organizationName}</h2>
+                <span className={`${styles.requestTypeBadge} ${styles.large} ${styles[selectedRequest.requestType.toLowerCase().replace(' ', '-')]}`}>
+                  {selectedRequest.requestType}
+                </span>
+              </div>
+              <button onClick={closeViewModal} className={styles.closeButton}>
+                ×
+              </button>
+            </div>
+            
+            <div className={styles.modalBody}>        
+              {/* Request Details Grid */}
+              <div className={styles.detailsGrid}>
+                <div className={styles.detailItem}>
+                  <User size={20} />
+                  <div>
+                    <strong>Contact Person: </strong>{selectedRequest.contactPerson}
+                  </div>
+                </div>
+                
+                <div className={styles.detailItem}>
+                  <Building2 size={20} />
+                  <div>
+                    <strong>Organization Type: </strong>{selectedRequest.organizationType}
+                  </div>
+                </div>
+              </div>
+              
+              {/* Purpose */}
+              <div className={styles.section}>
+                <h4>Purpose</h4>
+                <p className={styles.requirements}>{selectedRequest.purpose}</p>
+              </div>
+              
+              {/* Requested Assistance Details */}
+              <div className={styles.section}>
+                <h4>Specific Request Details</h4>
+                <p className={styles.description}>{selectedRequest.requestedAssistanceDetails}</p>
+              </div>
+
+              {/* Modal Metadata */}
+              <div className={styles.modalMetadata}>
+                <div className={styles.metaItem}>
+                  <strong>Published:</strong> {formatDateTime(selectedRequest.createdAt)}
+                </div>
+                {selectedRequest.updatedAt !== selectedRequest.createdAt && (
+                <div className={styles.metaItem}>
+                  <strong>Last Updated:</strong> {formatDateTime(selectedRequest.updatedAt)}
+                </div>
+               )}
+              </div>
+              
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Requests Grid with Add New Request Card */}
       {filteredRequests.length === 0 && !searchTerm && categoryFilter === 'all' ? (
@@ -442,18 +523,18 @@ const SolicitationRequests = () => {
                       <span>{(request.organizationType)}</span>
                     </div>
                   </div>
-
-                  <p className={styles.requestPurpose}>
-                    {request.purpose.length > 120 
-                      ? `${request.purpose.substring(0, 120)}...` 
-                      : request.purpose}
-                  </p>
-
-                  <div className={styles.requestFooter}>
-                    <span className={styles.submittedDate}>
+                  
+                  {/* Purpose Preview */}
+                  <div className={styles.purpose}>
+                    <strong>Purpose:</strong>
+                    <p>{request.purpose.substring(0, 100)}...</p>
+                  </div>
+                  
+                  <div className={styles.cardFooter}>
+                    <span className={styles.publishDate}>
                       {formatDate(request.createdAt)}
                     </span>
-                    <button className={styles.viewDetailsBtn}>
+                    <button className={styles.viewDetailsButton}>
                       View Details
                     </button>
                   </div>
@@ -464,24 +545,6 @@ const SolicitationRequests = () => {
         </div>
       )}
 
-      {/* Authentication Modal */}
-      {showAuthModal && (
-        <div className={styles.modal} onClick={() => setShowAuthModal(false)}>
-          <div className={styles.authPrompt} onClick={(e) => e.stopPropagation()}>
-            <div className={styles.authPromptHeader}>
-              <User size={32} />
-              <h3>Account Required</h3>
-            </div>
-            <p>You need to have an account to submit a solicitation request.</p>
-            <div className={styles.authActions}>
-              <a href="/login" className={styles.loginBtn}>Login</a>
-              <a href="/register" className={styles.registerBtn}>Register</a>
-            </div>
-          </div>
-        </div>
-      )}
-
-
       {/* Solicitation Request Form Modal */}
       {showRequestForm && (
         <div className={styles.modal} onClick={closeAllModals}>
@@ -490,10 +553,7 @@ const SolicitationRequests = () => {
               <div className={styles.modalTitle}>
                 <h2>Submit Solicitation Request</h2>
               </div>
-              <button
-                onClick={closeAllModals}
-                className={styles.closeBtn}
-              >
+              <button onClick={closeAllModals} className={styles.closeButton}>
                 ×
               </button>
             </div>
@@ -763,64 +823,20 @@ const SolicitationRequests = () => {
           </div>
         </div>
       )}
-
-      {/* View Details Modal */}
-      {showDetailsModal && selectedRequest && (
-        <div className={styles.modal} onClick={() => setShowDetailsModal(false)}>
-          <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-            <div className={styles.modalHeader}>
-                <h2 className={styles.modalTitle}>{selectedRequest.organizationName}</h2>
-                <span className={`${styles.requestTypeBadge} ${styles.large} ${styles[selectedRequest.requestType.toLowerCase().replace(' ', '-')]}`}>
-                  {selectedRequest.requestType}
-                </span>
-              <button
-                onClick={() => setShowDetailsModal(false)}
-                className={styles.closeBtn}
-              >
-                <X size={24} />
-              </button>
-            </div>
-            
-            <div className={styles.modalBody}>        
-        {/* Request Details Grid */}
-        <div className={styles.detailsGrid}>
-          <div className={styles.detailItem}>
-            <User size={20} />
-            <div>
-              <strong>Contact Person:</strong> {selectedRequest.contactPerson}
-            </div>
-          </div>
-        
-          <div className={styles.detailItem}>
-            <Building2 size={20} />
-            <div>
-              <strong>Organization Type:</strong> {selectedRequest.organizationType}
-            </div>
-          </div>
-          
       
-        </div>
-
-        {/* Requested Assistance Details */}
-        <div className={styles.section}>
-          <h4>Specific Request Details</h4>
-          <p className={styles.description}>{selectedRequest.requestedAssistanceDetails}</p>
-        </div>
-
-        {/* Purpose */}
-        <div className={styles.section}>
-          <h4>Purpose</h4>
-          <p className={styles.requirements}>{selectedRequest.purpose}</p>
-        </div>
-
-        {/* Request Metadata */}
-        <div className={styles.requestMeta}>
-          <span className={styles.metaItem}>Submitted: {formatDate(selectedRequest.createdAt)}</span>
-          {selectedRequest.completedAt && (
-            <span className={styles.metaItem}>Completed: {formatDate(selectedRequest.completedAt)}</span>
-          )}
-        </div>
-      </div>
+      {/* Authentication Modal */}
+      {showAuthModal && (
+        <div className={styles.modal} onClick={() => setShowAuthModal(false)}>
+          <div className={styles.authPrompt} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.authPromptHeader}>
+              <User size={32} />
+              <h3>Account Required</h3>
+            </div>
+            <p>You need to have an account to submit a solicitation request.</p>
+            <div className={styles.authActions}>
+              <a href="/login" className={styles.loginBtn}>Login</a>
+              <a href="/register" className={styles.registerBtn}>Register</a>
+            </div>
           </div>
         </div>
       )}
