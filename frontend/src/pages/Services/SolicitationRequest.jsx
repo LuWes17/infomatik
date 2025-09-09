@@ -33,6 +33,12 @@ const SolicitationRequests = () => {
 
   const { showSuccess, showError, showWarning, showInfo } = useNotification();
 
+  // **NEW: Field validation states**
+  const [fieldErrors, setFieldErrors] = useState({});
+  const [touched, setTouched] = useState({});
+  
+  const [submitting, setSubmitting] = useState(false);
+
   // Barangays list
   const barangays = [
     'agnas', 'bacolod', 'bangkilingan', 'bantayan', 'baranghawon', 'basagan', 
@@ -144,6 +150,224 @@ const SolicitationRequests = () => {
     setFilteredRequests(filtered);
   }, [solicitationRequests, categoryFilter, searchTerm]);
 
+  // **NEW: Field validation function**
+  const getFieldValidation = (name, value) => {
+    let isValid = true;
+    let errorMessage = '';
+
+    switch (name) {
+      case 'contactPersonFirstName':
+      case 'contactPersonLastName':
+        if (!value || !value.trim()) {
+          isValid = false;
+          errorMessage = `${name === 'contactPersonFirstName' ? 'First' : 'Last'} name is required`;
+        } else if (value.trim().length < 2) {
+          isValid = false;
+          errorMessage = `${name === 'contactPersonFirstName' ? 'First' : 'Last'} name must be at least 2 characters`;
+        } else if (value.trim().length > 50) {
+          isValid = false;
+          errorMessage = `${name === 'contactPersonFirstName' ? 'First' : 'Last'} name must be less than 50 characters`;
+        } else if (!/^[a-zA-Z\s]+$/.test(value.trim())) {
+          isValid = false;
+          errorMessage = `${name === 'contactPersonFirstName' ? 'First' : 'Last'} name can only contain letters and spaces`;
+        }
+        break;
+      
+      case 'contactNumber':
+        const digits = value.replace(/\D/g, '');
+        if (!digits) {
+          isValid = false;
+          errorMessage = 'Contact number is required';
+        } else if (digits.length !== 11) {
+          isValid = false;
+          errorMessage = 'Contact number must be exactly 11 digits';
+        } else if (!digits.startsWith('09')) {
+          isValid = false;
+          errorMessage = 'Contact number must start with 09';
+        }
+        break;
+      
+      case 'organizationType':
+        if (!value) {
+          isValid = false;
+          errorMessage = 'Please select an organization type';
+        }
+        break;
+      
+      case 'organizationName':
+        if (!value || !value.trim()) {
+          isValid = false;
+          errorMessage = 'Organization name is required';
+        } else if (value.trim().length < 2) {
+          isValid = false;
+          errorMessage = 'Organization name must be at least 2 characters';
+        } else if (value.trim().length > 150) {
+          isValid = false;
+          errorMessage = 'Organization name must be less than 150 characters';
+        }
+        break;
+      
+      case 'street':
+        if (!value || !value.trim()) {
+          isValid = false;
+          errorMessage = 'Street address is required';
+        } else if (value.trim().length < 5) {
+          isValid = false;
+          errorMessage = 'Street address must be at least 5 characters';
+        } else if (value.trim().length > 200) {
+          isValid = false;
+          errorMessage = 'Street address must be less than 200 characters';
+        }
+        break;
+      
+      case 'barangay':
+        if (!value) {
+          isValid = false;
+          errorMessage = 'Please select a barangay';
+        }
+        break;
+      
+      case 'requestType':
+        if (!value) {
+          isValid = false;
+          errorMessage = 'Please select a request type';
+        }
+        break;
+      
+      case 'requestedAssistanceDetails':
+        if (!value || !value.trim()) {
+          isValid = false;
+          errorMessage = 'Specific request details are required';
+        } else if (value.trim().length < 10) {
+          isValid = false;
+          errorMessage = 'Please provide more detailed request information (at least 10 characters)';
+        } else if (value.trim().length > 1000) {
+          isValid = false;
+          errorMessage = 'Request details must be less than 1000 characters';
+        }
+        break;
+      
+      case 'purpose':
+        if (!value || !value.trim()) {
+          isValid = false;
+          errorMessage = 'Purpose is required';
+        } else if (value.trim().length < 10) {
+          isValid = false;
+          errorMessage = 'Please provide more detailed purpose information (at least 10 characters)';
+        } else if (value.trim().length > 800) {
+          isValid = false;
+          errorMessage = 'Purpose must be less than 800 characters';
+        }
+        break;
+      
+      case 'solicitationLetter':
+        if (!value) {
+          isValid = false;
+          errorMessage = 'Solicitation letter is required';
+        } else {
+          const allowedTypes = ['application/pdf'];
+          const maxSize = 5 * 1024 * 1024; // 5MB
+          
+          if (!allowedTypes.includes(value.type)) {
+            isValid = false;
+            errorMessage = 'Only PDF files are allowed';
+          } else if (value.size > maxSize) {
+            isValid = false;
+            errorMessage = 'File size must be less than 5MB';
+          }
+        }
+        break;
+      
+      default:
+        break;
+    }
+
+    return { isValid, errorMessage };
+  };
+
+  // **NEW: Validate individual field**
+  const validateField = (name, value) => {
+    const validation = getFieldValidation(name, value);
+    setFieldErrors(prev => ({
+      ...prev,
+      [name]: validation.errorMessage
+    }));
+    return validation.isValid;
+  };
+
+  // **NEW: Get input class based on validation state**
+  const getInputClass = (fieldName) => {
+    if (!touched[fieldName]) {
+      return styles.inputWithIcon;
+    }
+    
+    const hasError = fieldErrors[fieldName] && fieldErrors[fieldName] !== '';
+    return `${styles.inputWithIcon} ${hasError ? styles.inputInvalid : styles.inputValid}`;
+  };
+
+  // **NEW: Handle input changes with validation**
+  const handleInputChange = (field, value) => {
+    // Handle phone number formatting
+    if (field === 'contactNumber') {
+      let cleanValue = value.replace(/\D/g, '');
+      // Ensure it starts with 09 if user types numbers
+      if (cleanValue && !cleanValue.startsWith('09')) {
+        cleanValue = '09' + cleanValue.substring(cleanValue.startsWith('9') ? 1 : 0);
+      }
+      // Limit to 11 digits
+      cleanValue = cleanValue.substring(0, 11);
+      value = cleanValue;
+    }
+
+    setFormData({...formData, [field]: value});
+    
+    // Validate field on change if already touched
+    if (touched[field]) {
+      validateField(field, value);
+    }
+  };
+
+  // **NEW: Handle input blur**
+  const handleInputBlur = (field, value) => {
+    setTouched(prev => ({
+      ...prev,
+      [field]: true
+    }));
+    validateField(field, value);
+  };
+
+  // **NEW: Validate entire form**
+  const validateForm = () => {
+    const newTouched = {
+      contactPersonFirstName: true,
+      contactPersonLastName: true,
+      contactNumber: true,
+      organizationType: true,
+      organizationName: true,
+      street: true,
+      barangay: true,
+      requestType: true,
+      requestedAssistanceDetails: true,
+      purpose: true,
+      solicitationLetter: true
+    };
+    setTouched(newTouched);
+
+    let isFormValid = true;
+    const newFieldErrors = {};
+    
+    Object.keys(formData).forEach(key => {
+      const validation = getFieldValidation(key, formData[key]);
+      newFieldErrors[key] = validation.errorMessage;
+      if (!validation.isValid) {
+        isFormValid = false;
+      }
+    });
+
+    setFieldErrors(newFieldErrors);
+    return isFormValid;
+  };
+
   const handleRequestClick = () => {
     if (!isAuthenticated) {
       setShowAuthModal(true);
@@ -161,12 +385,14 @@ const SolicitationRequests = () => {
       return;
     }
     
-    if (!formData.solicitationLetter) {
-      alert('Please upload your solicitation letter');
+    if (!validateForm()) {
+      showError('Please fix the errors in the form before proceeding.');
       return;
     }
     
     try {
+      setSubmitting(true);
+
       const submitData = new FormData();
       
       // Map form data to API expected format
@@ -201,6 +427,8 @@ const SolicitationRequests = () => {
     } catch (error) {
       console.error('Error submitting form:', error);
       showError('Failed to submit solicitation request. Please try again.');
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -219,30 +447,16 @@ const SolicitationRequests = () => {
       purpose: '',
       solicitationLetter: null
     });
+
+    // **NEW: Reset validation states**
+    setFieldErrors({});
+    setTouched({});
+    setSubmitting(false);
+    
     setShowRequestForm(false);
     document.body.style.overflow = "auto";
   };
 
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      // Validate file type and size
-      const allowedTypes = ['application/pdf'];
-      const maxSize = 5 * 1024 * 1024; // 5MB
-
-      if (!allowedTypes.includes(file.type)) {
-        alert('Please upload a PDF file only');
-        return;
-      }
-
-      if (file.size > maxSize) {
-        alert('File size must be less than 5MB');
-        return;
-      }
-
-      setFormData({...formData, solicitationLetter: file});
-    }
-  };
 
   const openDetailsModal = (request) => {
     setSelectedRequest(request);
@@ -270,6 +484,11 @@ const SolicitationRequests = () => {
   const handleBarangayChange = (barangay) => {
     setFormData({...formData, barangay: barangay});
     setBarangayDropdownOpen(false);
+
+     // Validate if touched
+    if (touched.barangay) {
+      validateField('barangay', barangay);
+    }
   };
 
   const toggleBarangayDropdown = () => {
@@ -279,6 +498,10 @@ const SolicitationRequests = () => {
   const handleOrganizationTypeChange = (type) => {
     setFormData({...formData, organizationType: type});
     setOrganizationTypeDropdownOpen(false);
+
+    if (touched.organizationType) {
+    validateField('organizationType', type);
+    }
   };
 
   const toggleOrganizationTypeDropdown = () => {
@@ -288,6 +511,11 @@ const SolicitationRequests = () => {
   const handleRequestTypeChange = (type) => {
     setFormData({...formData, requestType: type});
     setRequestTypeDropdownOpen(false);
+
+    // Validate if touched
+    if (touched.requestType) {
+      validateField('requestType', type);
+    }
   };
 
   const toggleRequestTypeDropdown = () => {
@@ -303,6 +531,8 @@ const SolicitationRequests = () => {
 
   // Close all modals
   const closeAllModals = () => {
+    if (submitting) return;
+
     setShowRequestForm(false);
     setShowAuthModal(false);
     setShowDetailsModal(false);
@@ -310,6 +540,11 @@ const SolicitationRequests = () => {
     setBarangayDropdownOpen(false);
     setOrganizationTypeDropdownOpen(false);
     setRequestTypeDropdownOpen(false);
+
+    // Reset validation states
+    setFieldErrors({});
+    setTouched({});
+
     document.body.style.overflow = "auto";
   };
 
@@ -553,7 +788,7 @@ const SolicitationRequests = () => {
               <div className={styles.modalTitle}>
                 <h2>Submit Solicitation Request</h2>
               </div>
-              <button onClick={closeAllModals} className={styles.closeButton}>
+              <button onClick={closeAllModals} className={styles.closeButton} disabled={submitting}>
                 ×
               </button>
             </div>
@@ -569,13 +804,19 @@ const SolicitationRequests = () => {
                       <input
                         type="text"
                         value={formData.contactPersonFirstName}
-                        onChange={(e) => setFormData({...formData, contactPersonFirstName: e.target.value})}
+                        onChange={(e) => handleInputChange('contactPersonFirstName', e.target.value)}
+                        onBlur={(e) => handleInputBlur('contactPersonFirstName', e.target.value)}
                         required
                         placeholder="First Name"
-                        className={styles.inputWithIcon}
+                        className={getInputClass('contactPersonFirstName')}
                         maxLength={50}
                       />
                     </div>
+                      {touched.contactPersonFirstName && fieldErrors.contactPersonFirstName && (
+                        <div className={styles.errorMessage}>
+                          {fieldErrors.contactPersonFirstName}
+                        </div>
+                      )}
                   </div>
 
                   {/* Contact Person Last Name */}
@@ -586,13 +827,19 @@ const SolicitationRequests = () => {
                       <input
                         type="text"
                         value={formData.contactPersonLastName}
-                        onChange={(e) => setFormData({...formData, contactPersonLastName: e.target.value})}
+                        onChange={(e) => handleInputChange('contactPersonLastName', e.target.value)}
+                        onBlur={(e) => handleInputBlur('contactPersonLastName', e.target.value)}
                         required
                         placeholder="Last Name"
-                        className={styles.inputWithIcon}
+                        className={getInputClass('contactPersonLastName')}
                         maxLength={50}
                       />
                     </div>
+                      {touched.contactPersonLastName && fieldErrors.contactPersonLastName && (
+                        <div className={styles.errorMessage}>
+                          {fieldErrors.contactPersonLastName}
+                        </div>
+                      )}
                   </div>
 
                   {/* Contact Number */}
@@ -603,23 +850,27 @@ const SolicitationRequests = () => {
                       <span className={styles.phonePrefix}>+63</span>
                       <input
                         type="tel"
-                        value={formData.contactNumber.replace(/^(\+63|63)/, '').replace(/^09/, '9')}
+                        value={formData.contactNumber.replace(/^(\+63|63)/, '').replace(/^0/, '')}
                         onChange={(e) => {
                           let value = e.target.value.replace(/\D/g, '');
-                          if (value && !value.startsWith('9')) {
-                            value = '9' + value.substring(1);
+                          if (value && !value.startsWith('09')) {
+                            value = '09' + value.substring(value.startsWith('9') ? 1 : 0);
                           }
-                          value = value.substring(0, 10);
-                          setFormData({...formData, contactNumber: `09${value.substring(1)}`});
+                          value = value.substring(0, 11);
+                          handleInputChange('contactNumber', value);
                         }}
+                        onBlur={(e) => handleInputBlur('contactNumber', formData.contactNumber)}
                         required
-                        placeholder="9XX XXX XXXX"
-                        pattern="^9\d{9}$"
-                        title="Please enter a valid Philippine mobile number (9XXXXXXXXX)"
-                        className={styles.phoneInputWithIcon}
-                        maxLength={10}
+                        placeholder="09XX XXX XXXX"
+                        className={`${styles.phoneInputWithIcon} ${getInputClass('contactNumber').split(' ').pop()}`}
+                        maxLength={11}
                       />
-                    </div>
+                      </div>
+                      {touched.contactNumber && fieldErrors.contactNumber && (
+                        <div className={styles.errorMessage}>
+                          {fieldErrors.contactNumber}
+                        </div>
+                      )}
                   </div>
 
                   {/* Organization Type - Custom Dropdown */}
@@ -631,7 +882,13 @@ const SolicitationRequests = () => {
                         <button
                           type="button"
                           onClick={toggleOrganizationTypeDropdown}
-                          className={`${styles.customDropdownButton} ${organizationTypeDropdownOpen ? styles.active : ''} ${!formData.organizationType ? styles.placeholder : ''}`}
+                          onBlur={(e) => {
+                            // Only trigger blur validation if clicking outside the dropdown
+                            if (!organizationTypeDropdownRef.current?.contains(e.relatedTarget)) {
+                              handleInputBlur('organizationType', formData.organizationType);
+                            }
+                          }}
+                          className={`${styles.customDropdownButton} ${organizationTypeDropdownOpen ? styles.active : ''} ${!formData.organizationType ? styles.placeholder : ''} ${touched.organizationType && fieldErrors.organizationType ? styles.inputInvalid : touched.organizationType ? styles.inputValid : ''}`}
                           required
                         >
                           <span>
@@ -644,7 +901,10 @@ const SolicitationRequests = () => {
                             <button
                               key={type}
                               type="button"
-                              onClick={() => handleOrganizationTypeChange(type)}
+                              onClick={() => {
+                                handleOrganizationTypeChange(type);
+                                setTouched(prev => ({ ...prev, organizationType: true }));
+                              }}
                               className={`${styles.customDropdownItem} ${formData.organizationType === type ? styles.active : ''}`}
                             >
                               {type}
@@ -653,6 +913,11 @@ const SolicitationRequests = () => {
                         </div>
                       </div>
                     </div>
+                    {touched.organizationType && fieldErrors.organizationType && (
+                      <div className={styles.errorMessage}>
+                        {fieldErrors.organizationType}
+                      </div>
+                    )}
                   </div>
 
                   {/* Organization Name */}
@@ -663,13 +928,19 @@ const SolicitationRequests = () => {
                       <input
                         type="text"
                         value={formData.organizationName}
-                        onChange={(e) => setFormData({...formData, organizationName: e.target.value})}
+                        onChange={(e) => handleInputChange('organizationName', e.target.value)}
+                        onBlur={(e) => handleInputBlur('organizationName', e.target.value)}
                         required
                         placeholder="Enter organization name"
-                        className={styles.inputWithIcon}
+                        className={getInputClass('organizationName')}
                         maxLength={150}
                       />
                     </div>
+                    {touched.organizationName && fieldErrors.organizationName && (
+                        <div className={styles.errorMessage}>
+                          {fieldErrors.organizationName}
+                        </div>
+                      )}
                   </div>
 
                   {/* Street Address */}
@@ -680,13 +951,19 @@ const SolicitationRequests = () => {
                       <input
                         type="text"
                         value={formData.street}
-                        onChange={(e) => setFormData({...formData, street: e.target.value})}
+                        onChange={(e) => handleInputChange('street', e.target.value)}
+                        onBlur={(e) => handleInputBlur('street', e.target.value)}
                         required
                         placeholder="House/Unit No., Street Name"
                         maxLength={200}
-                        className={styles.inputWithIcon}
-                      />
-                    </div>
+                        className={getInputClass('street')}
+                        />
+                      </div>
+                        {touched.street && fieldErrors.street && (
+                          <div className={styles.errorMessage}>
+                             {fieldErrors.street}
+                          </div>
+                        )}
                   </div>
 
                   {/* Barangay Dropdown */}
@@ -698,7 +975,13 @@ const SolicitationRequests = () => {
                         <button
                           type="button"
                           onClick={toggleBarangayDropdown}
-                          className={`${styles.customDropdownButton} ${barangayDropdownOpen ? styles.active : ''} ${!formData.barangay ? styles.placeholder : ''}`}
+                          onBlur={(e) => {
+                            // Only trigger blur validation if clicking outside the dropdown
+                            if (!barangayDropdownRef.current?.contains(e.relatedTarget)) {
+                              handleInputBlur('barangay', formData.barangay);
+                            }
+                          }}
+                          className={`${styles.customDropdownButton} ${barangayDropdownOpen ? styles.active : ''} ${!formData.barangay ? styles.placeholder : ''} ${touched.barangay && fieldErrors.barangay ? styles.inputInvalid : touched.barangay ? styles.inputValid : ''}`}
                         >
                           <span>
                             {formData.barangay ? formatBarangayName(formData.barangay) : 'Select Barangay'}
@@ -710,7 +993,10 @@ const SolicitationRequests = () => {
                             <button
                               key={barangay}
                               type="button"
-                              onClick={() => handleBarangayChange(barangay)}
+                              onClick={() => {
+                                handleBarangayChange(barangay);
+                                setTouched(prev => ({ ...prev, barangay: true }));
+                              }}
                               className={`${styles.customDropdownItem} ${formData.barangay === barangay ? styles.active : ''}`}
                             >
                               {formatBarangayName(barangay)}
@@ -719,6 +1005,11 @@ const SolicitationRequests = () => {
                         </div>
                       </div>
                     </div>
+                    {touched.barangay && fieldErrors.barangay && (
+                      <div className={styles.errorMessage}>
+                        {fieldErrors.barangay}
+                      </div>
+                    )}
                   </div>
 
                   {/* Request Type - Custom Dropdown */}
@@ -730,7 +1021,13 @@ const SolicitationRequests = () => {
                         <button
                           type="button"
                           onClick={toggleRequestTypeDropdown}
-                          className={`${styles.customDropdownButton} ${requestTypeDropdownOpen ? styles.active : ''} ${!formData.requestType ? styles.placeholder : ''}`}
+                          onBlur={(e) => {
+                            // Only trigger blur validation if clicking outside the dropdown
+                            if (!requestTypeDropdownRef.current?.contains(e.relatedTarget)) {
+                              handleInputBlur('requestType', formData.requestType);
+                            }
+                          }}
+                          className={`${styles.customDropdownButton} ${requestTypeDropdownOpen ? styles.active : ''} ${!formData.requestType ? styles.placeholder : ''} ${touched.requestType && fieldErrors.requestType ? styles.inputInvalid : touched.requestType ? styles.inputValid : ''}`}
                           required
                         >
                           <span>
@@ -743,7 +1040,10 @@ const SolicitationRequests = () => {
                             <button
                               key={type}
                               type="button"
-                              onClick={() => handleRequestTypeChange(type)}
+                              onClick={() => {
+                                handleRequestTypeChange(type);
+                                setTouched(prev => ({ ...prev, requestType: true }));
+                              }}
                               className={`${styles.customDropdownItem} ${formData.requestType === type ? styles.active : ''}`}
                             >
                               {type}
@@ -752,6 +1052,11 @@ const SolicitationRequests = () => {
                         </div>
                       </div>
                     </div>
+                    {touched.requestType && fieldErrors.requestType && (
+                      <div className={styles.errorMessage}>
+                        {fieldErrors.requestType}
+                      </div>
+                    )}
                   </div>
 
                   {/* Specific Request Details */}
@@ -759,26 +1064,38 @@ const SolicitationRequests = () => {
                     <label>Specific Request Details *</label>
                     <textarea
                       value={formData.requestedAssistanceDetails}
-                      onChange={(e) => setFormData({...formData, requestedAssistanceDetails: e.target.value})}
+                      onChange={(e) => handleInputChange('requestedAssistanceDetails', e.target.value)}
+                      onBlur={(e) => handleInputBlur('requestedAssistanceDetails', e.target.value)}
                       required
                       placeholder="Describe the specific assistance you are requesting..."
                       rows={4}
                       maxLength={1000}
                     />
                   </div>
+                  {touched.requestedAssistanceDetails && fieldErrors.requestedAssistanceDetails && (
+                    <div className={styles.errorMessage}>
+                      {fieldErrors.requestedAssistanceDetails}
+                    </div>
+                  )}
 
                   {/* Purpose */}
                   <div className={styles.formGroup}>
                     <label>Purpose *</label>
                     <textarea
                       value={formData.purpose}
-                      onChange={(e) => setFormData({...formData, purpose: e.target.value})}
+                      onChange={(e) => handleInputChange('purpose', e.target.value)}
+                      onBlur={(e) => handleInputBlur('purpose', e.target.value)}
                       required
                       placeholder="Explain the purpose and importance of this request..."
                       rows={4}
                       maxLength={800}
                     />
                   </div>
+                  {touched.purpose && fieldErrors.purpose && (
+                    <div className={styles.errorMessage}>
+                      {fieldErrors.purpose}
+                    </div>
+                  )}
 
                   {/* Solicitation Letter Upload */}
                   <div className={styles.formGroup}>
@@ -788,15 +1105,27 @@ const SolicitationRequests = () => {
                         type="file"
                         id="solicitationFile"
                         accept=".pdf"
-                        onChange={handleFileChange}
+                        onChange={(e) => {
+                          const file = e.target.files[0];
+                          handleInputChange('solicitationLetter', file);
+                          setTouched(prev => ({ ...prev, solicitationLetter: true }));
+                        }}
                         required
                         className={styles.fileInput}
                       />
-                      <label htmlFor="solicitationFile" className={styles.fileLabel}>
+                      <label 
+                        htmlFor="solicitationFile" 
+                        className={`${styles.fileLabel} ${touched.solicitationLetter && fieldErrors.solicitationLetter ? styles.fileError : touched.solicitationLetter && !fieldErrors.solicitationLetter ? styles.fileValid : ''}`}
+                      >
                         <Upload size={18} />
                         {formData.solicitationLetter ? formData.solicitationLetter.name : 'Choose Solicitation Letter (PDF only)'}
                       </label>
-                    </div>
+                      </div>
+                      {touched.solicitationLetter && fieldErrors.solicitationLetter && (
+                        <div className={styles.errorMessage}>
+                          {fieldErrors.solicitationLetter}
+                        </div>
+                      )}
                     <small className={styles.fileHint}>
                       Maximum file size: 5MB. Accepted formats: PDF only
                     </small>
@@ -808,14 +1137,16 @@ const SolicitationRequests = () => {
                     type="button" 
                     className={styles.cancelBtn}
                     onClick={closeAllModals}
+                    disabled={submitting}
                   >
                     Cancel
                   </button>
                   <button 
                     type="submit" 
                     className={styles.submitBtn}
+                    disabled={submitting}
                   >
-                    Submit Request
+                    {submitting ? 'Submitting...' : 'Submit Request'} 
                   </button>
                 </div>
               </form>
