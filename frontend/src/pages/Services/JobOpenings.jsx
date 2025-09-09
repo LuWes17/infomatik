@@ -188,7 +188,8 @@ const toggleBarangayDropdown = () => {
         ...prev,
         firstName: user.firstName || '',
         lastName: user.lastName || '',
-        phone: user.contactNumber || ''
+        phone: user.contactNumber || '',
+        barangay: user.barangay || ''
       }));
     }
   }, [showApplicationForm, isAuthenticated, user]);

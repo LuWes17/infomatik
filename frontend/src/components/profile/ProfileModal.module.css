@@ -65,10 +65,32 @@
   flex: 1;
 }
 
+.inputWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.inputIcon {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--gray-400);
+  z-index: 2;
+  pointer-events: none;
+  width: 16px;
+  height: 16px;
+}
+
+.inputWithIcon {
+  padding-left: 2.75rem !important;
+}
+
 /* Form Styles */
 .formGrid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: 1rem;
   margin-bottom: 1rem;
 }
@@ -84,6 +106,24 @@
   font-size: var(--font-size-sm);
   font-weight: 500;
   color: var(--gray-700);
+}
+
+.inputError {
+  border-color: #ef4444 !important;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1) !important;
+}
+
+.fieldError {
+  font-size: var(--font-size-xs);
+  color: #ef4444;
+  margin-top: 0.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.fieldError::before {
+  font-size: 0.75rem;
 }
 
 .formInput,
@@ -207,13 +247,20 @@
 
 /* Messages */
 .errorMessage {
-  background-color: #fef2f2;
-  border: 1px solid #fecaca;
-  color: #dc2626;
-  padding: 0.75rem;
-  border-radius: var(--border-radius-md);
-  font-size: var(--font-size-sm);
-  margin-bottom: 1rem;
+  color: #dc3545;
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+  margin-left: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-weight: 500;
+  line-height: 1.3;
+}
+
+.errorMessage::before {
+  font-size: 0.8rem;
+  flex-shrink: 0;
 }
 
 .successMessage {
@@ -225,6 +272,11 @@
   font-size: var(--font-size-sm);
   margin-bottom: 1rem;
 }
+
+.successMessage::before {
+  font-size: 0.875rem;
+}
+
 
 /* Responsive Design */
 @media (max-width: 768px) {
@@ -244,4 +296,130 @@
   .modalActions button {
     width: 100%;
   }
+}
+
+/* Add these styles at the end of your CSS file: */
+
+/* Custom Barangay Dropdown */
+.customDropdown {
+  position: relative;
+  width: 100%;
+}
+
+.customDropdownButton {
+  width: 100%;
+  padding: 0.75rem 1rem 0.75rem 2.75rem;
+  border: 2px solid var(--gray-300);
+  border-radius: var(--border-radius-md);
+  background: var(--white);
+  color: var(--gray-700);
+  font-size: var(--font-size-base);
+  font-weight: 400;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  text-align: left;
+  font-family: inherit;
+}
+
+.customDropdownButton:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(28, 98, 187, 0.1);
+}
+
+.customDropdownButton.active {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(28, 98, 187, 0.1);
+}
+
+.customDropdownButton.placeholder {
+  color: var(--gray-400);
+}
+
+.dropdownArrow {
+  transition: transform 0.3s ease;
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  color: var(--gray-400);
+}
+
+.dropdownArrow.open {
+  transform: rotate(180deg);
+}
+
+.customDropdownContent {
+  position: absolute;
+  top: 110%;
+  left: 0;
+  right: 0;
+  background: var(--white);
+  box-shadow: var(--shadow-xl);
+  border-radius: var(--border-radius-md);
+  padding: 8px 0;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  transition: all 0.3s ease;
+  z-index: 200;
+  border: 1px solid var(--gray-200);
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.customDropdownContent.show {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.customDropdownItem {
+  display: block;
+  padding: 10px 16px;
+  color: var(--gray-700);
+  text-decoration: none;
+  font-weight: 400;
+  transition: background-color 0.2s ease;
+  white-space: nowrap;
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+}
+
+.customDropdownItem:hover {
+  background-color: var(--gray-50);
+  color: var(--primary-color);
+  font-weight: 500;
+}
+
+.customDropdownItem.active {
+  background-color: var(--primary-color);
+  color: var(--white);
+  font-weight: 600;
+}
+
+/* Custom scrollbar for dropdown */
+.customDropdownContent::-webkit-scrollbar {
+  width: 6px;
+}
+
+.customDropdownContent::-webkit-scrollbar-track {
+  background: var(--gray-100);
+  border-radius: 3px;
+}
+
+.customDropdownContent::-webkit-scrollbar-thumb {
+  background: var(--gray-300);
+  border-radius: 3px;
+}
+
+.customDropdownContent::-webkit-scrollbar-thumb:hover {
+  background: var(--gray-400);
 }
