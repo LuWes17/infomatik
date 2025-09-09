@@ -37,6 +37,10 @@ const JobOpenings = () => {
   const dropdownRef = useRef(null);
   const [barangayDropdownOpen, setBarangayDropdownOpen] = useState(false);
   const barangayDropdownRef = useRef(null);
+
+  // **NEW: Field validation states**
+  const [fieldErrors, setFieldErrors] = useState({});
+  const [touched, setTouched] = useState({});
   
   const [applicationData, setApplicationData] = useState({
     firstName: '',
@@ -71,6 +75,11 @@ const JobOpenings = () => {
 const handleBarangayChange = (barangay) => {
   setApplicationData({...applicationData, barangay: barangay});
   setBarangayDropdownOpen(false);
+
+   // Validate if touched
+  if (touched.barangay) {
+    validateField('barangay', barangay);
+  }
 };
 
 // Add this function to toggle barangay dropdown
@@ -197,6 +206,206 @@ const toggleBarangayDropdown = () => {
     };
   }, []);
 
+  const getFieldValidation = (name, value) => {
+    let isValid = true;
+    let errorMessage = '';
+
+    switch (name) {
+      case 'firstName':
+      case 'lastName':
+        if (!value || !value.trim()) {
+          isValid = false;
+          errorMessage = `${name === 'firstName' ? 'First' : 'Last'} name is required`;
+        } else if (value.trim().length < 2) {
+          isValid = false;
+          errorMessage = `${name === 'firstName' ? 'First' : 'Last'} name must be at least 2 characters`;
+        } else if (value.trim().length > 50) {
+          isValid = false;
+          errorMessage = `${name === 'firstName' ? 'First' : 'Last'} name must be less than 50 characters`;
+        } else if (!/^[a-zA-Z\s]+$/.test(value.trim())) {
+          isValid = false;
+          errorMessage = `${name === 'firstName' ? 'First' : 'Last'} name can only contain letters and spaces`;
+        }
+        break;
+      
+      case 'birthday':
+        if (!value) {
+          isValid = false;
+          errorMessage = 'Birthday is required';
+        } else {
+          const today = new Date();
+          const birthDate = new Date(value);
+          let age = today.getFullYear() - birthDate.getFullYear();
+          const monthDiff = today.getMonth() - birthDate.getMonth();
+          
+          if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+            age--;
+          }
+          
+          if (birthDate > today) {
+            isValid = false;
+            errorMessage = 'Birthday cannot be in the future';
+          } else if (age < 16) {
+            isValid = false;
+            errorMessage = 'You must be at least 16 years old to apply';
+          } else if (age > 100) {
+            isValid = false;
+            errorMessage = 'Please enter a valid birth date';
+          }
+        }
+        break;
+      
+      case 'phone':
+        const digits = value.replace(/\D/g, '');
+        if (!digits) {
+          isValid = false;
+          errorMessage = 'Phone number is required';
+        } else if (digits.length !== 11) {
+          isValid = false;
+          errorMessage = 'Phone number must be exactly 11 digits';
+        } else if (!digits.startsWith('09')) {
+          isValid = false;
+          errorMessage = 'Phone number must start with 09';
+        }
+        break;
+      
+      case 'street':
+        if (!value || !value.trim()) {
+          isValid = false;
+          errorMessage = 'Street address is required';
+        } else if (value.trim().length < 5) {
+          isValid = false;
+          errorMessage = 'Street address must be at least 5 characters';
+        } else if (value.trim().length > 200) {
+          isValid = false;
+          errorMessage = 'Street address must be less than 200 characters';
+        }
+        break;
+      
+      case 'barangay':
+        if (!value) {
+          isValid = false;
+          errorMessage = 'Please select a barangay';
+        }
+        break;
+      
+      case 'city':
+        if (!value || !value.trim()) {
+          isValid = false;
+          errorMessage = 'City is required';
+        } else if (value.trim().length < 2) {
+          isValid = false;
+          errorMessage = 'City must be at least 2 characters';
+        } else if (value.trim().length > 100) {
+          isValid = false;
+          errorMessage = 'City must be less than 100 characters';
+        } else if (!/^[a-zA-Z\s]+$/.test(value.trim())) {
+          isValid = false;
+          errorMessage = 'City can only contain letters and spaces';
+        }
+        break;
+      
+      case 'cvFile':
+        if (!value) {
+          isValid = false;
+          errorMessage = 'CV file is required';
+        } else {
+          const allowedTypes = ['application/pdf'];
+          const maxSize = 5 * 1024 * 1024; // 5MB
+          
+          if (!allowedTypes.includes(value.type)) {
+            isValid = false;
+            errorMessage = 'Only PDF files are allowed';
+          } else if (value.size > maxSize) {
+            isValid = false;
+            errorMessage = 'File size must be less than 5MB';
+          }
+        }
+        break;
+      
+      default:
+        break;
+    }
+
+    return { isValid, errorMessage };
+  };
+
+  const validateField = (name, value) => {
+    const validation = getFieldValidation(name, value);
+    setFieldErrors(prev => ({
+      ...prev,
+      [name]: validation.errorMessage
+    }));
+    return validation.isValid;
+  };
+
+  // **NEW: Get input class based on validation state**
+  const getInputClass = (fieldName) => {
+    if (!touched[fieldName]) {
+      return styles.inputWithIcon;
+    }
+    
+    const hasError = fieldErrors[fieldName] && fieldErrors[fieldName] !== '';
+    return `${styles.inputWithIcon} ${hasError ? styles.inputInvalid : styles.inputValid}`;
+  };
+
+  const handleInputChange = (field, value) => {
+    // Handle phone number formatting
+    if (field === 'phone') {
+      let cleanValue = value.replace(/\D/g, '');
+      // Ensure it starts with 09 if user types numbers
+      if (cleanValue && !cleanValue.startsWith('09')) {
+        cleanValue = '09' + cleanValue.substring(cleanValue.startsWith('9') ? 1 : 0);
+      }
+      // Limit to 11 digits
+      cleanValue = cleanValue.substring(0, 11);
+      value = cleanValue;
+    }
+
+    setApplicationData({...applicationData, [field]: value});
+    
+    // Validate field on change if already touched
+    if (touched[field]) {
+      validateField(field, value);
+    }
+  };
+
+  const handleInputBlur = (field, value) => {
+    setTouched(prev => ({
+      ...prev,
+      [field]: true
+    }));
+    validateField(field, value);
+  };
+
+  const validateForm = () => {
+    const newTouched = {
+      firstName: true,
+      lastName: true,
+      birthday: true,
+      phone: true,
+      street: true,
+      barangay: true,
+      city: true,
+      cvFile: true
+    };
+    setTouched(newTouched);
+
+    let isFormValid = true;
+    const newFieldErrors = {};
+    
+    Object.keys(applicationData).forEach(key => {
+      const validation = getFieldValidation(key, applicationData[key]);
+      newFieldErrors[key] = validation.errorMessage;
+      if (!validation.isValid) {
+        isFormValid = false;
+      }
+    });
+
+    setFieldErrors(newFieldErrors);
+    return isFormValid;
+  };
+
   // Format date
   function formatDate(dateString) {
     const date = new Date(dateString);
@@ -261,9 +470,9 @@ const toggleBarangayDropdown = () => {
   const handleApplicationSubmit = async (e) => {
     e.preventDefault();
     
-    if (!applicationData.cvFile) {
-      alert('Please upload your CV file');
-      return;
+    if (!validateForm()) {
+    showError('Please fix the errors in the form before proceeding.');
+    return;
     }
     
     try {
@@ -322,6 +531,20 @@ const toggleBarangayDropdown = () => {
     setShowApplicationForm(false);
     setShowAuthPrompt(false);
     setSelectedJob(null);
+
+    setApplicationData({
+    firstName: '',
+    lastName: '',
+    birthday: '',
+    phone: '',
+    street: '',
+    barangay: '',
+    city: '',
+    cvFile: null
+    });
+    setFieldErrors({});
+    setTouched({});
+
     // Unfreeze background when any modal closes
     document.body.style.overflow = "auto";
   };
@@ -623,13 +846,19 @@ const toggleBarangayDropdown = () => {
                       <input
                         type="text"
                         value={applicationData.firstName}
-                        onChange={(e) => setApplicationData({...applicationData, firstName: e.target.value})}
+                        onChange={(e) => handleInputChange('firstName', e.target.value)}
+                        onBlur={(e) => handleInputBlur('firstName', e.target.value)}
                         required
                         placeholder="First Name"
-                        className={styles.inputWithIcon}
+                        className={getInputClass('firstName')}
                         maxLength={50}
                       />
-                    </div>
+                      </div>
+                      {touched.firstName && fieldErrors.firstName && (
+                        <div className={styles.errorMessage}>
+                          {fieldErrors.firstName}
+                        </div>
+                      )}
                   </div>
 
                   {/* Last Name Input */}
@@ -642,13 +871,19 @@ const toggleBarangayDropdown = () => {
                       <input
                         type="text"
                         value={applicationData.lastName}
-                        onChange={(e) => setApplicationData({...applicationData, lastName: e.target.value})}
+                        onChange={(e) => handleInputChange('lastName', e.target.value)}
+                        onBlur={(e) => handleInputBlur('lastName', e.target.value)}
                         required
                         placeholder="Last Name"
-                        className={styles.inputWithIcon}
+                        className={getInputClass('lastName')}
                         maxLength={50}
                       />
                     </div>
+                    {touched.lastName && fieldErrors.lastName && (
+                      <div className={styles.errorMessage}>
+                        {fieldErrors.lastName}
+                      </div>
+                    )}
                   </div>
 
                   {/* Birthday Input */}
@@ -661,12 +896,18 @@ const toggleBarangayDropdown = () => {
                       <input
                         type="date"
                         value={applicationData.birthday}
-                        onChange={(e) => setApplicationData({...applicationData, birthday: e.target.value})}
+                        onChange={(e) => handleInputChange('birthday', e.target.value)}
+                        onBlur={(e) => handleInputBlur('birthday', e.target.value)}
                         required
                         max={new Date().toISOString().split('T')[0]}
-                        className={styles.inputWithIcon}
+                        className={getInputClass('birthday')}
                       />
                     </div>
+                    {touched.birthday && fieldErrors.birthday && (
+                      <div className={styles.errorMessage}>
+                        {fieldErrors.birthday}
+                      </div>
+                    )}
                   </div>
 
                   {/* Phone Number Input */}
@@ -679,25 +920,28 @@ const toggleBarangayDropdown = () => {
                       <span className={styles.phonePrefix}>+63</span>
                       <input
                         type="tel"
-                        value={applicationData.phone.replace(/^(\+63|63)/, '').replace(/^09/, '9')}
+                        value={applicationData.phone.replace(/^(\+63|63)/, '').replace(/^0/, '')}
                         onChange={(e) => {
                           let value = e.target.value.replace(/\D/g, '');
-                          // Ensure it starts with 9 if user types numbers
-                          if (value && !value.startsWith('9')) {
-                            value = '9' + value.substring(1);
+                          // Format as 09XXXXXXXXX
+                          if (value && !value.startsWith('09')) {
+                            value = '09' + value.substring(value.startsWith('9') ? 1 : 0);
                           }
-                          // Limit to 10 digits (9xxxxxxxxx)
-                          value = value.substring(0, 10);
-                          setApplicationData({...applicationData, phone: `09${value.substring(1)}`});
+                          value = value.substring(0, 11);
+                          handleInputChange('phone', value);
                         }}
+                        onBlur={(e) => handleInputBlur('phone', applicationData.phone)}
                         required
-                        placeholder="9XX XXX XXXX"
-                        pattern="^9\d{9}$"
-                        title="Please enter a valid Philippine mobile number (9XXXXXXXXX)"
-                        className={styles.phoneInputWithIcon}
-                        maxLength={10}
+                        placeholder="09XX XXX XXXX"
+                        className={`${styles.phoneInputWithIcon} ${getInputClass('phone').split(' ').pop()}`}
+                        maxLength={11}
                       />
                     </div>
+                    {touched.phone && fieldErrors.phone && (
+                      <div className={styles.errorMessage}>
+                        {fieldErrors.phone}
+                      </div>
+                    )}
                   </div>
 
                   {/* Street Address Input */}
@@ -710,13 +954,19 @@ const toggleBarangayDropdown = () => {
                       <input
                         type="text"
                         value={applicationData.street}
-                        onChange={(e) => setApplicationData({...applicationData, street: e.target.value})}
+                        onChange={(e) => handleInputChange('street', e.target.value)}
+                        onBlur={(e) => handleInputBlur('street', e.target.value)}
                         required
                         placeholder="House/Unit No., Street Name"
                         maxLength={200}
-                        className={styles.inputWithIcon}
+                        className={getInputClass('street')}
                       />
                     </div>
+                    {touched.street && fieldErrors.street && (
+                      <div className={styles.errorMessage}>
+                        {fieldErrors.street}
+                      </div>
+                    )}
                   </div>
 
                   {/* Barangay Dropdown */}
@@ -725,10 +975,16 @@ const toggleBarangayDropdown = () => {
                     <div className={styles.inputWrapper}>
                       <MapPin size={16} className={styles.inputIcon} />
                       <div className={styles.customDropdown} ref={barangayDropdownRef}>
-                        <button
+                         <button
                           type="button"
                           onClick={toggleBarangayDropdown}
-                          className={`${styles.customDropdownButton} ${barangayDropdownOpen ? styles.active : ''} ${!applicationData.barangay ? styles.placeholder : ''}`}
+                          onBlur={(e) => {
+                            // Only trigger blur validation if clicking outside the dropdown
+                            if (!barangayDropdownRef.current?.contains(e.relatedTarget)) {
+                              handleInputBlur('barangay', applicationData.barangay);
+                            }
+                          }}
+                          className={`${styles.customDropdownButton} ${barangayDropdownOpen ? styles.active : ''} ${!applicationData.barangay ? styles.placeholder : ''} ${touched.barangay && fieldErrors.barangay ? styles.inputInvalid : touched.barangay ? styles.inputValid : ''}`}
                         >
                           <span>
                             {applicationData.barangay ? formatBarangayName(applicationData.barangay) : 'Select Barangay'}
@@ -740,7 +996,10 @@ const toggleBarangayDropdown = () => {
                             <button
                               key={barangay}
                               type="button"
-                              onClick={() => handleBarangayChange(barangay)}
+                              onClick={() => {
+                                handleBarangayChange(barangay);
+                                setTouched(prev => ({ ...prev, barangay: true }));
+                              }}
                               className={`${styles.customDropdownItem} ${applicationData.barangay === barangay ? styles.active : ''}`}
                             >
                               {formatBarangayName(barangay)}
@@ -749,6 +1008,11 @@ const toggleBarangayDropdown = () => {
                         </div>
                       </div>
                     </div>
+                    {touched.barangay && fieldErrors.barangay && (
+                      <div className={styles.errorMessage}>
+                        {fieldErrors.barangay}
+                      </div>
+                    )}
                   </div>
                   
                   
@@ -763,13 +1027,19 @@ const toggleBarangayDropdown = () => {
                       <input
                         type="text"
                         value={applicationData.city}
-                        onChange={(e) => setApplicationData({...applicationData, city: e.target.value})}
+                        onChange={(e) => handleInputChange('city', e.target.value)}
+                        onBlur={(e) => handleInputBlur('city', e.target.value)}
                         required
                         placeholder="City"
-                        className={styles.inputWithIcon}
+                        className={getInputClass('city')}
                         maxLength={100}
                       />
                     </div>
+                    {touched.city && fieldErrors.city && (
+                      <div className={styles.errorMessage}>
+                        {fieldErrors.city}
+                      </div>
+                    )}
                   </div>
 
                   {/* CV Upload Input */}
@@ -782,15 +1052,27 @@ const toggleBarangayDropdown = () => {
                         type="file"
                         id="cvFile"
                         accept=".pdf"
-                        onChange={(e) => setApplicationData({...applicationData, cvFile: e.target.files[0]})}
+                        onChange={(e) => {
+                          const file = e.target.files[0];
+                          handleInputChange('cvFile', file);
+                          setTouched(prev => ({ ...prev, cvFile: true }));
+                        }}
                         required
                         className={styles.fileInput}
                       />
-                      <label htmlFor="cvFile" className={styles.fileLabel}>
+                      <label 
+                        htmlFor="cvFile" 
+                        className={`${styles.fileLabel} ${touched.cvFile && fieldErrors.cvFile ? styles.fileError : touched.cvFile && !fieldErrors.cvFile ? styles.fileValid : ''}`}
+                      >
                         <Upload size={18} />
                         {applicationData.cvFile ? applicationData.cvFile.name : 'Choose CV file (PDF only)'}
                       </label>
                     </div>
+                    {touched.cvFile && fieldErrors.cvFile && (
+                      <div className={styles.errorMessage}>
+                        {fieldErrors.cvFile}
+                      </div>
+                    )}
                     <small className={styles.fileHint}>
                       Maximum file size: 5MB. Accepted format: PDF only.
                     </small>
