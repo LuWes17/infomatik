@@ -297,85 +297,95 @@ const JobApplications = () => {
 
               {/* Job Details Section */}
               {selectedApplication.jobPosting && (
-                <div className={styles.jobDetailsSection}>
-                  <h3>Job Details</h3>
-                  <div className={styles.jobInfo}>
-                    <div className={styles.jobMeta}>
-                      {selectedApplication.jobPosting.location && (
-                        <div className={styles.metaItem}>
-                          <MapPin size={16} />
-                          <span>{selectedApplication.jobPosting.location}</span>
-                        </div>
-                      )}
-                      {selectedApplication.jobPosting.employmentType && (
-                        <div className={styles.metaItem}>
-                          <BriefcaseBusiness size={16} />
-                          <span className={styles.employmentType}>
-                            {selectedApplication.jobPosting.employmentType}
-                          </span>
-                        </div>
-                      )}
-                      {selectedApplication.jobPosting.positionsAvailable && (
-                        <div className={styles.metaItem}>
-                          <Users size={16} />
-                          <span className={styles.positions}>
-                            {selectedApplication.jobPosting.positionsAvailable} position(s) available
-                          </span>
-                        </div>
-                      )}
-                      {selectedApplication.jobPosting.applicationDeadline && (
-                        <div className={styles.metaItem}>
-                          <Calendar size={16} />
-                          <span>Deadline: {formatDate(selectedApplication.jobPosting.applicationDeadline)}</span>
-                        </div>
-                      )}
+              <div className={styles.jobDetailsSection}>
+                <h3>Job Details</h3>
+                
+                {/* Job Details Grid */}
+                <div className={styles.jobDetailsGrid}>
+                  {selectedApplication.jobPosting.location && (
+                    <div className={styles.detailItem}>
+                      <MapPin size={18} />
+                      <div>
+                        <strong>Location:</strong> {selectedApplication.jobPosting.location}
+                      </div>
                     </div>
-                    
-                    {selectedApplication.jobPosting.description && (
-                      <div className={styles.jobDescription}>
-                        <h4>Job Description</h4>
-                        <p>{selectedApplication.jobPosting.description}</p>
+                  )}
+                  
+                  {selectedApplication.jobPosting.employmentType && (
+                    <div className={styles.detailItem}>
+                      <BriefcaseBusiness size={18} />
+                      <div>
+                        <strong>Employment Type:</strong> {selectedApplication.jobPosting.employmentType}
                       </div>
-                    )}
-                    
-                    {selectedApplication.jobPosting.requirements && (
-                      <div className={styles.jobRequirements}>
-                        <h4>Requirements</h4>
-                        <p>{selectedApplication.jobPosting.requirements}</p>
+                    </div>
+                  )}
+                
+                  {selectedApplication.jobPosting.applicationDeadline && (
+                    <div className={styles.detailItem}>
+                      <Calendar size={18} />
+                      <div>
+                        <strong>Application Deadline:</strong> {formatDate(selectedApplication.jobPosting.applicationDeadline)}
                       </div>
-                    )}
-                  </div>
+                    </div>
+                  )}
+                
+                  {selectedApplication.jobPosting.positionsAvailable && (
+                    <div className={styles.detailItem}>
+                      <Users size={18} />
+                      <div>
+                        <strong>Available Positions:</strong> {selectedApplication.jobPosting.positionsAvailable}{' '}
+                        {selectedApplication.jobPosting.positionsAvailable === 1 ? 'Opening' : 'Openings'}
+                      </div>
+                    </div>
+                  )}
                 </div>
-              )}
+
+                {/* Job Description */}
+                {selectedApplication.jobPosting.description && (
+                  <div className={styles.section}>
+                    <h4>Job Description</h4>
+                    <p className={styles.description}>{selectedApplication.jobPosting.description}</p>
+                  </div>
+                )}
+
+                {/* Requirements */}
+                {selectedApplication.jobPosting.requirements && (
+                  <div className={styles.section}>
+                    <h4>Requirements</h4>
+                    <p className={styles.requirements}>{selectedApplication.jobPosting.requirements}</p>
+                  </div>
+                )}
+              </div>
+            )}
 
               {/* Application Details Section */}
               <div className={styles.applicationDetailsSection}>
                 <h3>Your Application</h3>
                 
                 <div className={styles.applicantInfo}>
-                  <h4>Personal Information</h4>
+                  <strong>Personal Information</strong>
                   <div className={styles.infoGrid}>
                     {selectedApplication.fullName && (
                       <div className={styles.infoItem}>
-                        <span className={styles.infoLabel}>Full Name:</span>
+                        <strong>Full Name:</strong>
                         <span>{selectedApplication.fullName}</span>
-                      </div>
-                    )}
-                    {selectedApplication.phone && (
-                      <div className={styles.infoItem}>
-                        <span className={styles.infoLabel}>Phone:</span>
-                        <span>{selectedApplication.phone}</span>
                       </div>
                     )}
                     {selectedApplication.birthday && (
                       <div className={styles.infoItem}>
-                        <span className={styles.infoLabel}>Birthday:</span>
+                        <strong>Birthday:</strong>
                         <span>{formatDate(selectedApplication.birthday)}</span>
+                      </div>
+                    )}
+                    {selectedApplication.phone && (
+                      <div className={styles.infoItem}>
+                        <strong>Phone:</strong>
+                        <span>{selectedApplication.phone}</span>
                       </div>
                     )}
                     {selectedApplication.address && (
                       <div className={styles.infoItem}>
-                        <span className={styles.infoLabel}>Address:</span>
+                        <strong>Address:</strong>
                         <span>{selectedApplication.address}</span>
                       </div>
                     )}
@@ -383,21 +393,24 @@ const JobApplications = () => {
                 </div>
                 
 
-                {selectedApplication.cvFile && (
-                  <div className={styles.cvSection}>
-                    <h4>Resume/CV</h4>
-                    <div className={styles.fileInfo}>
+              {selectedApplication.cvFile && (
+                <div className={styles.cvSection}>
+                  <strong>Resume/CV</strong>
+                  <div className={styles.documentSection}>
+                    <a
+                      href={selectedApplication.cvFile}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={styles.documentLink}
+                    >
                       <FileText size={20} />
-                      <button
-                        onClick={() => handleViewCV(selectedApplication.cvFile)}
-                        className="cv-btn cv-btn-view"
-                        title={`View ${selectedApplication.fullName}'s CV`}
-                      >
-                        View CV
-                      </button>
-                    </div>
+                      <span className={styles.downloadLink}>
+                        View Resume/CV Document
+                      </span>
+                    </a>
                   </div>
-                )}
+                </div>
+              )}
 
                 {selectedApplication.adminNotes && (
                   <div className={styles.adminNotesSection}>
