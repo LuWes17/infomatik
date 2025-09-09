@@ -202,9 +202,8 @@
 }
 
 .applicationCard:hover {
-  box-shadow: var(--shadow-lg);
-  transform: translateY(-2px);
-  border-color: var(--primary-color);
+  box-shadow: 0 5px 10px #9AAACF;
+  transform: translateY(-4px);
 }
 
 .cardHeader {
@@ -212,7 +211,9 @@
   justify-content: space-between;
   align-items: flex-start;
   padding: var(--spacing-xl) var(--spacing-xl) var(--spacing-lg);
-  border-bottom: 1px solid var(--gray-100);
+  padding-bottom: 0;
+  min-height: 0; /* Allow flex items to shrink */
+  gap: var(--spacing-md);
 }
 
 .cardTitle {
@@ -220,6 +221,7 @@
   align-items: center;
   gap: var(--spacing-md);
   flex: 1;
+  min-width: 0;
 }
 
 .cardTitle h3 {
@@ -228,6 +230,10 @@
   font-weight: 600;
   margin: 0;
   line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0; 
 }
 
 .jobIcon {
@@ -245,6 +251,8 @@
   font-size: var(--font-size-sm);
   font-weight: 500;
   white-space: nowrap;
+  flex-shrink: 0; 
+  margin-top: -6px;
 }
 
 .statusPending {
@@ -266,14 +274,14 @@
 }
 
 .cardBody {
-  padding: var(--spacing-lg) var(--spacing-xl);
+  padding: var(--spacing-md) var(--spacing-xl) var(--spacing-lg);
 }
 
 .cardMeta {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-sm);
-  margin-bottom: var(--spacing-lg);
+  margin-bottom: var(--spacing-md);
 }
 
 .metaItem {
@@ -282,16 +290,26 @@
   gap: var(--spacing-xs);
   color: var(--gray-600);
   font-size: var(--font-size-sm);
+  min-width: 0; /* Allow items to shrink */
+  overflow: hidden; 
+}
+
+.metaItem span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .metaItem svg {
-  color: var(--gray-400);
+  color: var(--primary-color);
   flex-shrink: 0;
+  width: 16px;
+  height: 16px;
 }
+
 
 .employmentType {
   text-transform: capitalize;
-  font-weight: 500;
 }
 
 .positions {
@@ -315,32 +333,34 @@
 }
 
 .cardFooter {
-  padding: var(--spacing-lg) var(--spacing-xl) var(--spacing-xl);
-  border-top: 1px solid var(--gray-100);
-  background-color: var(--gray-50);
+  padding: var(--spacing-md) var(--spacing-xl) var(--spacing-xl);
   display: flex;
   justify-content: flex-end;
 }
 
 .viewButton {
+  flex: 1;
   display: flex;
-  align-items: center;
-  gap: var(--spacing-xs);
-  padding: var(--spacing-sm) var(--spacing-lg);
-  background: var(--white);
-  border: 2px solid var(--primary-color);
-  color: var(--primary-color);
-  border-radius: var(--border-radius-md);
-  font-size: var(--font-size-sm);
+  justify-content: center;
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  padding: 0.5rem 1.25rem;
+  border-radius: 20px;
+  font-size: 0.875rem;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.1s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  white-space: nowrap;
 }
 
 .viewButton:hover {
-  background-color: var(--primary-color);
-  color: var(--white);
+  background: #f8fafc;
+  color: var(--primary-color);
+  border: 2px solid var(--primary-color);
   transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
 }
 
 /* Modal Styles */
@@ -388,20 +408,23 @@
 .closeButton {
   background: none;
   border: none;
-  color: var(--gray-400);
+  font-size: 1.8rem;
+  color: var(--gray-500);
   cursor: pointer;
-  padding: var(--spacing-xs);
-  border-radius: var(--border-radius-md);
-  transition: all 0.2s ease;
+  padding: 0;
+  line-height: 1;
+  transition: color 0.3s ease;
+  width: 24px;
+  height: 24px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .closeButton:hover {
-  background-color: var(--gray-100);
-  color: var(--gray-600);
+  color: #334155;
 }
+
 
 .modalBody {
   flex: 1;
@@ -410,6 +433,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--spacing-2xl);
+  max-height: calc(90vh - 120px);
 }
 
 .statusSection {
@@ -434,6 +458,7 @@
   background: var(--white);
   border: 1px solid var(--gray-200);
   border-radius: var(--border-radius-lg);
+  margin-bottom: var(--spacing-lg);
 }
 
 .jobDetailsSection h3,
@@ -456,6 +481,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: var(--spacing-lg);
+  margin-bottom: var(--spacing-lg);
 }
 
 .jobDescription,
@@ -464,6 +490,7 @@
 .adminNotesSection,
 .applicantInfo {
   margin-top: var(--spacing-xl);
+  display: block;
 }
 
 .jobDescription h4,
@@ -484,24 +511,60 @@
   line-height: 1.6;
   margin: 0;
   white-space: pre-wrap;
+  word-break: break-word;
 }
 
-.coverLetterContent {
-  background-color: var(--gray-50);
-  border-left: 4px solid var(--primary-color);
-  padding: var(--spacing-xl);
-  border-radius: 0 var(--border-radius-md) var(--border-radius-md) 0;
+.requirements {
+  margin-bottom: 0rem;
 }
 
-.coverLetterContent p {
-  color: var(--gray-700);
-  line-height: 1.6;
+.requirements strong {
+  color: var(--gray-800);
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.requirements p {
+  color: var(--gray-600);
+  line-height: 1.4;
   margin: 0;
-  white-space: pre-wrap;
+  font-size: 0.875rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .cvSection {
   margin-top: var(--spacing-xl);
+}
+
+.cv-btn {
+  padding: var(--spacing-sm) var(--spacing-lg);
+  border-radius: var(--border-radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.cv-btn-view {
+  background-color: var(--primary-color);
+  color: var(--white);
+}
+
+.cv-btn-view:hover {
+  background-color: var(--primary-dark);
+  transform: translateY(-1px);
 }
 
 .fileInfo {
@@ -512,10 +575,12 @@
   background-color: var(--gray-50);
   border: 1px solid var(--gray-200);
   border-radius: var(--border-radius-md);
+  margin-top: var(--spacing-md);
 }
 
 .fileInfo svg {
   color: var(--primary-color);
+  flex-shrink: 0;
 }
 
 .fileInfo span {
@@ -535,8 +600,8 @@
   flex-direction: column;
   gap: var(--spacing-xs);
   padding: var(--spacing-md);
-  background-color: var(--gray-50);
   border-radius: var(--border-radius-md);
+  min-width: 0;
 }
 
 .infoLabel {
@@ -548,6 +613,8 @@
 .infoItem span:not(.infoLabel) {
   color: var(--gray-600);
   font-size: var(--font-size-sm);
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .modalFooter {
@@ -579,10 +646,15 @@
   .applicationsGrid {
     grid-template-columns: 1fr;
     gap: var(--spacing-lg);
+    margin: 0;
+    padding: 0;
   }
   
   .applicationCard {
-    margin: 0 calc(-1 * var(--spacing-sm));
+    margin: 0;
+    max-width: 100%;
+    width: 100%;
+    box-sizing: border-box;
   }
   
   .modalOverlay {
@@ -591,6 +663,7 @@
   
   .modalContent {
     max-height: 95vh;
+    margin: 0 var(--spacing-sm);
   }
   
   .modalHeader,
@@ -600,21 +673,41 @@
     padding-right: var(--spacing-xl);
   }
   
+  .statusSection {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-lg);
+  }
+
   .cardHeader {
     flex-direction: column;
     align-items: flex-start;
     gap: var(--spacing-lg);
   }
   
-  .statusSection {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: var(--spacing-lg);
+  .cardTitle {
+    width: 100%; /* Full width on mobile */
+  }
+  
+  .cardTitle h3 {
+    white-space: normal; /* Allow wrapping on mobile */
+    overflow: visible;
+    text-overflow: initial;
+  }
+  
+  .statusBadge {
+    align-self: flex-start; /* Align to start on mobile */
   }
   
   .jobMeta {
     flex-direction: column;
     gap: var(--spacing-sm);
+  }
+  
+  .metaItem span {
+    white-space: normal; /* Allow wrapping on mobile */
+    overflow: visible;
+    text-overflow: initial;
   }
   
   .infoGrid {
@@ -632,12 +725,17 @@
   }
   
   .applicationsGrid {
-    margin: 0 calc(-1 * var(--spacing-lg));
+    margin: 0;
+    padding: 0;
+    /* Ensure proper spacing from container edges */
+    gap: var(--spacing-md);
   }
   
   .applicationCard {
     margin: 0;
     border-radius: var(--border-radius-md);
+    max-width: 100%;
+    min-width: 0;
   }
   
   .modalOverlay {
@@ -684,7 +782,6 @@
 
 /* Focus states for accessibility */
 .viewButton:focus,
-.closeButton:focus,
 .closeModalButton:focus,
 .retryButton:focus,
 .browseButton:focus {
@@ -731,5 +828,23 @@
   .applicationCard:hover {
     transform: none;
     box-shadow: var(--shadow-sm);
+  }
+}
+
+@media (max-width: 360px) {
+  /* For very small screens */
+  .applicationsGrid {
+    gap: var(--spacing-sm);
+  }
+  
+  .cardHeader,
+  .cardBody,
+  .cardFooter {
+    padding-left: var(--spacing-lg);
+    padding-right: var(--spacing-lg);
+  }
+  
+  .modalContent {
+    margin: 0 var(--spacing-xs);
   }
 }

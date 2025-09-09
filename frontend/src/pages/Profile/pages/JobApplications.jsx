@@ -4,7 +4,7 @@ import {
   FileText, 
   Calendar, 
   MapPin, 
-  Briefcase, 
+  BriefcaseBusiness, 
   CheckCircle, 
   XCircle, 
   Clock, 
@@ -159,7 +159,7 @@ const JobApplications = () => {
       <div className={styles.container}>
         <div className={styles.header}>
           <h2>My Job Applications</h2>
-          <p className={styles.subtitle}>Track your application progress</p>
+          <p className={styles.subtitle}>Track your application status</p>
         </div>
         <div className={styles.loadingContainer}>
           <div className={styles.spinner}></div>
@@ -174,7 +174,7 @@ const JobApplications = () => {
       <div className={styles.container}>
         <div className={styles.header}>
           <h2>My Job Applications</h2>
-          <p className={styles.subtitle}>Track your application progress</p>
+          <p className={styles.subtitle}>Track your application status</p>
         </div>
         <div className={styles.errorContainer}>
           <p className={styles.errorMessage}>{error}</p>
@@ -190,7 +190,7 @@ const JobApplications = () => {
     <div className={styles.container}>
       <div className={styles.header}>
         <h2>My Job Applications</h2>
-        <p className={styles.subtitle}>Track your application progress</p>
+        <p className={styles.subtitle}>Track your application status</p>
       </div>
 
       {applications.length === 0 ? (
@@ -215,7 +215,6 @@ const JobApplications = () => {
               >
                 <div className={styles.cardHeader}>
                   <div className={styles.cardTitle}>
-                    <Briefcase size={20} className={styles.jobIcon} />
                     <h3>{application.jobPosting?.title || 'Job Position'}</h3>
                   </div>
                   <div className={`${styles.statusBadge} ${statusDisplay.className}`}>
@@ -226,10 +225,6 @@ const JobApplications = () => {
 
                 <div className={styles.cardBody}>
                   <div className={styles.cardMeta}>
-                    <div className={styles.metaItem}>
-                      <Calendar size={16} />
-                      <span>Applied: {formatDate(application.createdAt)}</span>
-                    </div>
                     {application.jobPosting?.location && (
                       <div className={styles.metaItem}>
                         <MapPin size={16} />
@@ -238,20 +233,25 @@ const JobApplications = () => {
                     )}
                     {application.jobPosting?.employmentType && (
                       <div className={styles.metaItem}>
-                        <Briefcase size={16} />
+                        <BriefcaseBusiness size={16} />
                         <span className={styles.employmentType}>
                           {application.jobPosting.employmentType}
                         </span>
                       </div>
                     )}
+                    <div className={styles.metaItem}>
+                      <Calendar size={16} />
+                      <span>{formatDate(application.jobPosting.applicationDeadline)}</span>
+                    </div>
                   </div>
 
-                  {application.coverLetter && (
-                    <div className={styles.coverLetterPreview}>
+                  {application.jobPosting?.requirements && (
+                    <div className={styles.requirements}>
+                      <strong>Requirements:</strong>
                       <p>
-                        {application.coverLetter.length > 100 
-                          ? `${application.coverLetter.substring(0, 100)}...`
-                          : application.coverLetter
+                        {application.jobPosting.requirements.length > 100 
+                          ? `${application.jobPosting.requirements.substring(0, 100)}...`
+                          : application.jobPosting.requirements
                         }
                       </p>
                     </div>
@@ -260,7 +260,6 @@ const JobApplications = () => {
 
                 <div className={styles.cardFooter}>
                   <button className={styles.viewButton}>
-                    <Eye size={16} />
                     View Details
                   </button>
                 </div>
@@ -280,7 +279,7 @@ const JobApplications = () => {
                 className={styles.closeButton}
                 onClick={closeDetails}
               >
-                <X size={24} />
+                ×
               </button>
             </div>
 
@@ -310,7 +309,7 @@ const JobApplications = () => {
                       )}
                       {selectedApplication.jobPosting.employmentType && (
                         <div className={styles.metaItem}>
-                          <Briefcase size={16} />
+                          <BriefcaseBusiness size={16} />
                           <span className={styles.employmentType}>
                             {selectedApplication.jobPosting.employmentType}
                           </span>
@@ -407,15 +406,6 @@ const JobApplications = () => {
                   </div>
                 )}
               </div>
-            </div>
-
-            <div className={styles.modalFooter}>
-              <button 
-                className={styles.closeModalButton}
-                onClick={closeDetails}
-              >
-                Close
-              </button>
             </div>
           </div>
         </div>
