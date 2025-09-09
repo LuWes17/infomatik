@@ -49,7 +49,6 @@ const JobOpenings = () => {
     phone: '',
     street: '',
     barangay: '',
-    city: '',
     cvFile: null
   });
   
@@ -216,23 +215,23 @@ const toggleBarangayDropdown = () => {
       case 'lastName':
         if (!value || !value.trim()) {
           isValid = false;
-          errorMessage = `${name === 'firstName' ? 'First' : 'Last'} name is required`;
+          errorMessage = `${name === 'firstName' ? 'First' : 'Last'} name is required.`;
         } else if (value.trim().length < 2) {
           isValid = false;
-          errorMessage = `${name === 'firstName' ? 'First' : 'Last'} name must be at least 2 characters`;
+          errorMessage = `${name === 'firstName' ? 'First' : 'Last'} name must be at least 2 characters.`;
         } else if (value.trim().length > 50) {
           isValid = false;
-          errorMessage = `${name === 'firstName' ? 'First' : 'Last'} name must be less than 50 characters`;
+          errorMessage = `${name === 'firstName' ? 'First' : 'Last'} name must be less than 50 characters.`;
         } else if (!/^[a-zA-Z\s]+$/.test(value.trim())) {
           isValid = false;
-          errorMessage = `${name === 'firstName' ? 'First' : 'Last'} name can only contain letters and spaces`;
+          errorMessage = `${name === 'firstName' ? 'First' : 'Last'} name can only contain letters and spaces.`;
         }
         break;
       
       case 'birthday':
         if (!value) {
           isValid = false;
-          errorMessage = 'Birthday is required';
+          errorMessage = 'Birthday is required.';
         } else {
           const today = new Date();
           const birthDate = new Date(value);
@@ -245,13 +244,13 @@ const toggleBarangayDropdown = () => {
           
           if (birthDate > today) {
             isValid = false;
-            errorMessage = 'Birthday cannot be in the future';
+            errorMessage = 'Birthday cannot be in the future.';
           } else if (age < 16) {
             isValid = false;
-            errorMessage = 'You must be at least 16 years old to apply';
+            errorMessage = 'You must be at least 16 years old to apply.';
           } else if (age > 100) {
             isValid = false;
-            errorMessage = 'Please enter a valid birth date';
+            errorMessage = 'Please enter a valid birth date.';
           }
         }
         break;
@@ -260,49 +259,33 @@ const toggleBarangayDropdown = () => {
         const digits = value.replace(/\D/g, '');
         if (!digits) {
           isValid = false;
-          errorMessage = 'Phone number is required';
+          errorMessage = 'Phone number is require.';
         } else if (digits.length !== 11) {
           isValid = false;
-          errorMessage = 'Phone number must be exactly 11 digits';
+          errorMessage = 'Phone number must be exactly 11 digits.';
         } else if (!digits.startsWith('09')) {
           isValid = false;
-          errorMessage = 'Phone number must start with 09';
+          errorMessage = 'Phone number must start with 09.';
         }
         break;
       
       case 'street':
         if (!value || !value.trim()) {
           isValid = false;
-          errorMessage = 'Street address is required';
+          errorMessage = 'Street address is required.';
         } else if (value.trim().length < 5) {
           isValid = false;
-          errorMessage = 'Street address must be at least 5 characters';
+          errorMessage = 'Street address must be at least 5 characters.';
         } else if (value.trim().length > 200) {
           isValid = false;
-          errorMessage = 'Street address must be less than 200 characters';
+          errorMessage = 'Street address must be less than 200 characters.';
         }
         break;
       
       case 'barangay':
         if (!value) {
           isValid = false;
-          errorMessage = 'Please select a barangay';
-        }
-        break;
-      
-      case 'city':
-        if (!value || !value.trim()) {
-          isValid = false;
-          errorMessage = 'City is required';
-        } else if (value.trim().length < 2) {
-          isValid = false;
-          errorMessage = 'City must be at least 2 characters';
-        } else if (value.trim().length > 100) {
-          isValid = false;
-          errorMessage = 'City must be less than 100 characters';
-        } else if (!/^[a-zA-Z\s]+$/.test(value.trim())) {
-          isValid = false;
-          errorMessage = 'City can only contain letters and spaces';
+          errorMessage = 'Please select a barangay.';
         }
         break;
       
@@ -316,10 +299,10 @@ const toggleBarangayDropdown = () => {
           
           if (!allowedTypes.includes(value.type)) {
             isValid = false;
-            errorMessage = 'Only PDF files are allowed';
+            errorMessage = 'Only PDF files are allowed.';
           } else if (value.size > maxSize) {
             isValid = false;
-            errorMessage = 'File size must be less than 5MB';
+            errorMessage = 'File size must be less than 5MB.';
           }
         }
         break;
@@ -387,7 +370,6 @@ const toggleBarangayDropdown = () => {
       phone: true,
       street: true,
       barangay: true,
-      city: true,
       cvFile: true
     };
     setTouched(newTouched);
@@ -485,7 +467,7 @@ const toggleBarangayDropdown = () => {
       formData.append('fullName', `${applicationData.firstName} ${applicationData.lastName}`);
       formData.append('birthday', applicationData.birthday);
       formData.append('phone', applicationData.phone);
-      formData.append('address', `${applicationData.street}, ${applicationData.barangay}, ${applicationData.city}`);
+      formData.append('address', `${applicationData.street}, ${applicationData.barangay}`);
       formData.append('cvFile', applicationData.cvFile);
       
       const response = await fetch(`http://localhost:4000/api/jobs/${selectedJob._id}/apply`, {
@@ -510,7 +492,6 @@ const toggleBarangayDropdown = () => {
           phone: '',
           street: '',
           barangay: '',
-          city: '',
           cvFile: null
         });
         // Unfreeze background when form closes after successful submission
@@ -540,7 +521,6 @@ const toggleBarangayDropdown = () => {
     phone: '',
     street: '',
     barangay: '',
-    city: '',
     cvFile: null
     });
     setFieldErrors({});
@@ -1012,33 +992,6 @@ const toggleBarangayDropdown = () => {
                     {touched.barangay && fieldErrors.barangay && (
                       <div className={styles.errorMessage}>
                         {fieldErrors.barangay}
-                      </div>
-                    )}
-                  </div>
-                  
-                  
-
-                  {/* City */}
-                  <div className={styles.formGroup}>
-                    <label>
-                      City *
-                    </label>
-                    <div className={styles.inputWrapper}>
-                      <LocationIcon size={16} className={styles.inputIcon} />
-                      <input
-                        type="text"
-                        value={applicationData.city}
-                        onChange={(e) => handleInputChange('city', e.target.value)}
-                        onBlur={(e) => handleInputBlur('city', e.target.value)}
-                        required
-                        placeholder="City"
-                        className={getInputClass('city')}
-                        maxLength={100}
-                      />
-                    </div>
-                    {touched.city && fieldErrors.city && (
-                      <div className={styles.errorMessage}>
-                        {fieldErrors.city}
                       </div>
                     )}
                   </div>

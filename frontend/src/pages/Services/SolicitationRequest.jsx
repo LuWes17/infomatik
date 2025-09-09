@@ -160,16 +160,16 @@ const SolicitationRequests = () => {
       case 'contactPersonLastName':
         if (!value || !value.trim()) {
           isValid = false;
-          errorMessage = `${name === 'contactPersonFirstName' ? 'First' : 'Last'} name is required`;
+          errorMessage = `${name === 'contactPersonFirstName' ? 'First' : 'Last'} name is required.`;
         } else if (value.trim().length < 2) {
           isValid = false;
-          errorMessage = `${name === 'contactPersonFirstName' ? 'First' : 'Last'} name must be at least 2 characters`;
+          errorMessage = `${name === 'contactPersonFirstName' ? 'First' : 'Last'} name must be at least 2 characters.`;
         } else if (value.trim().length > 50) {
           isValid = false;
-          errorMessage = `${name === 'contactPersonFirstName' ? 'First' : 'Last'} name must be less than 50 characters`;
+          errorMessage = `${name === 'contactPersonFirstName' ? 'First' : 'Last'} name must be less than 50 characters.`;
         } else if (!/^[a-zA-Z\s]+$/.test(value.trim())) {
           isValid = false;
-          errorMessage = `${name === 'contactPersonFirstName' ? 'First' : 'Last'} name can only contain letters and spaces`;
+          errorMessage = `${name === 'contactPersonFirstName' ? 'First' : 'Last'} name can only contain letters and spaces.`;
         }
         break;
       
@@ -177,73 +177,73 @@ const SolicitationRequests = () => {
         const digits = value.replace(/\D/g, '');
         if (!digits) {
           isValid = false;
-          errorMessage = 'Contact number is required';
+          errorMessage = 'Contact number is required.';
         } else if (digits.length !== 11) {
           isValid = false;
-          errorMessage = 'Contact number must be exactly 11 digits';
+          errorMessage = 'Contact number must be exactly 11 digits.';
         } else if (!digits.startsWith('09')) {
           isValid = false;
-          errorMessage = 'Contact number must start with 09';
+          errorMessage = 'Contact number must start with 09.';
         }
         break;
       
       case 'organizationType':
         if (!value) {
           isValid = false;
-          errorMessage = 'Please select an organization type';
+          errorMessage = 'Please select an organization type.';
         }
         break;
       
       case 'organizationName':
         if (!value || !value.trim()) {
           isValid = false;
-          errorMessage = 'Organization name is required';
+          errorMessage = 'Organization name is required.';
         } else if (value.trim().length < 2) {
           isValid = false;
-          errorMessage = 'Organization name must be at least 2 characters';
+          errorMessage = 'Organization name must be at least 2 characters.';
         } else if (value.trim().length > 150) {
           isValid = false;
-          errorMessage = 'Organization name must be less than 150 characters';
+          errorMessage = 'Organization name must be less than 150 characters.';
         }
         break;
       
       case 'street':
         if (!value || !value.trim()) {
           isValid = false;
-          errorMessage = 'Street address is required';
+          errorMessage = 'Street address is required.';
         } else if (value.trim().length < 5) {
           isValid = false;
-          errorMessage = 'Street address must be at least 5 characters';
+          errorMessage = 'Street address must be at least 5 characters,';
         } else if (value.trim().length > 200) {
           isValid = false;
-          errorMessage = 'Street address must be less than 200 characters';
+          errorMessage = 'Street address must be less than 200 characters.';
         }
         break;
       
       case 'barangay':
         if (!value) {
           isValid = false;
-          errorMessage = 'Please select a barangay';
+          errorMessage = 'Please select a barangay.';
         }
         break;
       
       case 'requestType':
         if (!value) {
           isValid = false;
-          errorMessage = 'Please select a request type';
+          errorMessage = 'Please select a request type.';
         }
         break;
       
       case 'requestedAssistanceDetails':
         if (!value || !value.trim()) {
           isValid = false;
-          errorMessage = 'Specific request details are required';
+          errorMessage = 'Specific request details are required.';
         } else if (value.trim().length < 10) {
           isValid = false;
-          errorMessage = 'Please provide more detailed request information (at least 10 characters)';
+          errorMessage = 'Please provide more detailed request information (at least 10 characters).';
         } else if (value.trim().length > 1000) {
           isValid = false;
-          errorMessage = 'Request details must be less than 1000 characters';
+          errorMessage = 'Request details must be less than 1000 characters.';
         }
         break;
       
@@ -253,27 +253,27 @@ const SolicitationRequests = () => {
           errorMessage = 'Purpose is required';
         } else if (value.trim().length < 10) {
           isValid = false;
-          errorMessage = 'Please provide more detailed purpose information (at least 10 characters)';
+          errorMessage = 'Please provide more detailed purpose information (at least 10 characters).';
         } else if (value.trim().length > 800) {
           isValid = false;
-          errorMessage = 'Purpose must be less than 800 characters';
+          errorMessage = 'Purpose must be less than 800 characters.';
         }
         break;
       
       case 'solicitationLetter':
         if (!value) {
           isValid = false;
-          errorMessage = 'Solicitation letter is required';
+          errorMessage = 'Solicitation letter is required.';
         } else {
           const allowedTypes = ['application/pdf'];
           const maxSize = 5 * 1024 * 1024; // 5MB
           
           if (!allowedTypes.includes(value.type)) {
             isValid = false;
-            errorMessage = 'Only PDF files are allowed';
+            errorMessage = 'Only PDF files are allowed.';
           } else if (value.size > maxSize) {
             isValid = false;
-            errorMessage = 'File size must be less than 5MB';
+            errorMessage = 'File size must be less than 5MB.';
           }
         }
         break;
