@@ -1031,121 +1031,6 @@
   border-radius: 0.75rem;
 }
 
-/* CUSTOM DROPDOWN STYLES */
-.customDropdown {
-  position: relative;
-  width: 100%;
-}
-
-.customDropdownButton {
-  width: 100%;
-  padding: 0.8rem 1rem 0.8rem 2.5rem;
-  border: 2px solid #e2e8f0;
-  border-radius: 1rem;
-  background: white;
-  color: var(--gray-700);
-  font-size: 0.9rem;
-  font-weight: 400;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
-  text-align: left;
-}
-
-.customDropdownButton:hover {
-  background-color: #f8fafc;
-  border-color: var(--primary-color);
-}
-
-.customDropdownButton:focus {
-  outline: none;
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 0.2rem rgba(28, 98, 187, 0.25);
-}
-
-.customDropdownButton.active {
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 0.2rem rgba(28, 98, 187, 0.25);
-}
-
-.customDropdownButton.placeholder {
-  color: #999;
-}
-
-.customDropdownContent {
-  position: absolute;
-  top: 110%;
-  left: 0;
-  right: 0;
-  background: white;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-  border-radius: 12px;
-  padding: 8px 0;
-  opacity: 0;
-  visibility: hidden;
-  transform: translateY(-10px);
-  transition: all 0.3s ease;
-  z-index: 200;
-  border: 1px solid #e2e8f0;
-  max-height: 200px;
-  overflow-y: auto;
-}
-
-.customDropdownContent.show {
-  opacity: 1;
-  visibility: visible;
-  transform: translateY(0);
-}
-
-.customDropdownItem {
-  display: block;
-  padding: 10px 16px;
-  color: var(--gray-700);
-  text-decoration: none;
-  font-weight: 400;
-  transition: background-color 0.2s ease;
-  white-space: nowrap;
-  font-size: 0.8rem;
-  cursor: pointer;
-  border: none;
-  background: none;
-  width: 100%;
-  text-align: left;
-}
-
-.customDropdownItem:hover {
-  background-color: #f8fafc;
-  color: var(--primary-color);
-  font-weight: 500;
-}
-
-.customDropdownItem.active {
-  background-color: var(--primary-color);
-  color: white;
-  font-weight: 600;
-}
-
-.customDropdownContent::-webkit-scrollbar {
-  width: 6px;
-}
-
-.customDropdownContent::-webkit-scrollbar-track {
-  background: #f1f5f9;
-  border-radius: 3px;
-}
-
-.customDropdownContent::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 3px;
-}
-
-.customDropdownContent::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
-}
-
 /* File Upload - Updated styling */
 .fileUpload {
   position: relative;
@@ -1283,7 +1168,6 @@
   opacity: 0.7;
   cursor: not-allowed;
 }
-
 
 /* Input Validation States */
 .inputValid {
@@ -1549,18 +1433,46 @@
     padding: 1rem 1.25rem;
   }
 
+  /* FIXED: Mobile Job Details Grid */
   .jobDetailsGrid {
+    display: grid;
     grid-template-columns: 1fr;
     gap: 1rem;
+    margin-bottom: 1rem;
+    margin-top: 0.5rem;
   }
 
   .detailItem {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
     padding: 0.75rem 0;
-    border-bottom: 1px solid #f1f5f9;
   }
 
   .detailItem:last-child {
     border-bottom: none;
+  }
+
+  .detailItem svg {
+    color: var(--primary-color);
+    flex-shrink: 0;
+    margin-top: 0.125rem;
+    width: 20px;
+    height: 20px;
+  }
+
+  .detailItem > div {
+    flex: 1;
+    min-width: 0;
+    line-height: 1.5;
+  }
+
+  .detailItem strong {
+    display: block;
+    color: var(--gray-800);
+    margin-bottom: 0.25rem;
+    font-weight: 600;
+    font-size: 0.875rem;
   }
 
   /* Form responsiveness */
@@ -1599,7 +1511,7 @@
     gap: 0.75rem;
   }
 
-  .cancelBtn 
+  .cancelBtn,
   .submitBtn {
     width: 100%;
     padding: 1rem 2rem;
@@ -1712,22 +1624,34 @@
 
   .section .description,
   .section .requirements {
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     line-height: 1.6;
   }
 
+  /* FIXED: Smaller Mobile Job Details */
+  .jobDetailsGrid {
+    gap: 0.75rem;
+  }
+
   .detailItem {
-    flex-direction: column;
-    gap: 0.25rem;
+    gap: 0.5rem;
     padding: 0.5rem 0;
   }
 
   .detailItem svg {
-    align-self: flex-start;
+    width: 18px;
+    height: 18px;
+    margin-top: 0.1rem;
   }
 
-  .detailItem div {
+  .detailItem strong {
     font-size: 0.8rem;
+    margin-bottom: 0.2rem;
+  }
+
+  .detailItem > div {
+    font-size: 0.8rem;
+    line-height: 1.4;
   }
 
   /* Form adjustments */
@@ -1821,12 +1745,31 @@
     font-size: 1rem;
   }
 
-  .detailItem div {
+  /* FIXED: Very Small Mobile Job Details */
+  .modalBody {
+    padding: 0.5rem 0.75rem;
+  }
+
+  .detailItem {
+    gap: 0.4rem;
+    padding: 0.4rem 0;
+  }
+
+  .detailItem svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .detailItem strong {
+    font-size: 0.75rem;
+  }
+
+  .detailItem > div {
     font-size: 0.75rem;
   }
 
   .section .description,
   .section .requirements {
-    font-size: 0.8rem;
+    font-size: 0.7rem;
   }
 }
