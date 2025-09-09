@@ -120,6 +120,7 @@
   display: flex;
   align-items: center;
   gap: 0.25rem;
+  font-weight: 500;
 }
 
 .fieldError::before {
@@ -162,10 +163,12 @@
   position: relative;
   display: flex;
   align-items: center;
+  width: 100%;
 }
 
 .passwordInputWrapper .formInput {
   padding-right: 3rem;
+  width: 100%;
 }
 
 .passwordToggle {
@@ -191,6 +194,25 @@
   font-size: var(--font-size-xs);
   color: var(--gray-500);
   margin-top: 0.25rem;
+}
+
+/* Disabled States */
+.formInput:disabled,
+.formTextarea:disabled,
+.formSelect:disabled {
+  background-color: #f8f9fa;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.passwordToggle:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.passwordToggle:disabled:hover {
+  background-color: transparent;
+  color: var(--gray-500);
 }
 
 /* Modal Actions */
@@ -295,6 +317,18 @@
 
   .modalActions button {
     width: 100%;
+  }
+  .inputIcon {
+    width: 14px;
+    height: 14px;
+  }
+
+  .inputWithIcon {
+    padding-left: 2.5rem !important;
+  }
+
+  .fieldError {
+    font-size: 0.7rem;
   }
 }
 

@@ -1,7 +1,7 @@
 // frontend/src/components/profile/ChangePasswordModal.jsx
 import React, { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
-import { X, Eye, EyeOff } from 'lucide-react';
+import { X, Eye, EyeOff, Lock } from 'lucide-react';
 import styles from './ProfileModal.module.css';
 
 const ChangePasswordModal = ({ onClose }) => {
@@ -21,6 +21,80 @@ const ChangePasswordModal = ({ onClose }) => {
     confirmNewPassword: ''
   });
 
+  // Field-specific errors and touched state
+  const [fieldErrors, setFieldErrors] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmNewPassword: ''
+  });
+
+  const [touched, setTouched] = useState({
+    currentPassword: false,
+    newPassword: false,
+    confirmNewPassword: false
+  });
+
+  // Field validation function
+  const getFieldValidation = (name, value) => {
+    let isValid = true;
+    let errorMessage = '';
+
+    switch (name) {
+      case 'currentPassword':
+        if (!value.trim()) {
+          isValid = false;
+          errorMessage = 'Current password is required';
+        }
+        break;
+      
+      case 'newPassword':
+        if (!value.trim()) {
+          isValid = false;
+          errorMessage = 'New password is required';
+        } else if (value.length < 8) {
+          isValid = false;
+          errorMessage = 'New password must be at least 8 characters long';
+        } else if (formData.currentPassword && value === formData.currentPassword) {
+          isValid = false;
+          errorMessage = 'New password must be different from current password';
+        }
+        break;
+      
+      case 'confirmNewPassword':
+        if (!value.trim()) {
+          isValid = false;
+          errorMessage = 'Please confirm your new password';
+        } else if (formData.newPassword && value !== formData.newPassword) {
+          isValid = false;
+          errorMessage = 'Passwords do not match';
+        }
+        break;
+      
+      default:
+        break;
+    }
+
+    return { isValid, errorMessage };
+  };
+
+  const validateField = (name, value) => {
+    const validation = getFieldValidation(name, value);
+    setFieldErrors(prev => ({
+      ...prev,
+      [name]: validation.errorMessage
+    }));
+    return validation.isValid;
+  };
+
+  const getInputClass = (fieldName) => {
+    if (!touched[fieldName]) {
+      return styles.formInput;
+    }
+    
+    const hasError = fieldErrors[fieldName] && fieldErrors[fieldName] !== '';
+    return `${styles.formInput} ${hasError ? styles.inputError : ''}`;
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -28,9 +102,43 @@ const ChangePasswordModal = ({ onClose }) => {
       [name]: value
     }));
     
-    // Clear messages when user starts typing
+    // Validate field on change if already touched
+    if (touched[name]) {
+      validateField(name, value);
+    }
+
+    // Special case: validate confirm password when new password changes
+    if (name === 'newPassword' && touched.confirmNewPassword && formData.confirmNewPassword) {
+      const confirmValidation = getFieldValidation('confirmNewPassword', formData.confirmNewPassword);
+      setFieldErrors(prev => ({
+        ...prev,
+        confirmNewPassword: confirmValidation.errorMessage
+      }));
+    }
+
+    // Special case: validate new password when current password changes
+    if (name === 'currentPassword' && touched.newPassword && formData.newPassword) {
+      const newPasswordValidation = getFieldValidation('newPassword', formData.newPassword);
+      setFieldErrors(prev => ({
+        ...prev,
+        newPassword: newPasswordValidation.errorMessage
+      }));
+    }
+    
+    // Clear general messages when user starts typing
     if (error) setError('');
     if (success) setSuccess('');
+  };
+
+  const handleBlur = (e) => {
+    const { name, value } = e.target;
+    
+    setTouched(prev => ({
+      ...prev,
+      [name]: true
+    }));
+
+    validateField(name, value);
   };
 
   const togglePasswordVisibility = (field) => {
@@ -41,33 +149,35 @@ const ChangePasswordModal = ({ onClose }) => {
   };
 
   const validateForm = () => {
-    if (!formData.currentPassword) {
-      setError('Current password is required');
-      return false;
-    }
+    // Mark all fields as touched
+    const newTouched = {
+      currentPassword: true,
+      newPassword: true,
+      confirmNewPassword: true
+    };
+    setTouched(newTouched);
+
+    // Validate all fields
+    let isFormValid = true;
+    const newFieldErrors = {};
     
-    if (formData.newPassword.length < 8) {
-      setError('New password must be at least 8 characters long');
-      return false;
-    }
-    
-    if (formData.newPassword !== formData.confirmNewPassword) {
-      setError('New passwords do not match');
-      return false;
-    }
-    
-    if (formData.currentPassword === formData.newPassword) {
-      setError('New password must be different from current password');
-      return false;
-    }
-    
-    return true;
+    Object.keys(formData).forEach(key => {
+      const validation = getFieldValidation(key, formData[key]);
+      newFieldErrors[key] = validation.errorMessage;
+      if (!validation.isValid) {
+        isFormValid = false;
+      }
+    });
+
+    setFieldErrors(newFieldErrors);
+    return isFormValid;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     
     if (!validateForm()) {
+      setError('Please fix the errors in the form before proceeding.');
       return;
     }
     
@@ -128,70 +238,103 @@ const ChangePasswordModal = ({ onClose }) => {
 
           <div className={styles.formGroup}>
             <label className={styles.formLabel}>Current Password</label>
-            <div className={styles.passwordInputWrapper}>
-              <input
-                type={showPasswords.current ? 'text' : 'password'}
-                name="currentPassword"
-                value={formData.currentPassword}
-                onChange={handleChange}
-                className={styles.formInput}
-                required
-              />
-              <button
-                type="button"
-                className={styles.passwordToggle}
-                onClick={() => togglePasswordVisibility('current')}
-              >
-                {showPasswords.current ? <Eye size={18} /> : <EyeOff size={18} />}
-              </button>
+            <div className={styles.inputWrapper}>
+              <Lock className={styles.inputIcon} />
+              <div className={styles.passwordInputWrapper}>
+                <input
+                  type={showPasswords.current ? 'text' : 'password'}
+                  name="currentPassword"
+                  value={formData.currentPassword}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  className={`${getInputClass('currentPassword')} ${styles.inputWithIcon}`}
+                  required
+                  disabled={isLoading}
+                />
+                <button
+                  type="button"
+                  className={styles.passwordToggle}
+                  onClick={() => togglePasswordVisibility('current')}
+                  disabled={isLoading}
+                >
+                  {showPasswords.current ? <Eye size={18} /> : <EyeOff size={18} />}
+                </button>
+              </div>
             </div>
+            {touched.currentPassword && fieldErrors.currentPassword && (
+              <div className={styles.fieldError}>
+                {fieldErrors.currentPassword}
+              </div>
+            )}
           </div>
 
           <div className={styles.formGroup}>
             <label className={styles.formLabel}>New Password</label>
-            <div className={styles.passwordInputWrapper}>
-              <input
-                type={showPasswords.new ? 'text' : 'password'}
-                name="newPassword"
-                value={formData.newPassword}
-                onChange={handleChange}
-                className={styles.formInput}
-                required
-                minLength={8}
-              />
-              <button
-                type="button"
-                className={styles.passwordToggle}
-                onClick={() => togglePasswordVisibility('new')}
-              >
-                {showPasswords.new ? <Eye size={18} /> : <EyeOff size={18} /> }
-              </button>
+            <div className={styles.inputWrapper}>
+              <Lock className={styles.inputIcon} />
+              <div className={styles.passwordInputWrapper}>
+                <input
+                  type={showPasswords.new ? 'text' : 'password'}
+                  name="newPassword"
+                  value={formData.newPassword}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  className={`${getInputClass('newPassword')} ${styles.inputWithIcon}`}
+                  required
+                  minLength={8}
+                  disabled={isLoading}
+                />
+                <button
+                  type="button"
+                  className={styles.passwordToggle}
+                  onClick={() => togglePasswordVisibility('new')}
+                  disabled={isLoading}
+                >
+                  {showPasswords.new ? <Eye size={18} /> : <EyeOff size={18} />}
+                </button>
+              </div>
             </div>
+            {touched.newPassword && fieldErrors.newPassword && (
+              <div className={styles.fieldError}>
+                {fieldErrors.newPassword}
+              </div>
+            )}
             <small className={styles.passwordHint}>
-              Must be at least 8 characters long
+              Must be at least 8 characters long and different from your current password
             </small>
           </div>
 
           <div className={styles.formGroup}>
             <label className={styles.formLabel}>Confirm New Password</label>
-            <div className={styles.passwordInputWrapper}>
-              <input
-                type={showPasswords.confirm ? 'text' : 'password'}
-                name="confirmNewPassword"
-                value={formData.confirmNewPassword}
-                onChange={handleChange}
-                className={styles.formInput}
-                required
-                minLength={8}
-              />
-              <button
-                type="button"
-                className={styles.passwordToggle}
-                onClick={() => togglePasswordVisibility('confirm')}
-              >
-                {showPasswords.confirm ? <Eye size={18} /> : <EyeOff size={18} />}
-              </button>
+            <div className={styles.inputWrapper}>
+              <Lock className={styles.inputIcon} />
+              <div className={styles.passwordInputWrapper}>
+                <input
+                  type={showPasswords.confirm ? 'text' : 'password'}
+                  name="confirmNewPassword"
+                  value={formData.confirmNewPassword}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  className={`${getInputClass('confirmNewPassword')} ${styles.inputWithIcon}`}
+                  required
+                  minLength={8}
+                  disabled={isLoading}
+                />
+                <button
+                  type="button"
+                  className={styles.passwordToggle}
+                  onClick={() => togglePasswordVisibility('confirm')}
+                  disabled={isLoading}
+                >
+                  {showPasswords.confirm ? <Eye size={18} /> : <EyeOff size={18} />}
+                </button>
+              </div>
             </div>
+            {touched.confirmNewPassword && fieldErrors.confirmNewPassword && (
+              <div className={styles.fieldError}>
+                {fieldErrors.confirmNewPassword}
+              </div>
+            )}
           </div>
 
           <div className={styles.modalActions}>
