@@ -5,7 +5,7 @@
   font-family: var(--font-family-primary);
 }
 
-/* Header Section - Matching SolicitationRequests */
+/* Header Section - Matching Job Openings exactly */
 .header {
   background: white;
   color: var(--gray-900);
@@ -53,7 +53,7 @@
   opacity: 1;
 }
 
-/* Filter Section - Matching SolicitationRequests */
+/* Filter Section - Matching Job Openings */
 .filterSection {
   display: flex;
   flex-direction: column;
@@ -101,7 +101,7 @@
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
 }
 
-/* Filter Dropdown */
+/* Filter Dropdown - Exactly like Job Openings */
 .filterDropdown {
   position: relative;
   display: flex;
@@ -201,16 +201,15 @@
   font-weight: 600;
 }
 
-/* User Banner - Updated to match consistent styling */
+/* User Banner - Same layout as Job Openings but for user info */
 .userBanner {
-  background: linear-gradient(135deg, var(--primary-color) 0%, #5a67d8 100%);
+  background: var(--primary-color);
   color: white;
   padding: 1.5rem 3rem;
   margin-bottom: 2rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: 0 2px 10px rgba(102, 126, 234, 0.2);
 }
 
 .userInfo {
@@ -220,16 +219,13 @@
 }
 
 .userLabel {
-  font-weight: 600;
-  opacity: 0.9;
+  font-weight: 500;
   font-size: 1rem;
 }
 
 .userBarangay {
-  font-weight: 700;
-  font-size: 1.2rem;
-  background: rgba(255, 255, 255, 0.2);
-  padding: 0.5rem 1rem;
+  font-weight: 600;
+  font-size: 1.1rem;
   border-radius: 6px;
   text-transform: capitalize;
 }
@@ -242,72 +238,59 @@
 
 /* Content Section */
 .content {
-  padding: 0 3rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
 }
 
 /* Loading State */
 .loadingContainer {
-  text-align: center;
-  padding: 4rem 0;
-  color: var(--gray-500);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   min-height: 400px;
-  gap: 1rem;
+  gap: var(--spacing-lg);
+  color: var(--gray-600);
 }
 
 .spinner {
-  width: 3rem;
-  height: 3rem;
-  border: 3px solid var(--gray-200);
-  border-top-color: var(--primary-color);
+  width: 40px;
+  height: 40px;
+  border: 4px solid #e2e8f0;
+  border-top: 4px solid var(--primary-color);
   border-radius: 50%;
-  margin: 0 auto 1rem;
   animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
-/* Error Message */
-.errorMessage {
-  background: #f8d7da;
-  color: #721c24;
-  padding: 1rem 1.5rem;
-  border-radius: 8px;
-  margin-bottom: 2rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  border: 1px solid #f5c6cb;
-}
-
-/* No Distributions State */
+/* No Distributions  */
 .noDistributions {
   text-align: center;
-  padding: 4rem 0;
+  padding: 4rem 2rem;
   color: var(--gray-500);
 }
 
-.noDistributionsIcon {
-  opacity: 0.3;
+.noDistributions svg {
   margin-bottom: 1rem;
   color: var(--gray-400);
+  opacity: 0.3;
 }
 
 .noDistributions h3 {
   font-size: 1.5rem;
-  color: var(--gray-700);
   margin: 0 0 0.5rem 0;
+  color: #334155;
 }
 
 .noDistributions p {
-  font-size: 1rem;
-  color: var(--gray-500);
   margin: 0;
+  font-size: 1rem;
 }
 
 /* Distributions Grid */
@@ -318,7 +301,7 @@
   margin-bottom: 3rem;
 }
 
-/* Distribution Cards - Matching SolicitationRequests style */
+/* Distribution Card  */
 .distributionCard {
   background: white;
   border-radius: 16px;
@@ -336,49 +319,32 @@
   box-shadow: 0 5px 10px #9AAACF;
 }
 
-/* Updated relevant card styling to use primary color */
-.relevantCard {
-  border-color: var(--primary-color);
-  box-shadow: 0 2px 15px rgba(102, 126, 234, 0.15);
-}
-
-.relevantCard::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: linear-gradient(90deg, var(--primary-color), #5a67d8);
-  border-radius: 16px 16px 0 0;
-}
-
-.cardHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 1rem;
-  gap: 1rem;
-}
+/* Card Header */
 
 .distributionTitle {
   color: var(--gray-900);
   font-size: 1.25rem;
   font-weight: 600;
-  flex: 1;
-  min-width: 0;
-  padding-right: 6rem;
+  margin-bottom: 1rem;
+  padding-right: 6rem; /* Make space for status badge */
   line-height: 1.3;
-  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
+/* Status Badge */
 .statusBadge {
   position: absolute;
   top: 1.5rem;
   right: 1.5rem;
   padding: 0.375rem 0.875rem;
   border-radius: 20px;
-  font-size: 0.6rem;
+  font-size: 0.7rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -386,15 +352,16 @@
 }
 
 .statusBadge.planned {
-  background-color: #fff3cd;
-  color: #856404;
+  background: #dcfce7;
+  color: #166534;
 }
 
 .statusBadge.completed {
-  background-color: #d1fae5;
-  color: #065f46;
+  background: #f1f5f9;
+  color: #475569;
 }
 
+/* Card Info Style  */
 .cardDetails {
   display: flex;
   flex-direction: column;
@@ -417,92 +384,93 @@
   height: 16px;
 }
 
-/* Updated User Relevant Info - Primary color theme */
-.userRelevantInfo {
-  background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
-  padding: 1rem;
-  border-radius: 8px;
-  margin-bottom: 1rem;
-  border: 1px solid #bbdefb;
-}
-
-.relevantBadge {
-  background: var(--primary-color);
-  color: white;
-  font-size: 0.8rem;
-  font-weight: 600;
-  padding: 0.3rem 0.8rem;
-  border-radius: 20px;
-  display: inline-block;
-  margin-bottom: 0.75rem;
-}
-
 .userSchedule strong {
+  color: var(--gray-800);
   display: block;
   margin-bottom: 0.5rem;
-  color: #1565c0;
+  font-weight: 600;
   font-size: 0.9rem;
+  border: solid 2px red;
 }
 
 .scheduleLocation,
 .scheduleContact {
-  color: #6c757d;
-  font-size: 0.85rem;
-  margin-bottom: 0.25rem;
+  color: var(--gray-600);
+  line-height: 1.4;
+  margin: 0;
+  font-size: 0.875rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
-/* Next Distribution */
+.scheduleLocation strong {
+  font-size: 0.875rem;
+}
+/* Next Distribution - Like Job Openings requirements section */
 .nextDistribution {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
   margin-bottom: 1rem;
   padding: 0.75rem 1rem;
   background: #f8f9fa;
   border-radius: 6px;
-  border-left: 3px solid var(--primary-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .nextLabel {
-  font-size: 0.9rem;
-  color: var(--gray-600);
-  font-weight: 500;
+  color: var(--gray-800);
+  display: block;
+  margin-bottom: 0.25rem;
+  font-weight: 600;
+  font-size: 0.875rem;
 }
 
 .nextDate {
+  color: var(--gray-600);
+  line-height: 1.4;
+  margin: 0;
+  font-size: 0.875rem;
   font-weight: 600;
   color: var(--primary-color);
-  font-size: 0.9rem;
 }
 
+/* Card Actions - Like Job Openings cardActions */
 .cardFooter {
   display: flex;
-  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
 }
 
 .viewDetailsBtn {
-  flex: .5;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
   padding: 0.5rem 1rem;
-  background: var(--primary-color);
-  color: white;
-  border: none;
+  border: 2px solid #e2e8f0;
+  background: white;
+  color: var(--gray-700);
   border-radius: 20px;
   font-size: 0.875rem;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .viewDetailsBtn:hover {
   background: #f8fafc;
+  border-color: var(--primary-color);
   color: var(--primary-color);
-  border: 2px solid var(--primary-color);
   transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
 }
 
-/* Modal Styles - Matching SolicitationRequests */
+/* Modal Styles - Matching Job Openings modal styling */
 .modal {
   position: fixed;
   top: 0;
@@ -531,10 +499,10 @@
   position: relative;
 }
 
-/* Modal Header */
+/* Modal Header - Matching Job Openings */
 .modalHeader {
   display: flex;
-  justify-content: flex-start;
+  justify-content: space-between;
   align-items: center;
   padding: 2rem 4rem 1rem 2rem;
   border-bottom: 1px solid #e2e8f0;
@@ -549,23 +517,30 @@
   font-weight: 600;
   flex: 1;
   min-width: 0;
+  padding-right: 1rem;
   word-wrap: break-word;
   overflow-wrap: break-word;
   hyphens: auto;
   margin: 0;
 }
 
-.modalHeader .statusBadge {
+.modalTitle .statusBadge {
   position: static;
-  font-size: .7rem;
+  display: inline-block;
+  margin: 0;
+  margin-left: 1rem;
+  padding: 0.375rem 0.875rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
   flex-shrink: 0;
 }
 
-/* Close Button */
+/* Close Button - Like Job Openings */
 .closeBtn {
-  position: absolute;
-  top: 2rem;
-  right: 2rem;
   background: none;
   border: none;
   font-size: 1.8rem;
@@ -579,7 +554,6 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 10;
 }
 
 .closeBtn:hover {
@@ -592,7 +566,7 @@
   flex: 1;
   scrollbar-width: thin;
   scrollbar-color: #cbd5e1 #f1f5f9;
-  padding: .8rem 2rem 1rem;
+  padding: 0.8rem 2rem 1rem;
 }
 
 .modalBody::-webkit-scrollbar {
@@ -625,34 +599,39 @@
   margin: 0 0 1rem 0;
 }
 
-/* Overview */
+/* Overview Grid - Like Job Openings job details grid */
 .overview {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1rem;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto auto;
+  gap: 0.5rem;
   margin-bottom: 1rem;
+  margin-top: 0.5rem;
 }
 
 .overviewItem {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.75rem;
-  background: #f8fafc;
-  border-radius: 6px;
-  border-left: 3px solid var(--primary-color);
+  gap: 0.5rem;
+}
+
+.overviewItem svg {
+  color: var(--primary-color);
+  flex-shrink: 0;
 }
 
 .overviewLabel {
-  font-weight: 500;
-  color: var(--gray-600);
+  color: var(--gray-800);
+  margin-bottom: 0.25rem;
+  font-weight: 600;
   font-size: 0.875rem;
 }
 
 .overviewValue {
-  font-weight: 600;
-  color: var(--gray-900);
+  display: flex;
+  gap: 0.5rem;
+  min-width: 0;
   font-size: 0.875rem;
+  color: var(--gray-600);
 }
 
 /* Barangay Grid */
@@ -664,7 +643,7 @@
 
 .barangayTag {
   background: #e3f2fd;
-  color: #1565c0;
+  color: var(--primary-color);
   padding: 0.25rem 0.75rem;
   border-radius: 15px;
   font-size: 0.8rem;
@@ -692,13 +671,6 @@
   box-shadow: 0 2px 8px rgba(102, 126, 234, 0.1);
 }
 
-/* Updated user schedule styling */
-.userSchedule {
-  background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
-  border-color: var(--primary-color);
-  position: relative;
-}
-
 .userSchedule::before {
   content: '';
   position: absolute;
@@ -706,7 +678,7 @@
   left: 0;
   right: 0;
   height: 3px;
-  background: linear-gradient(90deg, var(--primary-color), #5a67d8);
+  background: var(--primary-color);
   border-radius: 12px 12px 0 0;
 }
 
@@ -756,9 +728,9 @@
   flex-shrink: 0;
 }
 
-/* Updated Notification Info */
+/* Notification Info */
 .notificationInfo {
-  background: linear-gradient(135deg, #e1f5fe 0%, #b3e5fc 100%);
+  background: #f0f9ff;
   padding: 1.5rem;
   border-radius: 12px;
   border: 1px solid #81d4fa;
@@ -778,7 +750,7 @@
   font-size: 0.9rem;
 }
 
-/* Pagination */
+/* Pagination - Exactly like Job Openings */
 .pagination {
   display: flex;
   justify-content: center;
@@ -823,10 +795,10 @@
   cursor: not-allowed;
 }
 
-/* Responsive Design */
+/* Responsive Design - Matching Job Openings exactly */
 @media (max-width: 1024px) {
   .header {
-    padding: 2rem 2rem;
+    padding: 2rem;
     flex-direction: column;
     align-items: center;
     gap: 1.5rem;
@@ -842,22 +814,6 @@
     min-width: auto;
     width: 100%;
     max-width: 500px;
-  }
-
-  .searchContainer {
-    max-width: 100%;
-    width: 100%;
-  }
-
-  .filterDropdown {
-    width: 100%;
-    justify-content: center;
-  }
-
-  .dropdownButton {
-    width: 100%;
-    max-width: 300px;
-    min-width: auto;
   }
 
   .userBanner {
@@ -878,22 +834,16 @@
 }
 
 @media (max-width: 768px) {
+  .header {
+    padding: 1.5rem 1rem;
+  }
+
   .headerContent h1 {
     font-size: 1.75rem;
   }
 
-  .filterSection {
-    flex-direction: column;
-    gap: 1rem;
-    width: 100%;
-  }
-
   .userBanner {
     padding: 1rem;
-  }
-
-  .userBarangay {
-    font-size: 1.1rem;
   }
 
   .content {
@@ -912,6 +862,7 @@
   .cardHeader {
     flex-direction: column;
     gap: 0.5rem;
+    align-items: flex-start;
   }
 
   .statusBadge {
@@ -937,10 +888,6 @@
     align-self: flex-start;
   }
 
-  .modal {
-    padding: 0.5rem;
-  }
-
   .modalContent {
     max-height: 95vh;
   }
@@ -957,6 +904,7 @@
   }
 
   .closeBtn {
+    position: absolute;
     top: 1rem;
     right: 1rem;
     font-size: 1.5rem;
@@ -967,56 +915,21 @@
   .modalBody {
     padding: 1rem;
   }
-
-  .barangayGrid {
-    gap: 0.25rem;
-  }
-
-  .barangayTag {
-    font-size: 0.75rem;
-  }
-
-  .pagination {
-    flex-wrap: wrap;
-    gap: 0.25rem;
-  }
-
-  .pageBtn {
-    font-size: 0.8rem;
-    padding: 0.4rem 0.6rem;
-    min-width: 2rem;
-  }
 }
 
 @media (max-width: 480px) {
   .header {
-    padding: 1.5rem 1rem;
+    padding: 1rem;
   }
 
   .headerContent h1 {
     font-size: 1.5rem;
   }
 
-  .headerContent p {
-    font-size: 0.875rem;
-  }
-
-  .userBanner {
-    padding: 1rem;
-  }
-
   .userInfo {
     flex-direction: column;
     gap: 0.5rem;
     text-align: center;
-  }
-
-  .userBarangay {
-    font-size: 1rem;
-  }
-
-  .distributionCard {
-    padding: 1rem;
   }
 
   .distributionTitle {
@@ -1026,10 +939,6 @@
   .statusBadge {
     font-size: 0.625rem;
     padding: 0.25rem 0.5rem;
-  }
-
-  .detailItem {
-    font-size: 0.8rem;
   }
 
   .viewDetailsBtn {
@@ -1046,39 +955,8 @@
   }
 
   .closeBtn {
-    top: 1rem;
-    right: 1rem;
     font-size: 1.4rem;
     width: 18px;
     height: 18px;
-  }
-
-  .scheduleItem {
-    padding: 1rem;
-  }
-
-  .scheduleBarangay {
-    font-size: 1rem;
-  }
-
-  .overviewItem {
-    padding: 0.5rem;
-  }
-
-  .overviewLabel,
-  .overviewValue {
-    font-size: 0.8rem;
-  }
-
-  .notificationInfo {
-    padding: 1rem;
-  }
-
-  .notificationInfo h4 {
-    font-size: 1rem;
-  }
-
-  .notificationInfo p {
-    font-size: 0.85rem;
   }
 }

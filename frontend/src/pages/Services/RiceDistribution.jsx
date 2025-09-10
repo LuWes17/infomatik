@@ -1,5 +1,18 @@
-import React, { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, Calendar, MapPin, Users, Clock, Package, AlertCircle, Search, Filter, ChevronDown, X } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { 
+  ChevronLeft, 
+  ChevronRight, 
+  Calendar, 
+  MapPin, 
+  Users, 
+  Clock, 
+  Package, 
+  AlertCircle, 
+  Search, 
+  Filter, 
+  ChevronDown, 
+  X 
+} from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import api from '../../services/api';
 import styles from './RiceDistribution.module.css';
@@ -15,6 +28,7 @@ const RiceDistribution = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [pagination, setPagination] = useState({
     current: 1,
@@ -28,17 +42,31 @@ const RiceDistribution = () => {
     fetchDistributions(currentPage);
   }, [currentPage]);
 
-  // Filter functionality
+  // Close dropdown when clicking outside - Like Job Openings
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  // Filter functionality - Exactly like Job Openings
   useEffect(() => {
     let filtered = [...distributions];
 
-    // Status filter
+    // Apply status filter
     if (statusFilter !== 'all') {
       filtered = filtered.filter(dist => dist.status === statusFilter);
     }
 
-    // Search filter
-    if (searchTerm) {
+    // Apply search filter
+    if (searchTerm.trim()) {
       filtered = filtered.filter(dist => {
         const searchLower = searchTerm.toLowerCase();
         
@@ -132,7 +160,8 @@ const RiceDistribution = () => {
     );
   };
 
-  const openModal = (distribution) => {
+  // Modal handlers - Like Job Openings
+  const handleDistributionClick = (distribution) => {
     setSelectedDistribution(distribution);
     setShowModal(true);
     document.body.style.overflow = "hidden";
@@ -144,6 +173,7 @@ const RiceDistribution = () => {
     document.body.style.overflow = "auto";
   };
 
+  // Filter handlers - Exactly like Job Openings
   const handleFilterChange = (status) => {
     setStatusFilter(status);
     setDropdownOpen(false);
@@ -153,10 +183,7 @@ const RiceDistribution = () => {
     setDropdownOpen(!dropdownOpen);
   };
 
-  const getStatusBadgeClass = (status) => {
-    return `${styles.statusBadge} ${styles[status]}`;
-  };
-
+  // Loading state - Like Job Openings
   if (loading) {
     return (
       <div className={styles.riceDistribution}>
@@ -168,6 +195,7 @@ const RiceDistribution = () => {
     );
   }
 
+  // Error state - Like Job Openings
   if (error) {
     return (
       <div className={styles.riceDistribution}>
@@ -181,7 +209,7 @@ const RiceDistribution = () => {
 
   return (
     <div className={styles.riceDistribution}>
-      {/* Header */}
+      {/* Header - Exactly like Job Openings */}
       <div className={styles.header}>
         <div className={styles.headerText}>
           <Package size={92} className={styles.icon} />
@@ -192,7 +220,7 @@ const RiceDistribution = () => {
         </div>
 
         <div className={styles.filterSection}>
-          {/* Search Bar */}
+          {/* Search Container - Like Job Openings */}
           <div className={styles.searchContainer}>
             <Search size={20} className={styles.searchIcon} />
             <input
@@ -204,14 +232,14 @@ const RiceDistribution = () => {
             />
           </div>
 
-          {/* Filter Dropdown */}
-          <div className={styles.filterDropdown}>
+          {/* Filter Dropdown - Exactly like Job Openings */}
+          <div className={styles.filterDropdown} ref={dropdownRef}>
             <Filter size={20} className={styles.filterIcon} />
             <button
               onClick={toggleDropdown}
               className={`${styles.dropdownButton} ${dropdownOpen ? styles.active : ''}`}
             >
-              <span>{statusFilter === 'all' ? 'All Status' : statusFilter}</span>
+              <span>{statusFilter === 'all' ? 'All Status' : statusFilter.charAt(0).toUpperCase() + statusFilter.slice(1)}</span>
               <ChevronDown size={16} className={`${styles.dropdownArrow} ${dropdownOpen ? styles.open : ''}`} />
             </button>
             <div className={`${styles.dropdownContent} ${dropdownOpen ? styles.show : ''}`}>
@@ -235,7 +263,7 @@ const RiceDistribution = () => {
         </div>
       </div>
 
-      {/* User Info Banner */}
+      {/* User Banner */}
       {user?.barangay && (
         <div className={styles.userBanner}>
           <div className={styles.userInfo}>
@@ -250,7 +278,7 @@ const RiceDistribution = () => {
       <div className={styles.content}>
         {filteredDistributions.length === 0 ? (
           <div className={styles.noDistributions}>
-            <Package size={64} className={styles.noDistributionsIcon} />
+            <Package size={64} />
             <h3>No distributions found</h3>
             <p>{searchTerm || statusFilter !== 'all' 
               ? 'Try adjusting your search or filter criteria' 
@@ -268,39 +296,37 @@ const RiceDistribution = () => {
                 <div
                   key={distribution._id}
                   className={`${styles.distributionCard} ${isRelevant ? styles.relevantCard : ''}`}
-                  onClick={() => openModal(distribution)}
+                  onClick={() => handleDistributionClick(distribution)}
                 >
-                  <div className={styles.cardHeader}>
-                    <h3 className={styles.distributionTitle}>
-                      {formatMonth(distribution.distributionMonth)} Distribution
-                    </h3>
-                    <span className={getStatusBadgeClass(distribution.status)}>
-                      {distribution.status}
-                    </span>
+                  {/* Status Badge */}
+                  <div className={`${styles.statusBadge} ${styles[distribution.status]}`}>
+                    {distribution.status === 'planned' ? 'Planned' : 'Completed'}
                   </div>
 
+                  {/* Distribution Title */}
+                  <h3 className={styles.distributionTitle}>
+                    {formatMonth(distribution.distributionMonth)} Distribution
+                  </h3>
+
+                  {/* Distribution Info */}
                   <div className={styles.cardDetails}>
                     <div className={styles.detailItem}>
                       <MapPin size={16} />
                       <span>{distribution.selectedBarangays.length} Barangays</span>
                     </div>
                     <div className={styles.detailItem}>
-                      <Calendar size={16} />
-                      <span>{distribution.distributionSchedule.length} Schedule{distribution.distributionSchedule.length > 1 ? 's' : ''}</span>
-                    </div>
-                    <div className={styles.detailItem}>
                       <Users size={16} />
-                      <span>{distribution.riceDetails?.kilosPerFamily || 'N/A'} kg per family</span>
+                      <span>{distribution.riceDetails?.kilosPerFamily || 'N/A'} kg per Family</span>
                     </div>
                   </div>
 
+                  {/* User Relevant Info */}
                   {isRelevant && userSchedule && (
                     <div className={styles.userRelevantInfo}>
-                      <div className={styles.relevantBadge}>Your Schedule</div>
                       <div className={styles.userSchedule}>
-                        <strong>Date: {formatDate(userSchedule.date)}</strong>
+                        <strong>Details:</strong>
                         <div className={styles.scheduleLocation}>
-                          Location: {userSchedule.location}
+                          <strong>Location:</strong> {userSchedule.location}
                         </div>
                         {userSchedule.contactPerson?.name && (
                           <div className={styles.scheduleContact}>
@@ -312,6 +338,7 @@ const RiceDistribution = () => {
                     </div>
                   )}
 
+                  {/* Next Distribution - Like Job Openings requirements section */}
                   {upcomingSchedules.length > 0 && (
                     <div className={styles.nextDistribution}>
                       <span className={styles.nextLabel}>Next Distribution:</span>
@@ -321,8 +348,15 @@ const RiceDistribution = () => {
                     </div>
                   )}
 
+                  {/* Card Actions - Exactly like Job Openings cardActions */}
                   <div className={styles.cardFooter}>
-                    <button className={styles.viewDetailsBtn}>
+                    <button 
+                      className={styles.viewDetailsBtn}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDistributionClick(distribution);
+                      }}
+                    >
                       View Details
                     </button>
                   </div>
@@ -332,7 +366,7 @@ const RiceDistribution = () => {
           </div>
         )}
 
-        {/* Pagination */}
+        {/* Pagination - Like Job Openings if it had pagination */}
         {pagination.pages > 1 && (
           <div className={styles.pagination}>
             <button
@@ -368,55 +402,61 @@ const RiceDistribution = () => {
         )}
       </div>
 
-      {/* Modal */}
+      {/* Modal - Exactly like Job Openings modal structure */}
       {showModal && selectedDistribution && (
         <div className={styles.modal} onClick={closeModal}>
           <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
             <div className={styles.modalHeader}>
-              <h2 className={styles.modalTitle}>
-                {formatMonth(selectedDistribution.distributionMonth)} Rice Distribution
-              </h2>
-              <span className={getStatusBadgeClass(selectedDistribution.status)}>
-                {selectedDistribution.status}
-              </span>
+              <div className={styles.modalTitle}>
+                <h2>{formatMonth(selectedDistribution.distributionMonth)} Rice Distribution</h2>
+                <span className={`${styles.statusBadge} ${styles[selectedDistribution.status]}`}>
+                  {selectedDistribution.status === 'planned' ? 'Planned' : 'Completed'}
+                </span>
+              </div>
               <button
                 onClick={closeModal}
                 className={styles.closeBtn}
               >
-                <X size={24} />
+                ×
               </button>
             </div>
             
             <div className={styles.modalBody}>
-              {/* Overview */}
-              <div className={styles.section}>
-                <h4>Distribution Overview</h4>
-                <div className={styles.overview}>
-                  <div className={styles.overviewItem}>
-                    <span className={styles.overviewLabel}>Total Barangays:</span>
-                    <span className={styles.overviewValue}>{selectedDistribution.selectedBarangays.length}</span>
+              {/* Overview - Like Job Openings jobDetailsGrid */}
+              <div className={styles.overview}>
+                <div className={styles.overviewItem}>
+                  <MapPin size={20} />
+                  <div>
+                    <strong className={styles.overviewLabel}>Total Barangays:</strong>
+                    <div className={styles.overviewValue}>{selectedDistribution.selectedBarangays.length}</div>
                   </div>
-                  <div className={styles.overviewItem}>
-                    <span className={styles.overviewLabel}>Total Schedules:</span>
-                    <span className={styles.overviewValue}>{selectedDistribution.distributionSchedule.length}</span>
-                  </div>
-                  <div className={styles.overviewItem}>
-                    <span className={styles.overviewLabel}>Status:</span>
-                    <span className={styles.overviewValue}>{selectedDistribution.status}</span>
-                  </div>
-                  {selectedDistribution.riceDetails && (
-                    <>
-                      <div className={styles.overviewItem}>
-                        <span className={styles.overviewLabel}>Total Rice:</span>
-                        <span className={styles.overviewValue}>{selectedDistribution.riceDetails.totalKilos} kg</span>
-                      </div>
-                      <div className={styles.overviewItem}>
-                        <span className={styles.overviewLabel}>Per Family:</span>
-                        <span className={styles.overviewValue}>{selectedDistribution.riceDetails.kilosPerFamily} kg</span>
-                      </div>
-                    </>
-                  )}
                 </div>
+                
+                <div className={styles.overviewItem}>
+                  <Calendar size={20} />
+                  <div>
+                    <strong className={styles.overviewLabel}>Total Schedules:</strong>
+                    <div className={styles.overviewValue}>{selectedDistribution.distributionSchedule.length}</div>
+                  </div>
+                </div>
+                
+                <div className={styles.overviewItem}>
+                  <Clock size={20} />
+                  <div>
+                    <strong className={styles.overviewLabel}>Status:</strong>
+                    <div className={styles.overviewValue}>{selectedDistribution.status}</div>
+                  </div>
+                </div>
+                
+                {selectedDistribution.riceDetails && (
+                  <div className={styles.overviewItem}>
+                    <Package size={20} />
+                    <div>
+                      <strong className={styles.overviewLabel}>Per Family:</strong>
+                      <div className={styles.overviewValue}>{selectedDistribution.riceDetails.kilosPerFamily} kg</div>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Selected Barangays */}
@@ -473,7 +513,7 @@ const RiceDistribution = () => {
                 </div>
               </div>
 
-              {/* Notification Info */}
+              {/* Notification Info - Like Job Openings special info sections */}
               {user?.barangay && isUserBarangayIncluded(selectedDistribution) && (
                 <div className={styles.notificationInfo}>
                   <h4>SMS Notification</h4>
