@@ -14,7 +14,8 @@ import {
   Clock,
   XCircle,
   Download,
-  ExternalLink
+  ExternalLink,
+  Type
 } from 'lucide-react';
 import styles from './SolicitationRequests.module.css';
 
@@ -62,7 +63,7 @@ const SolicitationRequests = () => {
   const getStatusDisplay = (status) => {
     const statusConfig = {
       pending: {
-        text: 'Pending Review',
+        text: 'Under Review',
         className: styles.statusPending,
         icon: <Clock size={16} />
       },
@@ -121,7 +122,7 @@ const SolicitationRequests = () => {
     <div className={styles.container}>
       <div className={styles.header}>
         <div>
-          <h1 className={styles.title}>My Solicitation Requests</h1>
+          <h2>My Solicitation Requests</h2>
           <p className={styles.subtitle}>
             Track the status of your submitted solicitation requests
           </p>
@@ -164,29 +165,12 @@ const SolicitationRequests = () => {
                       <Building2 size={16} />
                       <span>{request.organizationType}</span>
                     </div>
-                    <div className={styles.infoRow}>
-                      <FileText size={16} />
-                      <span>{request.requestType}</span>
-                    </div>
-                    <div className={styles.infoRow}>
-                      <Calendar size={16} />
-                      <span>Event: {formatDate(request.eventDate)}</span>
-                    </div>
                   </div>
 
-                  <div className={styles.requestDetails}>
-                    <h4>Requested Assistance</h4>
-                    <p className={styles.assistanceText}>
-                      {request.requestedAssistanceDetails.length > 100
-                        ? `${request.requestedAssistanceDetails.substring(0, 100)}...`
-                        : request.requestedAssistanceDetails
-                      }
-                    </p>
-                  </div>
-
+                
                   {request.purpose && (
                     <div className={styles.purposeSection}>
-                      <h4>Purpose</h4>
+                      <strong>Purpose:</strong>
                       <p className={styles.purposeText}>
                         {request.purpose.length > 80
                           ? `${request.purpose.substring(0, 80)}...`
@@ -205,7 +189,6 @@ const SolicitationRequests = () => {
                     className={styles.viewButton}
                     onClick={() => viewRequest(request)}
                   >
-                    <Eye size={16} />
                     View Details
                   </button>
                 </div>
@@ -225,7 +208,7 @@ const SolicitationRequests = () => {
                 className={styles.closeButton}
                 onClick={closeDetails}
               >
-                <X size={24} />
+                ×
               </button>
             </div>
 
@@ -246,27 +229,38 @@ const SolicitationRequests = () => {
                 <h3>Organization Information</h3>
                 <div className={styles.infoGrid}>
                   <div className={styles.infoItem}>
-                    <span className={styles.infoLabel}>Contact Person</span>
+                    <div className={styles.infoItemHeader}> 
+                      <User size={16} />
+                      <span className={styles.infoLabel}>Contact Person:</span>
+                    </div>
                     <span>{selectedRequest.contactPerson}</span>
                   </div>
                   <div className={styles.infoItem}>
-                    <span className={styles.infoLabel}>Organization Type</span>
-                    <span>{selectedRequest.organizationType}</span>
-                  </div>
-                  <div className={styles.infoItem}>
-                    <span className={styles.infoLabel}>Contact Number</span>
+                    <div className={styles.infoItemHeader}> 
+                      <Phone size={16} />
+                      <span className={styles.infoLabel}>Contact Number:</span>
+                    </div>
                     <span>{selectedRequest.contactNumber}</span>
                   </div>
                   <div className={styles.infoItem}>
-                    <span className={styles.infoLabel}>Request Type</span>
+                    <div className={styles.infoItemHeader}> 
+                      <Building2 size={16} />
+                      <span className={styles.infoLabel}>Organization Type:</span>
+                    </div>
+                    <span>{selectedRequest.organizationType}</span>
+                  </div>
+                  <div className={styles.infoItem}>
+                    <div className={styles.infoItemHeader}> 
+                      <Type size={16} />
+                      <span className={styles.infoLabel}>Request Type:</span>
+                    </div>
                     <span>{selectedRequest.requestType}</span>
                   </div>
                   <div className={styles.infoItem}>
-                    <span className={styles.infoLabel}>Event Date</span>
-                    <span>{formatDate(selectedRequest.eventDate)}</span>
-                  </div>
-                  <div className={styles.infoItem}>
-                    <span className={styles.infoLabel}>Address</span>
+                    <div className={styles.infoItemHeader}> 
+                      <MapPin size={16} />
+                      <span className={styles.infoLabel}>Address:</span>
+                    </div>
                     <span>{selectedRequest.address}</span>
                   </div>
                 </div>
@@ -292,30 +286,30 @@ const SolicitationRequests = () => {
                       <p>{selectedRequest.additionalDetails}</p>
                     </div>
                   )}
+
+                  {/* Solicitation Letter Section */}
+                    {selectedRequest.solicitationLetter && (
+                    <div className={styles.documentSection}>
+                      <h4>Solicitation Letter</h4>
+                      <div className={styles.documentInfo}>
+                        <a
+                          href={selectedRequest.solicitationLetter}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={styles.documentLink}
+                        >
+                          <FileText size={20} />
+                          <span className={styles.downloadLink}>
+                            View Solicitation Letter Document
+                          </span>
+                        </a>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
 
-              {/* Solicitation Letter Section */}
-              {selectedRequest.solicitationLetter && (
-                <div className={styles.documentSection}>
-                  <h3>Solicitation Letter</h3>
-                  <div className={styles.documentInfo}>
-                    <div className={styles.fileInfo}>
-                      <FileText size={20} />
-                      <span>Solicitation Letter</span>
-                    </div>
-                    <div className={styles.documentActions}>
-                      <button 
-                        className={styles.viewDocButton}
-                        onClick={downloadSolicitationLetter}
-                      >
-                        <ExternalLink size={16} />
-                        View Document
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              )}
+              
 
               {/* Admin Response Section */}
               {(selectedRequest.adminNotes || selectedRequest.approvedAmount) && (
@@ -340,15 +334,6 @@ const SolicitationRequests = () => {
                   )}
                 </div>
               )}
-            </div>
-
-            <div className={styles.modalFooter}>
-              <button 
-                className={styles.closeModalButton}
-                onClick={closeDetails}
-              >
-                Close
-              </button>
             </div>
           </div>
         </div>
