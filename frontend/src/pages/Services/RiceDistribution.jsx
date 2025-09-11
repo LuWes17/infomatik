@@ -11,7 +11,9 @@ import {
   Search, 
   Filter, 
   ChevronDown, 
-  X 
+  X,
+  Home,
+  Wheat
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import api from '../../services/api';
@@ -247,7 +249,7 @@ const RiceDistribution = () => {
                 onClick={() => handleFilterChange('all')}
                 className={`${styles.dropdownItem} ${statusFilter === 'all' ? styles.active : ''}`}
               >
-                All Status ({distributions.length})
+                All Status
               </button>
               {statusOptions.slice(1).map(status => (
                 <button
@@ -255,24 +257,13 @@ const RiceDistribution = () => {
                   onClick={() => handleFilterChange(status)}
                   className={`${styles.dropdownItem} ${statusFilter === status ? styles.active : ''}`}
                 >
-                  {status.charAt(0).toUpperCase() + status.slice(1)} ({distributions.filter(dist => dist.status === status).length})
+                  {status.charAt(0).toUpperCase() + status.slice(1)}
                 </button>
               ))}
             </div>
           </div>
         </div>
       </div>
-
-      {/* User Banner */}
-      {user?.barangay && (
-        <div className={styles.userBanner}>
-          <div className={styles.userInfo}>
-            <span className={styles.userLabel}>Your Barangay:</span>
-            <span className={styles.userBarangay}>{user.barangay}</span>
-          </div>
-          <span className={styles.userNote}>You'll be notified when your barangay is scheduled</span>
-        </div>
-      )}
 
       {/* Content */}
       <div className={styles.content}>
@@ -311,29 +302,31 @@ const RiceDistribution = () => {
                   {/* Distribution Info */}
                   <div className={styles.cardDetails}>
                     <div className={styles.detailItem}>
-                      <MapPin size={16} />
+                      <Home size={16} />
                       <span>{distribution.selectedBarangays.length} Barangays</span>
                     </div>
                     <div className={styles.detailItem}>
-                      <Users size={16} />
+                      <Wheat size={16} />
                       <span>{distribution.riceDetails?.kilosPerFamily || 'N/A'} kg per Family</span>
                     </div>
                   </div>
 
-                  {/* User Relevant Info */}
-                  {isRelevant && userSchedule && (
-                    <div className={styles.userRelevantInfo}>
-                      <div className={styles.userSchedule}>
-                        <strong>Details:</strong>
-                        <div className={styles.scheduleLocation}>
-                          <strong>Location:</strong> {userSchedule.location}
+                  {/* User Distribution Details - Only show if user's barangay is included */}
+                  {user?.barangay && isRelevant && userSchedule && (
+                    <div className={styles.userBarangaySection}>
+                      <div className={styles.userBarangayLabel}>
+                        <strong>Your Barangay:</strong> {user.barangay}
+                      </div>
+                      
+                      <div className={styles.distributionDetails}>
+                        <div className={styles.detailItem}>
+                          <Calendar size={14} />
+                          <span><strong>Pick up Date:</strong> {formatDate(userSchedule.date)}</span>
                         </div>
-                        {userSchedule.contactPerson?.name && (
-                          <div className={styles.scheduleContact}>
-                            Contact: {userSchedule.contactPerson.name}
-                            {userSchedule.contactPerson.phone && ` (${userSchedule.contactPerson.phone})`}
-                          </div>
-                        )}
+                        <div className={styles.detailItem}>
+                          <MapPin size={14} />
+                          <span><strong>Pick up Address:</strong> {userSchedule.location}</span>
+                        </div>
                       </div>
                     </div>
                   )}
@@ -414,8 +407,7 @@ const RiceDistribution = () => {
                 </span>
               </div>
               <button
-                onClick={closeModal}
-                className={styles.closeBtn}
+                onClick={closeModal} className={styles.closeBtn}
               >
                 ×
               </button>
@@ -425,35 +417,17 @@ const RiceDistribution = () => {
               {/* Overview - Like Job Openings jobDetailsGrid */}
               <div className={styles.overview}>
                 <div className={styles.overviewItem}>
-                  <MapPin size={20} />
+                  <Home size={20} />
                   <div>
-                    <strong className={styles.overviewLabel}>Total Barangays:</strong>
-                    <div className={styles.overviewValue}>{selectedDistribution.selectedBarangays.length}</div>
-                  </div>
-                </div>
-                
-                <div className={styles.overviewItem}>
-                  <Calendar size={20} />
-                  <div>
-                    <strong className={styles.overviewLabel}>Total Schedules:</strong>
-                    <div className={styles.overviewValue}>{selectedDistribution.distributionSchedule.length}</div>
-                  </div>
-                </div>
-                
-                <div className={styles.overviewItem}>
-                  <Clock size={20} />
-                  <div>
-                    <strong className={styles.overviewLabel}>Status:</strong>
-                    <div className={styles.overviewValue}>{selectedDistribution.status}</div>
+                    <strong> Total Barangays:</strong> {selectedDistribution.selectedBarangays.length}
                   </div>
                 </div>
                 
                 {selectedDistribution.riceDetails && (
                   <div className={styles.overviewItem}>
-                    <Package size={20} />
+                    <Wheat size={20} />
                     <div>
-                      <strong className={styles.overviewLabel}>Per Family:</strong>
-                      <div className={styles.overviewValue}>{selectedDistribution.riceDetails.kilosPerFamily} kg</div>
+                      <strong>Rice Per Family:</strong> {selectedDistribution.riceDetails.kilosPerFamily} kgs
                     </div>
                   </div>
                 )}
