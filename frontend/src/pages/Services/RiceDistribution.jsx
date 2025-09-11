@@ -5,14 +5,16 @@ import {
   Calendar, 
   MapPin, 
   Users, 
-  Clock, 
+  Phone, 
   Package, 
   AlertCircle, 
   Search, 
   Filter, 
   ChevronDown, 
   X,
+  UserRound,
   Home,
+  Bell ,
   Wheat
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
@@ -321,11 +323,11 @@ const RiceDistribution = () => {
                       <div className={styles.distributionDetails}>
                         <div className={styles.detailItem}>
                           <Calendar size={14} />
-                          <span><strong>Pick up Date:</strong> {formatDate(userSchedule.date)}</span>
+                          <span><strong>Pick-up Date:</strong> {formatDate(userSchedule.date)}</span>
                         </div>
                         <div className={styles.detailItem}>
                           <MapPin size={14} />
-                          <span><strong>Pick up Address:</strong> {userSchedule.location}</span>
+                          <span><strong>Pick-up Location:</strong> {userSchedule.location}</span>
                         </div>
                       </div>
                     </div>
@@ -445,7 +447,7 @@ const RiceDistribution = () => {
                 </div>
               </div>
 
-              {/* Distribution Schedule */}
+              {/* Distribution Schedule List of Card*/}
               <div className={styles.section}>
                 <h4>Distribution Schedule</h4>
                 <div className={styles.scheduleList}>
@@ -462,7 +464,7 @@ const RiceDistribution = () => {
                         >
                           <div className={styles.scheduleHeader}>
                             <span className={styles.scheduleBarangay}>
-                              {schedule.barangay}
+                              Barangay {schedule.barangay}
                             </span>
                             <span className={styles.scheduleDate}>
                               {formatDate(schedule.date)}
@@ -471,13 +473,18 @@ const RiceDistribution = () => {
                           <div className={styles.scheduleDetails}>
                             <div className={styles.scheduleLocation}>
                               <MapPin size={14} />
-                              Location: {schedule.location}
+                              <span>Pick-up Location: {schedule.location}</span>
                             </div>
                             {schedule.contactPerson?.name && (
                               <div className={styles.scheduleContact}>
-                                <Users size={14} />
-                                Contact: {schedule.contactPerson.name}
-                                {schedule.contactPerson.phone && ` - ${schedule.contactPerson.phone}`}
+                                <UserRound size={14} />
+                                <span>Coordinator: {schedule.contactPerson.name}</span>
+                              </div>
+                            )}
+                            {schedule.contactPerson?.phone && (
+                              <div className={styles.scheduleContact}>
+                                <Phone size={14} />
+                                <span>Contact: {schedule.contactPerson.phone}</span>
                               </div>
                             )}
                           </div>
@@ -490,7 +497,10 @@ const RiceDistribution = () => {
               {/* Notification Info - Like Job Openings special info sections */}
               {user?.barangay && isUserBarangayIncluded(selectedDistribution) && (
                 <div className={styles.notificationInfo}>
-                  <h4>SMS Notification</h4>
+                  <h4>
+                    <Bell size={18} />
+                    SMS Notification
+                  </h4>
                   <p>You will receive an SMS notification closer to your scheduled distribution date with specific details and any updates.</p>
                 </div>
               )}

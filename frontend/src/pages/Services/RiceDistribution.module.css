@@ -501,6 +501,7 @@
 }
 
 /* Modal Header - Matching Job Openings */
+/* Modal Header - Compact single line layout */
 .modalHeader {
   display: flex;
   justify-content: space-between;
@@ -508,18 +509,7 @@
   padding: 2rem 2rem 1rem;
   border-bottom: 1px solid #e2e8f0;
   flex-shrink: 0;
-}
-
-.modalHeader h2 {
-  color: var(--gray-900);
-  font-size: 1.5rem;
-  font-weight: 600;
-  flex: 1;
-  min-width: 0;
-  padding-right: 1rem;
-  word-wrap: break-word;
-  overflow-wrap: break-word;
-  hyphens: auto;
+  gap: 1rem;
 }
 
 .modalTitle {
@@ -528,7 +518,18 @@
   gap: 1rem;
   flex: 1;
   min-width: 0;
-  padding-right: 1rem;
+}
+
+.modalTitle h2 {
+  color: var(--gray-900);
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .modalTitle .statusBadge {
@@ -545,7 +546,6 @@
   flex-shrink: 0;
 }
 
-/* Close Button - Like Job Openings */
 .closeBtn {
   background: none;
   border: none;
@@ -560,6 +560,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
 .closeBtn:hover {
@@ -626,7 +627,6 @@
   min-width: 0; 
   font-size: .875rem;
   color: var(--gray-900);
-  
 }
 
 /* Modal Sections */
@@ -662,78 +662,70 @@
 .scheduleList {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 0.75rem;
 }
 
 .scheduleItem {
-  background: #f8f9fa;
-  border: 1px solid #e9ecef;
-  border-radius: 12px;
-  padding: 1.5rem;
-  transition: all 0.3s ease;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 1rem;
+  transition: border-color 0.2s ease;
 }
 
 .scheduleItem:hover {
   border-color: var(--primary-color);
-  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.1);
-}
-
-.userSchedule::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: var(--primary-color);
-  border-radius: 12px 12px 0 0;
 }
 
 .scheduleHeader {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 0.75rem;
-  gap: 1rem;
+  align-items: center;
+  margin-bottom: 0.5rem;
 }
 
 .scheduleBarangay {
   font-weight: 600;
-  font-size: 1.1rem;
-  color: #2c3e50;
+  color: var(--gray-900);
   text-transform: capitalize;
-  flex: 1;
+  font-size: 1rem;
 }
 
 .scheduleDate {
-  font-weight: 600;
+  font-size: 0.875rem;
   color: var(--primary-color);
-  white-space: nowrap;
-  background: white;
-  padding: 0.25rem 0.75rem;
-  border-radius: 6px;
-  border: 1px solid #e9ecef;
-  font-size: 0.9rem;
+  font-weight: 500;
 }
 
 .scheduleDetails {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.25rem;
 }
 
-.scheduleDetails .scheduleLocation,
-.scheduleDetails .scheduleContact {
+.scheduleLocation,
+.scheduleContact {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  color: #6c757d;
-  font-size: 0.9rem;
+  font-size: 0.875rem;
+  color: var(--gray-600);
 }
 
-.scheduleDetails svg {
+.scheduleLocation svg,
+.scheduleContact svg {
+  color: var(--primary-color);
   flex-shrink: 0;
+  width: 14px;
+  height: 14px;
 }
+
+.scheduleLocation span,
+.scheduleContact span {
+  color: var(--gray-700);
+  line-height: 1.4;
+}
+
 
 /* Notification Info */
 .notificationInfo {
@@ -748,6 +740,20 @@
   margin: 0 0 0.75rem 0;
   color: var(--primary-color);
   font-size: 1.1rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  line-height: 1;
+}
+
+.notificationInfo h4 svg {
+  color: var(--primary-color);
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  display: block;
 }
 
 .notificationInfo p {
@@ -757,55 +763,24 @@
   font-size: 0.9rem;
 }
 
-/* Pagination - Exactly like Job Openings */
-.pagination {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 0.5rem;
-  margin-top: 3rem;
+/* RESPONSIVE DESIGN */
+/* RESPONSIVE DESIGN - Updated to match Job Openings exactly */
+
+/* Large tablets and small laptops */
+@media (max-width: 1200px) {
+  .content {
+    padding: 0 1.5rem;
+  }
+  
+  .distributionsGrid {
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 1.5rem;
+  }
 }
 
-.pageNumbers {
-  display: flex;
-  gap: 0.25rem;
-}
-
-.pageBtn {
-  background: white;
-  border: 1px solid #dee2e6;
-  color: #6c757d;
-  padding: 0.5rem 0.75rem;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  font-size: 0.9rem;
-  min-width: 2.5rem;
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-}
-
-.pageBtn:hover:not(.disabled) {
-  background: #e9ecef;
-  border-color: #adb5bd;
-}
-
-.pageBtn.active {
-  background: var(--primary-color);
-  border-color: var(--primary-color);
-  color: white;
-}
-
-.pageBtn.disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-/* Responsive Design - Matching Job Openings exactly */
 @media (max-width: 1024px) {
   .header {
-    padding: 2rem;
+    padding: 1.5rem 2rem;
     flex-direction: column;
     align-items: center;
     gap: 1.5rem;
@@ -814,6 +789,20 @@
   .headerText {
     justify-content: center;
     text-align: center;
+    gap: 1.5rem;
+  }
+
+  .icon {
+    width: 72px;
+    height: 72px;
+  }
+
+  .headerContent h1 {
+    font-size: 1.75rem;
+  }
+
+  .headerContent p {
+    font-size: 0.95rem;
   }
 
   .filterSection {
@@ -823,34 +812,72 @@
     max-width: 500px;
   }
 
-  .userBanner {
-    padding: 1.5rem 2rem;
-    flex-direction: column;
-    gap: 1rem;
-    text-align: center;
+  .searchContainer {
+    max-width: 100%;
+    width: 100%;
   }
 
-  .content {
-    padding: 0 2rem;
+  .filterDropdown {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .dropdownButton {
+    width: 100%;
+    max-width: 300px;
+    min-width: auto;
+  }
+
+  .dropdownContent {
+    left: 0;
+    right: 0;
+    width: 100%;
+    max-width: 300px;
+    margin: 0 auto;
   }
 
   .distributionsGrid {
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 1.5rem;
+  }
+
+  .content {
+    padding: 0 1.5rem;
+  }
+
+  .modalContent {
+    max-width: 700px;
   }
 }
 
 @media (max-width: 768px) {
   .header {
-    padding: 1.5rem 1rem;
+    padding: 1.25rem 1rem;
+  }
+
+  .headerText {
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+  }
+
+  .icon {
+    width: 64px;
+    height: 64px;
   }
 
   .headerContent h1 {
-    font-size: 1.75rem;
+    font-size: 1.5rem;
   }
 
-  .userBanner {
-    padding: 1rem;
+  .headerContent p {
+    font-size: 0.9rem;
+  }
+
+  .filterSection {
+    flex-direction: column;
+    gap: 1rem;
+    width: 100%;
   }
 
   .content {
@@ -866,12 +893,6 @@
     padding: 1.25rem;
   }
 
-  .cardHeader {
-    flex-direction: column;
-    gap: 0.5rem;
-    align-items: flex-start;
-  }
-
   .statusBadge {
     top: 1.25rem;
     right: 1.25rem;
@@ -884,8 +905,118 @@
     padding-right: 5rem;
   }
 
+  .cardFooter {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .viewDetailsBtn {
+    flex: none;
+    width: 100%;
+    padding: 0.75rem 1rem;
+    font-size: 0.9rem;
+  }
+
+  .nextDistribution {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+
+  /* Modal responsiveness */
+  .modalContent {
+    max-height: 95vh;
+    margin: 0.5rem;
+    max-width: 95%;
+  }
+
+  .modalHeader {
+    padding: 1.5rem 1.25rem 1rem;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+    position: relative;
+  }
+
+  .modalTitle {
+    font-size: 1.25rem;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+    width: 100%;
+    padding-right: 0;
+  }
+
+  .modalTitle h2 {
+    font-size: 1.25rem;
+    padding-right: 0;
+  }
+
+  .modalTitle .statusBadge {
+    font-size: 0.7rem;
+    padding: 0.25rem 0.65rem;
+  }
+
+  .closeBtn {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    font-size: 1.5rem;
+    width: 32px;
+    height: 32px;
+    padding: 0.375rem;
+    background: rgba(255, 255, 255, 0.9);
+  }
+
+  .closeBtn:hover {
+    background: rgba(255, 255, 255, 1);
+    border-color: var(--primary-color);
+  }
+
+  .modalBody {
+    padding: 1rem 1.25rem;
+  }
+
+  /* FIXED: Mobile Overview Grid - Match Job Openings */
   .overview {
+    display: grid;
     grid-template-columns: 1fr;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    margin-top: 0.5rem;
+  }
+
+  .overviewItem {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    padding: 0.75rem 0;
+  }
+
+  .overviewItem:last-child {
+    border-bottom: none;
+  }
+
+  .overviewItem svg {
+    color: var(--primary-color);
+    flex-shrink: 0;
+    margin-top: 0.125rem;
+    width: 20px;
+    height: 20px;
+  }
+
+  .overviewItem > div {
+    flex: 1;
+    min-width: 0;
+    line-height: 1.5;
+  }
+
+  .overviewItem strong {
+    display: block;
+    color: var(--gray-800);
+    margin-bottom: 0.25rem;
+    font-weight: 600;
+    font-size: 0.875rem;
   }
 
   .scheduleHeader {
@@ -898,75 +1029,495 @@
     align-self: flex-start;
   }
 
+  .barangayGrid {
+    gap: 0.375rem;
+  }
+
+  .barangayTag {
+    font-size: 0.75rem;
+    padding: 0.2rem 0.6rem;
+  }
+
+  .pagination {
+    flex-wrap: wrap;
+    gap: 0.25rem;
+  }
+
+  .pageNumbers {
+    order: 3;
+    width: 100%;
+    justify-content: center;
+    margin-top: 0.5rem;
+  }
+
+  /* Notification Info Responsive */
+  .notificationInfo {
+    padding: 1.25rem;
+    border-radius: 10px;
+  }
+
+  .notificationInfo h4 {
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+    flex-direction: column;
+    gap: 0.5rem;
+    text-align: center;
+  }
+
+  .notificationInfo h4 svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .notificationInfo p {
+    font-size: 0.85rem;
+    line-height: 1.5;
+  }
+}
+
+@media (max-width: 480px) {
+  .header {
+    padding: 1rem 0.75rem;
+  }
+
+  .headerContent h1 {
+    font-size: 1.375rem;
+  }
+
+  .headerContent p {
+    font-size: 0.85rem;
+    line-height: 1.4;
+  }
+
+  .icon {
+    width: 56px;
+    height: 56px;
+  }
+
+  .searchInput {
+    padding: 1rem 1rem 1rem 3rem;
+    font-size: 1rem;
+  }
+
+  .dropdownButton {
+    padding: 0.75rem 1.25rem;
+    font-size: 0.9rem;
+  }
+
+  .content {
+    padding: 0 0.75rem;
+  }
+
+  .distributionCard {
+    padding: 1rem;
+  }
+
+  .distributionTitle {
+    font-size: 1rem;
+    padding-right: 4.5rem;
+    -webkit-line-clamp: 3;
+  }
+
+  .statusBadge {
+    top: 1rem;
+    right: 1rem;
+    font-size: 0.6rem;
+    padding: 0.25rem 0.5rem;
+  }
+
+  .cardDetails {
+    gap: 0.375rem;
+  }
+
+  .detailItem {
+    font-size: 0.8rem;
+  }
+
+  .userBarangaySection {
+    padding: 0.875rem;
+    margin: 0.75rem 0;
+  }
+
+  .userBarangayLabel {
+    font-size: 0.85rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .distributionDetails .detailItem {
+    font-size: 0.8rem;
+  }
+
+  .nextDistribution {
+    padding: 0.625rem 0.875rem;
+  }
+
+  .nextLabel,
+  .nextDate {
+    font-size: 0.8rem;
+  }
+
+  .viewDetailsBtn {
+    padding: 0.75rem 0.875rem;
+    font-size: 0.85rem;
+  }
+
+  /* Modal adjustments for small screens */
+  .modal {
+    padding: 0.5rem;
+  }
+
   .modalContent {
-    max-height: 95vh;
+    border-radius: 12px;
   }
 
   .modalHeader {
-    padding: 1rem 3rem 1rem 1rem;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 1rem;
+    padding: 1rem 1rem 0.75rem;
   }
 
-  .modalTitle {
-    font-size: 1.25rem;
+  .modalTitle h2 {
+    font-size: 1.125rem;
+    line-height: 1.3;
   }
 
   .closeBtn {
     position: absolute;
     top: 1rem;
     right: 1rem;
-    font-size: 1.5rem;
-    width: 20px;
-    height: 20px;
+    font-size: 1.4rem;
+    width: 28px;
+    height: 28px;
+    padding: 0.25rem;
   }
 
   .modalBody {
+    padding: 0.75rem 1rem;
+  }
+
+  .section h4 {
+    font-size: 0.95rem;
+    margin-bottom: 0.75rem;
+  }
+
+  /* FIXED: Smaller Mobile Overview Details - Match Job Openings */
+  .overview {
+    gap: 0.75rem;
+  }
+
+  .overviewItem {
+    gap: 0.5rem;
+    padding: 0.5rem 0;
+  }
+
+  .overviewItem svg {
+    width: 18px;
+    height: 18px;
+    margin-top: 0.1rem;
+  }
+
+  .overviewItem strong {
+    font-size: 0.8rem;
+    margin-bottom: 0.2rem;
+  }
+
+  .overviewItem > div {
+    font-size: 0.8rem;
+    line-height: 1.4;
+  }
+
+  .scheduleItem {
+    padding: 0.875rem;
+  }
+
+  .scheduleBarangay {
+    font-size: 0.9rem;
+  }
+
+  .scheduleDate {
+    font-size: 0.8rem;
+  }
+
+  .scheduleLocation span,
+  .scheduleContact span {
+    font-size: 0.8rem;
+  }
+
+  .barangayTag {
+    font-size: 0.7rem;
+    padding: 0.15rem 0.5rem;
+  }
+
+  .pageBtn {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.8rem;
+  }
+
+  .pageNumbers {
+    gap: 0.15rem;
+  }
+
+  /* Notification Info Mobile */
+  .notificationInfo {
     padding: 1rem;
+    border-radius: 8px;
+  }
+
+  .notificationInfo h4 {
+    font-size: 0.95rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .notificationInfo h4 svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .notificationInfo p {
+    font-size: 0.8rem;
+    line-height: 1.4;
   }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 360px) {
+  .headerContent h1 {
+    font-size: 1.25rem;
+  }
+
+  .headerContent p {
+    font-size: 0.8rem;
+  }
+
+  .icon {
+    width: 48px;
+    height: 48px;
+  }
+
+  .distributionTitle {
+    font-size: 0.95rem;
+    padding-right: 4rem;
+  }
+
+  .statusBadge {
+    font-size: 0.55rem;
+    padding: 0.2rem 0.4rem;
+    top: 0.75rem;
+    right: 0.75rem;
+  }
+
+  .searchInput {
+    padding: 0.625rem 0.75rem 0.625rem 2.5rem;
+    font-size: 0.85rem;
+  }
+
+  .searchIcon {
+    left: 0.75rem;
+  }
+
+  .dropdownButton {
+    padding: 0.375rem 0.875rem;
+    font-size: 0.75rem;
+    min-width: 130px;
+  }
+
+  .distributionCard {
+    padding: 0.875rem;
+  }
+
+  .detailItem {
+    font-size: 0.75rem;
+  }
+
+  .userBarangaySection {
+    padding: 0.75rem;
+    margin: 0.625rem 0;
+  }
+
+  .userBarangayLabel {
+    font-size: 0.8rem;
+  }
+
+  .distributionDetails .detailItem {
+    font-size: 0.75rem;
+  }
+
+  .nextLabel,
+  .nextDate {
+    font-size: 0.75rem;
+  }
+
+  .viewDetailsBtn {
+    font-size: 0.7rem;
+    padding: 0.3rem 0.75rem;
+  }
+
+  .modalContent {
+    margin: 0.5rem;
+    max-width: calc(100vw - 1rem);
+    max-height: calc(100vh - 1rem);
+    border-radius: 12px;
+  }
+
+  .modalHeader {
+    padding: 0.875rem 0.875rem 0.75rem;
+  }
+
+  .modalTitle h2 {
+    font-size: 1rem;
+  }
+
+  .closeBtn {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    font-size: 1.2rem;
+    width: 24px;
+    height: 24px;
+    padding: 0.25rem;
+  }
+
+  .modalBody {
+    padding: 0.75rem;
+  }
+
+  .section h4 {
+    font-size: 0.9rem;
+    margin-bottom: 0.625rem;
+  }
+
+  /* FIXED: Very Small Mobile Overview Details - Match Job Openings */
+  .overview {
+    gap: 0.5rem;
+  }
+
+  .overviewItem {
+    gap: 0.4rem;
+    padding: 0.4rem 0;
+  }
+
+  .overviewItem svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .overviewItem strong {
+    font-size: 0.75rem;
+  }
+
+  .overviewItem > div {
+    font-size: 0.75rem;
+  }
+
+  .scheduleItem {
+    padding: 0.75rem;
+  }
+
+  .scheduleBarangay {
+    font-size: 0.85rem;
+  }
+
+  .scheduleDate {
+    font-size: 0.75rem;
+  }
+
+  .scheduleLocation span,
+  .scheduleContact span {
+    font-size: 0.75rem;
+  }
+
+  .barangayTag {
+    font-size: 0.65rem;
+    padding: 0.125rem 0.4rem;
+  }
+
+  .pageBtn {
+    padding: 0.3rem 0.6rem;
+    font-size: 0.75rem;
+  }
+
+  /* Notification Info Very Small Mobile */
+  .notificationInfo {
+    padding: 0.875rem;
+  }
+
+  .notificationInfo h4 {
+    font-size: 0.9rem;
+    gap: 0.375rem;
+  }
+
+  .notificationInfo h4 svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .notificationInfo p {
+    font-size: 0.75rem;
+  }
+}
+
+/* Landscape mobile */
+@media (max-width: 768px) and (orientation: landscape) {
   .header {
     padding: 1rem;
+    flex-direction: row;
+    gap: 1rem;
+  }
+
+  .headerText {
+    flex-direction: row;
+    text-align: left;
+    justify-content: flex-start;
+  }
+
+  .icon {
+    width: 60px;
+    height: 60px;
   }
 
   .headerContent h1 {
     font-size: 1.5rem;
   }
 
-  .userInfo {
-    flex-direction: column;
-    gap: 0.5rem;
-    text-align: center;
+  .filterSection {
+    flex-direction: row;
+    align-items: center;
+    min-width: auto;
+    max-width: none;
   }
 
-  .distributionTitle {
-    font-size: 1.125rem;
+  .searchContainer {
+    max-width: 300px;
   }
 
-  .statusBadge {
-    font-size: 0.625rem;
-    padding: 0.25rem 0.5rem;
+  .modalContent {
+    max-height: 85vh;
   }
 
-  .viewDetailsBtn {
-    font-size: 0.75rem;
-    padding: 0.375rem 0.75rem;
+  .modalBody {
+    max-height: calc(85vh - 100px);
+  }
+}
+
+/* Print styles */
+@media print {
+  .header {
+    padding: 1rem;
+    margin-bottom: 1rem;
   }
 
-  .modalHeader {
-    padding: 1rem 2.5rem 1rem 1rem;
+  .filterSection,
+  .pagination,
+  .viewDetailsBtn,
+  .modal {
+    display: none !important;
   }
 
-  .modalTitle {
-    font-size: 1.125rem;
+  .distributionCard {
+    break-inside: avoid;
+    box-shadow: none;
+    border: 1px solid #ddd;
   }
 
-  .closeBtn {
-    font-size: 1.4rem;
-    width: 18px;
-    height: 18px;
+  .distributionCard:hover {
+    transform: none;
+    box-shadow: none;
   }
 }
