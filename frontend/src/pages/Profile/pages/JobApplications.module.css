@@ -376,6 +376,8 @@
   justify-content: center;
   z-index: 1000;
   padding: var(--spacing-2xl);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
 }
 
 .modalContent {
@@ -388,6 +390,13 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  position: relative;
+  z-index: 1001;
+}
+
+.modalOverlay {
+  touch-action: none;
+  -webkit-overflow-scrolling: touch;
 }
 
 .modalHeader {
@@ -593,7 +602,7 @@
   margin: 0;
   font-size: 0.875rem;
   display: -webkit-box;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 1;
   -webkit-box-orient: vertical;
   overflow: hidden;
   word-wrap: break-word;
@@ -851,7 +860,6 @@
 }
 
 /* Focus states for accessibility */
-.viewButton:focus,
 .closeModalButton:focus,
 .retryButton:focus,
 .browseButton:focus {

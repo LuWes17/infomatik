@@ -93,6 +93,7 @@
   border: 1px solid #e2e8f0;
   display: flex;
   min-height: 200px;
+  width: 58rem;
 }
 
 .accomplishmentCard:hover {
@@ -696,6 +697,27 @@
   .actionButton {
     font-size: 0.8rem;
     padding: 0.4rem 0.8rem;
+  }
+
+  .accomplishmentCard {
+    flex-direction: column;
+    height: auto;
+    min-height: 350px;
+    width: 30rem;
+  }
+
+  .cardImageContainer {
+    width: 100%;
+    height: 200px;
+  }
+
+  .cardContent {
+    height: auto;
+    min-height: 150px;
+  }
+
+  .cardTitle {
+    max-width: 100%; /* Full width on mobile */
   }
 }
 

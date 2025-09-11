@@ -91,6 +91,24 @@ const SolicitationRequests = () => {
     };
   };
 
+  useEffect(() => {
+    if (showDetails) {
+      // Prevent scrolling when modal is open
+      document.body.style.overflow = 'hidden';
+      document.body.style.paddingRight = '17px'; // Prevent layout shift from scrollbar
+    } else {
+      // Restore scrolling when modal is closed
+      document.body.style.overflow = 'unset';
+      document.body.style.paddingRight = '0px';
+    }
+
+    // Cleanup function to restore scrolling when component unmounts
+    return () => {
+      document.body.style.overflow = 'unset';
+      document.body.style.paddingRight = '0px';
+    };
+  }, [showDetails]);
+
   const viewRequest = (request) => {
     setSelectedRequest(request);
     setShowDetails(true);
@@ -99,13 +117,25 @@ const SolicitationRequests = () => {
   const closeDetails = () => {
     setShowDetails(false);
     setSelectedRequest(null);
+
+    document.body.style.overflow = 'unset';
+    document.body.style.paddingRight = '0px';
   };
 
-  const downloadSolicitationLetter = () => {
-    if (selectedRequest?.solicitationLetter) {
-      window.open(selectedRequest.solicitationLetter, '_blank');
-    }
-  };
+  const capitalizeBarangay = (address) => {
+  if (!address) return address;
+  
+  // Split address by comma to get parts
+  const parts = address.split(',').map(part => part.trim());
+  
+  // Capitalize the first letter of each part (assuming barangay is one of the parts)
+  const capitalizedParts = parts.map(part => {
+    if (part.length === 0) return part;
+    return part.charAt(0).toUpperCase() + part.slice(1).toLowerCase();
+  });
+  
+  return capitalizedParts.join(', ');
+};
 
   if (loading) {
     return (
@@ -144,7 +174,7 @@ const SolicitationRequests = () => {
             const statusDisplay = getStatusDisplay(request.status);
             
             return (
-              <div key={request._id} className={styles.requestCard}>
+              <div key={request._id} className={styles.requestCard} onClick={() => viewRequest(request)}>
                 <div className={styles.cardHeader}>
                   <h3 className={styles.organizationName}>
                     {request.organizationName}
@@ -187,7 +217,6 @@ const SolicitationRequests = () => {
                   </span>
                   <button 
                     className={styles.viewButton}
-                    onClick={() => viewRequest(request)}
                   >
                     View Details
                   </button>
@@ -261,7 +290,7 @@ const SolicitationRequests = () => {
                       <MapPin size={16} />
                       <span className={styles.infoLabel}>Address:</span>
                     </div>
-                    <span>{selectedRequest.address}</span>
+                    <span>{capitalizeBarangay(selectedRequest.address)}</span>
                   </div>
                 </div>
               </div>

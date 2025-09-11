@@ -1,7 +1,20 @@
 import React, { useState } from 'react';
 import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import './AdminLayout.css';
+import { 
+  Menu, 
+  X, 
+  Home, 
+  Megaphone, 
+  Trophy, 
+  Briefcase, 
+  FileText, 
+  Wheat, 
+  Scale, 
+  MessageCircle,
+  LogOut
+} from 'lucide-react';
+import styles from './AdminLayout.module.css';
 
 const AdminLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -23,70 +36,76 @@ const AdminLayout = () => {
   };
 
   const menuItems = [
-    { path: '/admin/', label: 'Dashboard', icon: '📢' },
-    { path: '/admin/announcements', label: 'Announcements', icon: '📢' },
-    { path: '/admin/accomplishments', label: 'Accomplishments', icon: '🏆' },
-    { path: '/admin/job-openings', label: 'Job Openings', icon: '💼' },
-    { path: '/admin/solicitation-requests', label: 'Solicitation Requests', icon: '📝' },
-    { path: '/admin/rice-distribution', label: 'Monthly Rice Distribution', icon: '🌾' },
-    { path: '/admin/local-policies', label: 'Local Policies', icon: '📜' },
-    { path: '/admin/feedback', label: 'Feedback', icon: '💬' },
+    { path: '/admin/', label: 'Dashboard', icon: Home },
+    { path: '/admin/announcements', label: 'Announcements', icon: Megaphone },
+    { path: '/admin/accomplishments', label: 'Accomplishments', icon: Trophy },
+    { path: '/admin/job-openings', label: 'Job Openings', icon: Briefcase },
+    { path: '/admin/solicitation-requests', label: 'Solicitation Requests', icon: FileText },
+    { path: '/admin/rice-distribution', label: 'Monthly Rice Distribution', icon: Wheat },
+    { path: '/admin/local-policies', label: 'Local Policies', icon: Scale },
+    { path: '/admin/feedback', label: 'Feedback', icon: MessageCircle },
   ];
 
   return (
-    <div className="admin-layout">
+    <div className={styles.adminLayout}>
       {/* Mobile Header */}
-      <div className="admin-mobile-header">
-        <button className="sidebar-toggle" onClick={toggleSidebar}>
-          ☰
+      <div className={styles.mobileHeader}>
+        <button className={styles.sidebarToggle} onClick={toggleSidebar}>
+          <Menu size={20} />
         </button>
-        <h1 className="admin-title">System Administrator</h1>
+        <h1 className={styles.adminTitle}>System Administrator</h1>
       </div>
 
       {/* Sidebar */}
-      <aside className={`admin-sidebar ${isSidebarOpen ? 'sidebar-open' : ''}`}>
-        <div className="sidebar-header">
-          <h2>Admin Panel</h2>
-          <button className="sidebar-close" onClick={toggleSidebar}>
-            ✕
+      <aside className={`${styles.sidebar} ${isSidebarOpen ? styles.sidebarOpen : ''}`}>
+        <div className={styles.sidebarHeader}>
+          <h2 className={styles.sidebarTitle}>Admin Panel</h2>
+          <button className={styles.sidebarClose} onClick={toggleSidebar}>
+            <X size={20} />
           </button>
         </div>
 
-        <div className="admin-info">
-          <p>Welcome, Admin!</p>
+        <div className={styles.adminInfo}>
+          <p className={styles.welcomeText}>Welcome, Admin!</p>
         </div>
 
-        <nav className="sidebar-nav">
-          <ul className="sidebar-menu">
-            {menuItems.map((item) => (
-              <li key={item.path}>
-                <Link
-                  to={item.path}
-                  className={`sidebar-link ${location.pathname === item.path ? 'active' : ''}`}
-                  onClick={() => setIsSidebarOpen(false)}
-                >
-                  <span className="sidebar-icon">{item.icon}</span>
-                  <span className="sidebar-label">{item.label}</span>
-                </Link>
-              </li>
-            ))}
+        <nav className={styles.sidebarNav}>
+          <ul className={styles.sidebarMenu}>
+            {menuItems.map((item) => {
+              const IconComponent = item.icon;
+              return (
+                <li key={item.path}>
+                  <Link
+                    to={item.path}
+                    className={`${styles.sidebarLink} ${
+                      location.pathname === item.path ? styles.active : ''
+                    }`}
+                    onClick={() => setIsSidebarOpen(false)}
+                  >
+                    <IconComponent size={18} className={styles.sidebarIcon} />
+                    <span className={styles.sidebarLabel}>{item.label}</span>
+                  </Link>
+                </li>
+              );
+            })}
           </ul>
         </nav>
 
-        <div className="sidebar-footer">
-          <button className="logout-btn" onClick={handleLogout}>
-            🚪 Logout
+        <div className={styles.sidebarFooter}>
+          <button className={styles.logoutBtn} onClick={handleLogout}>
+            <LogOut size={18} />
+            <span>Logout</span>
           </button>
         </div>
       </aside>
 
       {/* Overlay for mobile */}
       {isSidebarOpen && (
-        <div className="sidebar-overlay" onClick={() => setIsSidebarOpen(false)} />
+        <div className={styles.sidebarOverlay} onClick={() => setIsSidebarOpen(false)} />
       )}
 
       {/* Main Content Area */}
-      <main className="admin-main">
+      <main className={styles.adminMain}>
         <Outlet />
       </main>
     </div>

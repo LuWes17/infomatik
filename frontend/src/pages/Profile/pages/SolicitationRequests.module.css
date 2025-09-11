@@ -180,9 +180,9 @@
 }
 
 .statusCompleted {
-  background-color: var(--gray-100);
-  color: var(--gray-700);
-  border: 1px solid var(--gray-400);
+  background-color: #dbeafe; /* Light blue background */
+  color: #1e40af; /* Dark blue text */
+  border: 1px solid #2563eb; /* Primary blue border */
 }
 
 .statusDefault {
@@ -310,6 +310,10 @@
   justify-content: center;
   z-index: 1000;
   padding: var(--spacing-2xl);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  touch-action: none;
+  -webkit-overflow-scrolling: touch;
 }
 
 .modalContent {
@@ -322,6 +326,8 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  position: relative;
+  z-index: 1001;
 }
 
 .modalHeader {

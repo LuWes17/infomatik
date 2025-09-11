@@ -75,6 +75,24 @@ const JobApplications = () => {
     }
   };
 
+  useEffect(() => {
+    if (showDetails) {
+      // Prevent scrolling when modal is open
+      document.body.style.overflow = 'hidden';
+      document.body.style.paddingRight = '17px'; // Prevent layout shift from scrollbar
+    } else {
+      // Restore scrolling when modal is closed
+      document.body.style.overflow = 'unset';
+      document.body.style.paddingRight = '0px';
+    }
+
+    // Cleanup function to restore scrolling when component unmounts
+    return () => {
+      document.body.style.overflow = 'unset';
+      document.body.style.paddingRight = '0px';
+    };
+  }, [showDetails]);
+
   // Handle card click to show details
   const handleCardClick = async (application) => {
     setSelectedApplication(application);
@@ -97,6 +115,9 @@ const JobApplications = () => {
   const closeDetails = () => {
     setShowDetails(false);
     setSelectedApplication(null);
+
+    document.body.style.overflow = 'unset';
+    document.body.style.paddingRight = '0px';
   };
 
   // Handle CV view - opens CV in new tab
@@ -149,6 +170,21 @@ const JobApplications = () => {
     };
     return new Date(dateString).toLocaleDateString(undefined, options);
   };
+
+  const capitalizeBarangay = (address) => {
+  if (!address) return address;
+  
+  // Split address by comma to get parts
+  const parts = address.split(',').map(part => part.trim());
+  
+  // Capitalize the first letter of each part (assuming barangay is one of the parts)
+  const capitalizedParts = parts.map(part => {
+    if (part.length === 0) return part;
+    return part.charAt(0).toUpperCase() + part.slice(1).toLowerCase();
+  });
+  
+  return capitalizedParts.join(', ');
+};
 
   useEffect(() => {
     fetchApplications();
@@ -386,7 +422,7 @@ const JobApplications = () => {
                     {selectedApplication.address && (
                       <div className={styles.infoItem}>
                         <strong>Address:</strong>
-                        <span>{selectedApplication.address}</span>
+                        <span>{capitalizeBarangay(selectedApplication.address)}</span>
                       </div>
                     )}
                   </div>

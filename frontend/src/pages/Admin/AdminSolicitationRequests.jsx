@@ -226,43 +226,6 @@ const AdminSolicitationRequests = () => {
     <div className="adminSolicitationRequests">
       <div className="header">
         <h1>Solicitation Requests</h1>
-        
-        {/* Filters */}
-        <div className="filters">
-          <div className="searchBox">
-            <input
-              type="text"
-              placeholder="Search by name, organization, or purpose..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="searchInput"
-            />
-          </div>
-          
-          <select
-            value={selectedFilter}
-            onChange={(e) => setSelectedFilter(e.target.value)}
-            className="filterSelect"
-          >
-            <option value="all">All Request Types</option>
-            {requestTypes.slice(1).map(type => (
-              <option key={type} value={type}>{type}</option>
-            ))}
-          </select>
-
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="filterSelect"
-          >
-            <option value="all">All Statuses</option>
-            {statusTypes.slice(1).map(status => (
-              <option key={status} value={status}>
-                {status.charAt(0).toUpperCase() + status.slice(1)}
-              </option>
-            ))}
-          </select>
-        </div>
       </div>
 
       {/* Loading State */}
