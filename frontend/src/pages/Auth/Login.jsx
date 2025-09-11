@@ -3,7 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import styles from './Auth.module.css';
 import infomatiklogo from '../../assets/infomatik-logo.png';
-import { Phone, Lock, Eye, EyeOff } from 'lucide-react';
+import { Phone, Lock, Eye, EyeOff, X, AlertCircle } from 'lucide-react';
 import { useNotification } from '../../contexts/NotificationContext';
 
 const Login = () => {
@@ -11,7 +11,7 @@ const Login = () => {
   const [activeTab, setActiveTab] = useState('login');
   const navigate = useNavigate();
   const location = useLocation();
-  const { login, isAuthenticated, isLoading: authLoading, error, clearError } = useAuth();
+  const { login, isAuthenticated, isLoading: authLoading, error, clearError, user } = useAuth();
   const { showSuccess, showError, showWarning, showInfo } = useNotification();
 
   const [formData, setFormData] = useState({
@@ -35,24 +35,51 @@ const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [loginSuccess, setLoginSuccess] = useState(false);
 
+  // Forgot Password States
+  const [showForgotPasswordPopup, setShowForgotPasswordPopup] = useState(false);
+  const [forgotPasswordStep, setForgotPasswordStep] = useState('phone'); // 'phone', 'verify'
+  const [forgotPasswordData, setForgotPasswordData] = useState({
+    contactNumber: '',
+    otp: '',
+    newPassword: '',
+    confirmPassword: ''
+  });
+  const [forgotPasswordErrors, setForgotPasswordErrors] = useState({});
+  const [forgotPasswordLoading, setForgotPasswordLoading] = useState(false);
+  const [maskedNumber, setMaskedNumber] = useState('');
+  const [otpTimer, setOtpTimer] = useState(0);
+
   // Redirect based on user role when authenticated
   useEffect(() => {
     if (isAuthenticated && !authLoading && !loginSuccess) {
       // Redirect admin users to /admin, regular users to /profile
-      if (user.role === 'admin') {
+      if (user?.role === 'admin') {
         navigate('/admin', { replace: true });
       } else {
         navigate('/profile', { replace: true });
       }
     }
-  }, [isAuthenticated, authLoading, navigate, location, loginSuccess]);
+  }, [isAuthenticated, authLoading, navigate, location, loginSuccess, user]);
+
+  // OTP Timer effect
+  useEffect(() => {
+    let interval = null;
+    if (otpTimer > 0) {
+      interval = setInterval(() => {
+        setOtpTimer(timer => timer - 1);
+      }, 1000);
+    } else if (interval) {
+      clearInterval(interval);
+    }
+    return () => clearInterval(interval);
+  }, [otpTimer]);
 
   // Clear error when component mounts or form data changes
   useEffect(() => {
     if (error) {
       clearError();
     }
-  }, [formData]);
+  }, [formData, clearError]);
 
   const handleTabChange = (tab) => {
     setActiveTab(tab);
@@ -116,9 +143,6 @@ const Login = () => {
     return validation.isValid;
   };
 
-
-  
-
   const getInputClass = (fieldName) => {
     if (!touched[fieldName]) {
       return styles.input;
@@ -157,17 +181,6 @@ const Login = () => {
     }
   };
 
-
-  useEffect(() => {
-      if (touched.confirmPassword && formData.confirmPassword) {
-        const validation = getFieldValidation('confirmPassword', formData.confirmPassword);
-        setFieldErrors(prev => ({
-          ...prev,
-          confirmPassword: validation.errorMessage
-        }));
-      }
-    }, [formData.password, formData.confirmPassword, touched.confirmPassword]);
-  
   const handlePhoneFocus = () => {
     setPhoneNumberFocused(true);
     if (formData.contactNumber === '') {
@@ -193,26 +206,26 @@ const Login = () => {
     validateField(name, valueToValidate);
   };
 
-    const validateForm = () => {
-      const newFieldErrors = {};
-      let isFormValid = true;
+  const validateForm = () => {
+    const newFieldErrors = {};
+    let isFormValid = true;
 
-      Object.keys(formData).forEach(field => {
-        const validation = getFieldValidation(field, formData[field]);
-        if (!validation.isValid) {
-          newFieldErrors[field] = validation.errorMessage;
-          isFormValid = false;
-        }
-      });
+    Object.keys(formData).forEach(field => {
+      const validation = getFieldValidation(field, formData[field]);
+      if (!validation.isValid) {
+        newFieldErrors[field] = validation.errorMessage;
+        isFormValid = false;
+      }
+    });
 
-      setFieldErrors(newFieldErrors);
-      setTouched({
-        contactNumber: true,
-        password: true
-      });
+    setFieldErrors(newFieldErrors);
+    setTouched({
+      contactNumber: true,
+      password: true
+    });
 
-      return isFormValid;
-    };
+    return isFormValid;
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -255,10 +268,255 @@ const Login = () => {
     } else {
         console.error('Login failed:', result.error);
         showError('Invalid account details. Account does not exist')
-
         setLoginSuccess(false);
     }
-    // Error handling is managed by the context and displayed in UI
+    setIsLoading(false);
+  };
+
+  // Forgot Password Functions
+  const resetForgotPasswordState = () => {
+    setForgotPasswordStep('phone');
+    setForgotPasswordData({
+      contactNumber: '',
+      otp: '',
+      newPassword: '',
+      confirmPassword: ''
+    });
+    setForgotPasswordErrors({});
+    setForgotPasswordLoading(false);
+    setMaskedNumber('');
+    setOtpTimer(0);
+  };
+
+  const handleForgotPasswordClick = () => {
+    resetForgotPasswordState();
+    setShowForgotPasswordPopup(true);
+  };
+
+  const closeForgotPasswordPopup = () => {
+    setShowForgotPasswordPopup(false);
+    resetForgotPasswordState();
+  };
+
+  const validateForgotPasswordField = (name, value) => {
+    let isValid = true;
+    let errorMessage = '';
+
+    switch (name) {
+      case 'contactNumber':
+        const digits = value.replace(/\D/g, '');
+        if (!digits) {
+          isValid = false;
+          errorMessage = 'Contact number is required';
+        } else if (digits.length !== 10) {
+          isValid = false;
+          errorMessage = 'Contact number must be exactly 10 digits';
+        }
+        break;
+      case 'otp':
+        if (!value) {
+          isValid = false;
+          errorMessage = 'Verification code is required';
+        } else if (value.length !== 6) {
+          isValid = false;
+          errorMessage = 'Verification code must be 6 digits';
+        }
+        break;
+      case 'newPassword':
+        if (!value) {
+          isValid = false;
+          errorMessage = 'New password is required';
+        } else if (value.length < 6) {
+          isValid = false;
+          errorMessage = 'Password must be at least 6 characters';
+        }
+        break;
+      case 'confirmPassword':
+        if (!value) {
+          isValid = false;
+          errorMessage = 'Please confirm your password';
+        } else if (value !== forgotPasswordData.newPassword) {
+          isValid = false;
+          errorMessage = 'Passwords do not match';
+        }
+        break;
+      default:
+        break;
+    }
+
+    return { isValid, errorMessage };
+  };
+
+  const handleForgotPasswordChange = (e) => {
+    const { name, value } = e.target;
+    
+    if (name === 'contactNumber') {
+      const digits = value.replace(/\D/g, '');
+      if (digits.length <= 10) {
+        setForgotPasswordData(prev => ({
+          ...prev,
+          [name]: digits
+        }));
+      }
+    } else if (name === 'otp') {
+      // Only allow digits for OTP
+      const digits = value.replace(/\D/g, '');
+      if (digits.length <= 6) {
+        setForgotPasswordData(prev => ({
+          ...prev,
+          [name]: digits
+        }));
+      }
+    } else {
+      setForgotPasswordData(prev => ({
+        ...prev,
+        [name]: value
+      }));
+    }
+
+    // Clear error for this field
+    if (forgotPasswordErrors[name]) {
+      setForgotPasswordErrors(prev => ({
+        ...prev,
+        [name]: ''
+      }));
+    }
+  };
+
+  const handleSendVerificationCode = async () => {
+    setForgotPasswordLoading(true);
+    setForgotPasswordErrors({});
+
+    const validation = validateForgotPasswordField('contactNumber', forgotPasswordData.contactNumber);
+    if (!validation.isValid) {
+      setForgotPasswordErrors({ contactNumber: validation.errorMessage });
+      setForgotPasswordLoading(false);
+      return;
+    }
+
+    try {
+      const phoneNumber = forgotPasswordData.contactNumber.length === 10 ? 
+        `0${forgotPasswordData.contactNumber}` : forgotPasswordData.contactNumber;
+
+      const response = await fetch('/api/auth/forgot-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          contactNumber: phoneNumber
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setMaskedNumber(data.data.maskedNumber);
+        setForgotPasswordStep('verify');
+        setOtpTimer(300); // 5 minutes
+        showSuccess('Verification code sent successfully!');
+      } else {
+        setForgotPasswordErrors({ general: data.message || 'Failed to send verification code' });
+        if (data.message && data.message.toLowerCase().includes('not found')) {
+          showError('Phone number not found. Please check and try again.');
+        }
+      }
+    } catch (error) {
+      console.error('Send verification code error:', error);
+      setForgotPasswordErrors({ general: 'Network error. Please try again.' });
+    } finally {
+      setForgotPasswordLoading(false);
+    }
+  };
+
+  const handleVerifyAndReset = async () => {
+    setForgotPasswordLoading(true);
+    setForgotPasswordErrors({});
+
+    // Validate all reset fields
+    const otpValidation = validateForgotPasswordField('otp', forgotPasswordData.otp);
+    const passwordValidation = validateForgotPasswordField('newPassword', forgotPasswordData.newPassword);
+    const confirmValidation = validateForgotPasswordField('confirmPassword', forgotPasswordData.confirmPassword);
+
+    const errors = {};
+    if (!otpValidation.isValid) errors.otp = otpValidation.errorMessage;
+    if (!passwordValidation.isValid) errors.newPassword = passwordValidation.errorMessage;
+    if (!confirmValidation.isValid) errors.confirmPassword = confirmValidation.errorMessage;
+
+    if (Object.keys(errors).length > 0) {
+      setForgotPasswordErrors(errors);
+      setForgotPasswordLoading(false);
+      return;
+    }
+
+    try {
+      const phoneNumber = forgotPasswordData.contactNumber.length === 10 ? 
+        `0${forgotPasswordData.contactNumber}` : forgotPasswordData.contactNumber;
+
+      const response = await fetch('/api/auth/reset-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          contactNumber: phoneNumber,
+          otp: forgotPasswordData.otp,
+          newPassword: forgotPasswordData.newPassword
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        showSuccess('Password reset successfully! You can now login with your new password.');
+        closeForgotPasswordPopup();
+      } else {
+        setForgotPasswordErrors({ general: data.message || 'Failed to reset password' });
+      }
+    } catch (error) {
+      console.error('Reset password error:', error);
+      setForgotPasswordErrors({ general: 'Network error. Please try again.' });
+    } finally {
+      setForgotPasswordLoading(false);
+    }
+  };
+
+  const handleResendOTP = async () => {
+    setForgotPasswordLoading(true);
+    try {
+      const phoneNumber = forgotPasswordData.contactNumber.length === 10 ? 
+        `0${forgotPasswordData.contactNumber}` : forgotPasswordData.contactNumber;
+
+      const response = await fetch('/api/auth/resend-forgot-password-otp', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          contactNumber: phoneNumber
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setOtpTimer(300); // Reset timer
+        showSuccess('New verification code sent!');
+      } else {
+        showError(data.message || 'Failed to resend verification code');
+      }
+    } catch (error) {
+      console.error('Resend OTP error:', error);
+      showError('Network error. Please try again.');
+    } finally {
+      setForgotPasswordLoading(false);
+    }
+  };
+
+  const formatTime = (seconds) => {
+    const minutes = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${minutes}:${secs.toString().padStart(2, '0')}`;
   };
 
   return (
@@ -296,7 +554,7 @@ const Login = () => {
               </button>
             </div>
 
-             {/* *** FIXED: Show loading state during successful login *** */}
+             {/* Show loading state during successful login */}
             {loginSuccess && (
               <div className={styles.successMessage}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -375,6 +633,18 @@ const Login = () => {
                 </div>
               )}
 
+              {/* Forgot Password Link */}
+              <div style={{ textAlign: 'right', marginBottom: '1rem' }}>
+                <button
+                  type="button"
+                  onClick={handleForgotPasswordClick}
+                  className={styles.forgotPasswordLink}
+                  disabled={isLoading}
+                >
+                  Forgot Password?
+                </button>
+              </div>
+
               <button 
                 type="submit" 
                 className={`${styles.submitButton} ${isLoading ? styles.submitButtonLoading : ''}`}
@@ -390,6 +660,160 @@ const Login = () => {
           </div>
         </div>
       </div>
+
+      {/* Forgot Password Popup */}
+      {showForgotPasswordPopup && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.forgotPasswordModal}>
+            <div className={styles.modalHeader}>
+              <h2>Reset Password</h2>
+              <button
+                className={styles.closeButton}
+                onClick={closeForgotPasswordPopup}
+                disabled={forgotPasswordLoading}
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className={styles.modalContent}>
+              {forgotPasswordErrors.general && (
+                <div className={styles.errorMessage}>
+                  <AlertCircle size={16} />
+                  {forgotPasswordErrors.general}
+                </div>
+              )}
+
+              {forgotPasswordStep === 'phone' && (
+                <div className={styles.forgotPasswordStep}>
+                  <h3>Enter your phone number</h3>
+                  <p>We'll send you a verification code to reset your password.</p>
+                  
+                  <div className={styles.phoneInputWrapper}>
+                    <Phone className={styles.inputIcon} />
+                    <span className={styles.phonePrefix}>+63</span>
+                    <input
+                      type="tel"
+                      name="contactNumber"
+                      placeholder="Contact Number"
+                      value={formatPhoneNumber(forgotPasswordData.contactNumber)}
+                      onChange={handleForgotPasswordChange}
+                      className={`${styles.input} ${styles.phoneInputWithIcon} ${forgotPasswordErrors.contactNumber ? styles.inputInvalid : ''}`}
+                      inputMode="numeric"
+                      maxLength="12"
+                      disabled={forgotPasswordLoading}
+                    />
+                  </div>
+                  {forgotPasswordErrors.contactNumber && (
+                    <div className={styles.fieldError}>
+                      {forgotPasswordErrors.contactNumber}
+                    </div>
+                  )}
+
+                  <button
+                    className={styles.submitButton}
+                    onClick={handleSendVerificationCode}
+                    disabled={forgotPasswordLoading}
+                  >
+                    {forgotPasswordLoading ? 'Sending...' : 'Send Verification Code'}
+                  </button>
+                </div>
+              )}
+
+              {forgotPasswordStep === 'verify' && (
+                <div className={styles.forgotPasswordStep}>
+                  <h3>Enter verification code</h3>
+                  <p>
+                    Enter the 6-digit code sent to <strong>{maskedNumber}</strong>
+                  </p>
+
+                  <div className={styles.otpSection}>
+                    <input
+                      type="text"
+                      name="otp"
+                      placeholder="000000"
+                      value={forgotPasswordData.otp}
+                      onChange={handleForgotPasswordChange}
+                      className={`${styles.input} ${styles.otpInput} ${forgotPasswordErrors.otp ? styles.inputInvalid : ''}`}
+                      inputMode="numeric"
+                      maxLength="6"
+                      disabled={forgotPasswordLoading}
+                    />
+                    {forgotPasswordErrors.otp && (
+                      <div className={styles.fieldError}>
+                        {forgotPasswordErrors.otp}
+                      </div>
+                    )}
+
+                    {otpTimer > 0 ? (
+                      <p className={styles.timer}>
+                        Code expires in {formatTime(otpTimer)}
+                      </p>
+                    ) : (
+                      <button
+                        type="button"
+                        className={styles.resendButton}
+                        onClick={handleResendOTP}
+                        disabled={forgotPasswordLoading}
+                      >
+                        Resend Code
+                      </button>
+                    )}
+                  </div>
+
+                  <div className={styles.passwordSection}>
+                    <h4>Set new password</h4>
+                    
+                    <div className={styles.passwordWrapper}>
+                      <Lock className={styles.inputIcon} />
+                      <input
+                        type="password"
+                        name="newPassword"
+                        placeholder="New Password"
+                        value={forgotPasswordData.newPassword}
+                        onChange={handleForgotPasswordChange}
+                        className={`${styles.input} ${styles.inputWithIcon} ${forgotPasswordErrors.newPassword ? styles.inputInvalid : ''}`}
+                        disabled={forgotPasswordLoading}
+                      />
+                    </div>
+                    {forgotPasswordErrors.newPassword && (
+                      <div className={styles.fieldError}>
+                        {forgotPasswordErrors.newPassword}
+                      </div>
+                    )}
+
+                    <div className={styles.passwordWrapper}>
+                      <Lock className={styles.inputIcon} />
+                      <input
+                        type="password"
+                        name="confirmPassword"
+                        placeholder="Confirm New Password"
+                        value={forgotPasswordData.confirmPassword}
+                        onChange={handleForgotPasswordChange}
+                        className={`${styles.input} ${styles.inputWithIcon} ${forgotPasswordErrors.confirmPassword ? styles.inputInvalid : ''}`}
+                        disabled={forgotPasswordLoading}
+                      />
+                    </div>
+                    {forgotPasswordErrors.confirmPassword && (
+                      <div className={styles.fieldError}>
+                        {forgotPasswordErrors.confirmPassword}
+                      </div>
+                    )}
+                  </div>
+
+                  <button
+                    className={styles.submitButton}
+                    onClick={handleVerifyAndReset}
+                    disabled={forgotPasswordLoading}
+                  >
+                    {forgotPasswordLoading ? 'Resetting...' : 'Reset Password'}
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

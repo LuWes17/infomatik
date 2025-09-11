@@ -495,3 +495,148 @@ exports.deactivateAccount = asyncHandler(async (req, res) => {
     message: 'Account deactivated successfully'
   });
 });
+
+// @desc    Send forgot password OTP
+// @route   POST /api/auth/forgot-password
+// @access  Public
+exports.forgotPassword = asyncHandler(async (req, res) => {
+  const { contactNumber } = req.body;
+
+  try {
+    // Find user by contact number
+    const user = await User.findOne({ contactNumber });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'No account found with this phone number'
+      });
+    }
+
+    if (!user.isActive) {
+      return res.status(400).json({
+        success: false,
+        message: 'Account is deactivated. Please contact support.'
+      });
+    }
+
+    // Send OTP for password reset
+    const result = await otpService.sendForgotPasswordOTP(contactNumber, user);
+    
+    if (result.success) {
+      res.status(200).json({
+        success: true,
+        message: result.message,
+        data: {
+          maskedNumber: result.maskedNumber
+        }
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        message: result.error
+      });
+    }
+
+  } catch (error) {
+    console.error('Forgot password error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to process forgot password request'
+    });
+  }
+});
+
+// @desc    Reset password with OTP
+// @route   POST /api/auth/reset-password
+// @access  Public
+exports.resetPassword = asyncHandler(async (req, res) => {
+  const { contactNumber, otp, newPassword } = req.body;
+
+  try {
+    // Verify OTP
+    const verification = otpService.verifyForgotPasswordOTP(contactNumber, otp);
+    
+    if (!verification.success) {
+      return res.status(400).json({
+        success: false,
+        message: verification.error
+      });
+    }
+
+    // Find user
+    const user = await User.findOne({ contactNumber });
+    
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    // Update password
+    user.password = newPassword;
+    await user.save();
+
+    // Clean up OTP data
+    otpService.cleanupForgotPasswordOTP(contactNumber);
+
+    res.status(200).json({
+      success: true,
+      message: 'Password reset successfully'
+    });
+
+    console.log(`Password reset successful for user: ${user.contactNumber} - ${user.fullName}`);
+
+  } catch (error) {
+    console.error('Reset password error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to reset password'
+    });
+  }
+});
+
+// @desc    Resend forgot password OTP
+// @route   POST /api/auth/resend-forgot-password-otp
+// @access  Public
+exports.resendForgotPasswordOTP = asyncHandler(async (req, res) => {
+  const { contactNumber } = req.body;
+
+  try {
+    // Find user
+    const user = await User.findOne({ contactNumber });
+    
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'No account found with this phone number'
+      });
+    }
+
+    // Resend OTP
+    const result = await otpService.resendForgotPasswordOTP(contactNumber);
+    
+    if (result.success) {
+      res.status(200).json({
+        success: true,
+        message: result.message,
+        data: {
+          maskedNumber: result.maskedNumber
+        }
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        message: result.error
+      });
+    }
+
+  } catch (error) {
+    console.error('Resend forgot password OTP error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to resend verification code'
+    });
+  }
+});

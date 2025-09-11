@@ -13,7 +13,10 @@ const {
   refreshToken,
   getBarangays,
   verifyAccount,
-  deactivateAccount
+  deactivateAccount,
+  forgotPassword,        
+  resetPassword,         
+  resendForgotPasswordOTP
 } = require('../controllers/authController');
 
 const { protect } = require('../middleware/auth');
@@ -29,6 +32,10 @@ router.post('/resend-otp', resendOTP); // New OTP resend route
 router.post('/login', validateLogin, login);
 router.post('/refresh-token', refreshToken);
 router.get('/barangays', getBarangays);
+
+router.post('/forgot-password', forgotPassword);
+router.post('/reset-password', resetPassword);
+router.post('/resend-forgot-password-otp', resendForgotPasswordOTP);
 
 // Protected routes
 router.post('/logout', protect, logout);

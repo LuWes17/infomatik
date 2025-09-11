@@ -240,6 +240,193 @@ class OTPService {
       verified: otpData.verified
     };
   }
+
+  /**
+ * Send OTP for forgot password
+ * @param {string} contactNumber - User's contact number
+ * @param {Object} user - User object
+ * @returns {Promise<Object>} - Result object
+ */
+async sendForgotPasswordOTP(contactNumber, user) {
+  try {
+    const otp = this.generateOTP();
+    
+    // Store OTP with forgot password flag
+    const otpData = {
+      otp,
+      user: {
+        id: user._id,
+        contactNumber: user.contactNumber,
+        fullName: user.fullName
+      },
+      type: 'forgot-password',
+      createdAt: Date.now(),
+      attempts: 0,
+      verified: false
+    };
+
+    this.otpStore.set(`forgot-${contactNumber}`, otpData);
+
+    // Auto-cleanup after expiry
+    setTimeout(() => {
+      this.otpStore.delete(`forgot-${contactNumber}`);
+    }, this.OTP_EXPIRY_TIME);
+
+    // Format phone number for display
+    const formattedNumber = this.formatPhoneForDisplay(contactNumber);
+
+    // For testing - log OTP to console instead of sending SMS
+    console.log('=== FORGOT PASSWORD OTP ===');
+    console.log(`OTP for ${formattedNumber}: ${otp}`);
+    console.log(`User: ${user.fullName}`);
+    console.log(`Valid for 5 minutes`);
+    console.log('===========================');
+
+    // In production, uncomment this line to actually send SMS:
+    // await smsService.sendSMS(formattedNumber, `Your password reset code is: ${otp}. Valid for 5 minutes. If you didn't request this, please ignore.`);
+
+    return {
+      success: true,
+      message: 'Password reset code sent successfully',
+      maskedNumber: this.maskPhoneNumber(formattedNumber)
+    };
+
+  } catch (error) {
+    console.error('Forgot password OTP sending error:', error);
+    return {
+      success: false,
+      error: 'Failed to send password reset code'
+    };
+  }
+}
+
+/**
+ * Verify forgot password OTP
+ * @param {string} contactNumber - User's contact number
+ * @param {string} inputOTP - OTP entered by user
+ * @returns {Object} - Verification result
+ */
+verifyForgotPasswordOTP(contactNumber, inputOTP) {
+  const otpData = this.otpStore.get(`forgot-${contactNumber}`);
+
+  if (!otpData) {
+    return {
+      success: false,
+      error: 'Reset code not found or expired. Please request a new one.'
+    };
+  }
+
+  // Check if expired
+  if (Date.now() - otpData.createdAt > this.OTP_EXPIRY_TIME) {
+    this.otpStore.delete(`forgot-${contactNumber}`);
+    return {
+      success: false,
+      error: 'Reset code has expired. Please request a new one.'
+    };
+  }
+
+  // Check attempts
+  if (otpData.attempts >= this.MAX_ATTEMPTS) {
+    this.otpStore.delete(`forgot-${contactNumber}`);
+    return {
+      success: false,
+      error: 'Maximum verification attempts exceeded. Please request a new reset code.'
+    };
+  }
+
+  // Increment attempts
+  otpData.attempts++;
+
+  // Verify OTP
+  if (otpData.otp !== inputOTP) {
+    const remainingAttempts = this.MAX_ATTEMPTS - otpData.attempts;
+    return {
+      success: false,
+      error: `Invalid reset code. ${remainingAttempts} attempt(s) remaining.`
+    };
+  }
+
+  // Mark as verified
+  otpData.verified = true;
+
+  return {
+    success: true,
+    user: otpData.user,
+    message: 'Reset code verified successfully'
+  };
+}
+
+/**
+ * Clean up forgot password OTP
+ * @param {string} contactNumber - User's contact number
+ */
+cleanupForgotPasswordOTP(contactNumber) {
+  this.otpStore.delete(`forgot-${contactNumber}`);
+}
+
+/**
+ * Resend forgot password OTP
+ * @param {string} contactNumber - User's contact number
+ * @returns {Promise<Object>} - Result object
+ */
+async resendForgotPasswordOTP(contactNumber) {
+  const otpData = this.otpStore.get(`forgot-${contactNumber}`);
+
+  if (!otpData) {
+    return {
+      success: false,
+      error: 'No pending password reset request found'
+    };
+  }
+
+  // Generate new OTP
+  const newOTP = this.generateOTP();
+  
+  // Update stored data
+  otpData.otp = newOTP;
+  otpData.createdAt = Date.now();
+  otpData.attempts = 0;
+
+  // Format phone number for display
+  const formattedNumber = this.formatPhoneForDisplay(contactNumber);
+
+  // For testing - log new OTP to console
+  console.log('=== FORGOT PASSWORD OTP RESENT ===');
+  console.log(`New reset code for ${formattedNumber}: ${newOTP}`);
+  console.log(`User: ${otpData.user.fullName}`);
+  console.log(`Valid for 5 minutes`);
+  console.log('==================================');
+
+  // In production, uncomment this line:
+  // await smsService.sendSMS(contactNumber, `Your new password reset code is: ${newOTP}. Valid for 5 minutes.`);
+
+  return {
+    success: true,
+    message: 'New password reset code sent successfully',
+    maskedNumber: this.maskPhoneNumber(formattedNumber)
+  };
+}
+
+/**
+ * Get forgot password OTP status (for debugging)
+ * @param {string} contactNumber - Contact number
+ * @returns {Object} - OTP status
+ */
+getForgotPasswordOTPStatus(contactNumber) {
+  const otpData = this.otpStore.get(`forgot-${contactNumber}`);
+  
+  if (!otpData) {
+    return { exists: false };
+  }
+
+  return {
+    exists: true,
+    attempts: otpData.attempts,
+    timeRemaining: Math.max(0, this.OTP_EXPIRY_TIME - (Date.now() - otpData.createdAt)),
+    verified: otpData.verified,
+    type: otpData.type
+  };
+}
 }
 
 module.exports = new OTPService();
