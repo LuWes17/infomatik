@@ -634,7 +634,7 @@ const Login = () => {
               )}
 
               {/* Forgot Password Link */}
-              <div style={{ textAlign: 'right', marginBottom: '1rem' }}>
+              <div style={{ textAlign: 'left', marginBottom: '1rem', marginLeft: '0.8rem', marginTop: '-0.5rem'}}>
                 <button
                   type="button"
                   onClick={handleForgotPasswordClick}

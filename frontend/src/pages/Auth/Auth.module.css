@@ -1274,7 +1274,7 @@
   background: none;
   border: none;
   color: #1c62bb;
-  font-size: 0.9rem;
+  font-size: 0.7rem;
   cursor: pointer;
   text-decoration: none;
   transition: color 0.3s ease;
@@ -1348,7 +1348,7 @@
 .modalHeader h2 {
   margin: 0;
   font-size: 1.25rem;
-  font-weight: 700;
+  font-weight: 600;
   color: #0f172a;
 }
 
