@@ -888,6 +888,42 @@
   width: 100%;
 }
 
+/* Admin Response Container */
+.adminResponseContainer {
+  background: #f0f8ff;
+  border-left: 4px solid var(--primary-color);
+  padding: 1rem;
+  border-radius: 8px;
+  margin-top: 0.5rem;
+}
+
+.responseMetadata {
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #e0e7ff;
+}
+
+.responseDate {
+  color: var(--gray-500);
+  font-size: 0.75rem;
+  font-style: italic;
+}
+
+.editedIndicator {
+  color: var(--gray-400);
+  font-weight: 500;
+}
+
+/* Checkbox styling */
+.checkbox {
+  margin-right: 0.5rem;
+  transform: scale(1.1);
+}
+
+.formGroup label input[type="checkbox"] {
+  margin-right: 0.5rem;
+}
+
 /* Phone input specific styling */
 .phoneInputWrapper {
   position: relative;
