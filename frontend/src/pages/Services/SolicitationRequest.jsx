@@ -1,24 +1,41 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Calendar, Filter, Plus, X, Upload, Search, Eye, Building2, Phone, MapPin, FileText, Calendar as CalendarIcon, User, Type, DollarSign, Users, Mail, ChevronDown } from 'lucide-react';
+import { 
+  Mail,
+  Filter, 
+  Plus, 
+  X, 
+  Upload, 
+  Search, 
+  Building2, 
+  Phone, 
+  MapPin, 
+  FileText, 
+  Calendar as CalendarIcon, 
+  User, 
+  Type, 
+  ChevronDown 
+} from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import styles from './SolicitationRequests.module.css';
-import { useNotification } from '../../contexts/NotificationContext'
+import { useNotification } from '../../contexts/NotificationContext';
 
 const SolicitationRequests = () => {
   // Auth context
   const { user, isAuthenticated, isLoading: authLoading } = useAuth();
+  const { showSuccess, showError } = useNotification();
 
   // State management
   const [solicitationRequests, setSolicitationRequests] = useState([]);
   const [filteredRequests, setFilteredRequests] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [showRequestForm, setShowRequestForm] = useState(false);
-  const [showAuthModal, setShowAuthModal] = useState(false);
-  const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState(null);
+  const [showRequestDetails, setShowRequestDetails] = useState(false);
+  const [showRequestForm, setShowRequestForm] = useState(false);
+  const [showAuthPrompt, setShowAuthPrompt] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   
   // Filter and search states
-  const [categoryFilter, setCategoryFilter] = useState('all');
+  const [filterStatus, setFilterStatus] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
@@ -31,15 +48,26 @@ const SolicitationRequests = () => {
   const organizationTypeDropdownRef = useRef(null);
   const requestTypeDropdownRef = useRef(null);
 
-  const { showSuccess, showError, showWarning, showInfo } = useNotification();
-
-  // **NEW: Field validation states**
+  // Field validation states
   const [fieldErrors, setFieldErrors] = useState({});
   const [touched, setTouched] = useState({});
-  
-  const [submitting, setSubmitting] = useState(false);
 
-  // Barangays list
+  // Form data
+  const [formData, setFormData] = useState({
+    contactPersonFirstName: '',
+    contactPersonLastName: '',
+    contactNumber: '',
+    organizationType: '',
+    organizationName: '',
+    street: '',
+    barangay: '',
+    requestType: '',
+    requestedAssistanceDetails: '',
+    purpose: '',
+    solicitationLetter: null
+  });
+
+  // Barangays and other constants
   const barangays = [
     'agnas', 'bacolod', 'bangkilingan', 'bantayan', 'baranghawon', 'basagan', 
     'basud', 'bognabong', 'bombon', 'bonot', 'san isidro', 'buang', 'buhian', 
@@ -51,23 +79,55 @@ const SolicitationRequests = () => {
     'tagas', 'tayhi', 'visita'
   ];
 
-  // Form data - Updated structure
-  const [formData, setFormData] = useState({
-    contactPersonFirstName: '',
-    contactPersonLastName: '',
-    contactNumber: '',
-    organizationType: '',
-    organizationName: '',
-    street: '',
-    barangay: '',
-    eventDate: '',
-    requestType: '',
-    requestedAssistanceDetails: '',
-    purpose: '',
-    solicitationLetter: null
-  });
+  const organizationTypes = ['NGA', 'NGO', 'CSO', 'LGU', 'Barangay', 'SK', 'Others'];
+  const requestTypes = ['Medical', 'Financial', 'Construction Materials', 'Educational Supplies', 'Others'];
 
-  // Load data on component mount
+  // Function to get display name for request type badges
+  const getRequestTypeBadgeName = (requestType) => {
+    switch (requestType) {
+      case 'Educational Supplies':
+        return 'Educational';
+      case 'Construction Materials':
+        return 'Construction';
+      default:
+        return requestType;
+    }
+  };
+
+  // Function to get CSS class name for request type badges
+  const getRequestTypeCssClass = (requestType) => {
+    switch (requestType) {
+      case 'Educational Supplies':
+        return 'educational';
+      case 'Construction Materials':
+        return 'construction';
+      default:
+        return requestType.toLowerCase().replace(' ', '-');
+    }
+  };
+
+  // Fetch solicitation requests
+  const fetchSolicitationRequests = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('http://localhost:4000/api/solicitations/approved');
+      const data = await response.json();
+      
+      if (data.success) {
+        // Sort by latest created first
+        const sortedRequests = data.data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        setSolicitationRequests(sortedRequests);
+        setFilteredRequests(sortedRequests);
+      }
+    } catch (error) {
+      console.error('Error fetching solicitation requests:', error);
+      setSolicitationRequests([]);
+      setFilteredRequests([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchSolicitationRequests();
   }, []);
@@ -108,49 +168,29 @@ const SolicitationRequests = () => {
     }
   }, [showRequestForm, isAuthenticated, user]);
 
-  const fetchSolicitationRequests = async () => {
-    try {
-      setLoading(true);
-      const response = await fetch('/api/solicitations/approved');
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch solicitation requests');
-      }
-
-      const data = await response.json();
-      setSolicitationRequests(data.data || []);
-      setFilteredRequests(data.data || []);
-    } catch (error) {
-      console.error('Error fetching solicitation requests:', error);
-      setSolicitationRequests([]);
-      setFilteredRequests([]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   // Filter and search functionality
   useEffect(() => {
     let filtered = [...solicitationRequests];
 
     // Category filter
-    if (categoryFilter !== 'all') {
-      filtered = filtered.filter(request => request.requestType === categoryFilter);
+    if (filterStatus !== 'all') {
+      filtered = filtered.filter(request => request.requestType === filterStatus);
     }
 
     // Search filter
-    if (searchTerm) {
+    if (searchTerm.trim()) {
       filtered = filtered.filter(request =>
         request.organizationName.toLowerCase().includes(searchTerm.toLowerCase()) ||
         request.purpose.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        request.requestedAssistanceDetails.toLowerCase().includes(searchTerm.toLowerCase())
+        request.requestedAssistanceDetails.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        request.contactPerson.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
     setFilteredRequests(filtered);
-  }, [solicitationRequests, categoryFilter, searchTerm]);
+  }, [solicitationRequests, filterStatus, searchTerm]);
 
-  // **NEW: Field validation function**
+  // Field validation function
   const getFieldValidation = (name, value) => {
     let isValid = true;
     let errorMessage = '';
@@ -213,7 +253,7 @@ const SolicitationRequests = () => {
           errorMessage = 'Street address is required.';
         } else if (value.trim().length < 5) {
           isValid = false;
-          errorMessage = 'Street address must be at least 5 characters,';
+          errorMessage = 'Street address must be at least 5 characters.';
         } else if (value.trim().length > 200) {
           isValid = false;
           errorMessage = 'Street address must be less than 200 characters.';
@@ -285,7 +325,7 @@ const SolicitationRequests = () => {
     return { isValid, errorMessage };
   };
 
-  // **NEW: Validate individual field**
+  // Validate individual field
   const validateField = (name, value) => {
     const validation = getFieldValidation(name, value);
     setFieldErrors(prev => ({
@@ -295,7 +335,7 @@ const SolicitationRequests = () => {
     return validation.isValid;
   };
 
-  // **NEW: Get input class based on validation state**
+  // Get input class based on validation state
   const getInputClass = (fieldName) => {
     if (!touched[fieldName]) {
       return styles.inputWithIcon;
@@ -305,7 +345,7 @@ const SolicitationRequests = () => {
     return `${styles.inputWithIcon} ${hasError ? styles.inputInvalid : styles.inputValid}`;
   };
 
-  // **NEW: Handle input changes with validation**
+  // Handle input changes with validation
   const handleInputChange = (field, value) => {
     // Handle phone number formatting
     if (field === 'contactNumber') {
@@ -327,7 +367,7 @@ const SolicitationRequests = () => {
     }
   };
 
-  // **NEW: Handle input blur**
+  // Handle input blur
   const handleInputBlur = (field, value) => {
     setTouched(prev => ({
       ...prev,
@@ -336,7 +376,7 @@ const SolicitationRequests = () => {
     validateField(field, value);
   };
 
-  // **NEW: Validate entire form**
+  // Validate entire form
   const validateForm = () => {
     const newTouched = {
       contactPersonFirstName: true,
@@ -368,20 +408,12 @@ const SolicitationRequests = () => {
     return isFormValid;
   };
 
-  const handleRequestClick = () => {
-    if (!isAuthenticated) {
-      setShowAuthModal(true);
-    } else {
-      setShowRequestForm(true);
-      document.body.style.overflow = "hidden";
-    }
-  };
-
+  // Handle request form submission
   const handleFormSubmit = async (e) => {
     e.preventDefault();
     
     if (!isAuthenticated) {
-      setShowAuthModal(true);
+      setShowAuthPrompt(true);
       return;
     }
     
@@ -432,6 +464,7 @@ const SolicitationRequests = () => {
     }
   };
 
+  // Reset form
   const resetForm = () => {
     setFormData({
       contactPersonFirstName: '',
@@ -441,14 +474,12 @@ const SolicitationRequests = () => {
       organizationName: '',
       street: '',
       barangay: '',
-      eventDate: '',
       requestType: '',
       requestedAssistanceDetails: '',
       purpose: '',
       solicitationLetter: null
     });
 
-    // **NEW: Reset validation states**
     setFieldErrors({});
     setTouched({});
     setSubmitting(false);
@@ -457,22 +488,48 @@ const SolicitationRequests = () => {
     document.body.style.overflow = "auto";
   };
 
-
-  const openDetailsModal = (request) => {
+  // Handle request click
+  const handleRequestClick = (request) => {
     setSelectedRequest(request);
-    setShowDetailsModal(true);
+    setShowRequestDetails(true);
     document.body.style.overflow = "hidden";
   };
 
-  const closeViewModal = () => {
-    setShowDetailsModal(false);
+  // Handle submit button click
+  const handleSubmitClick = (e) => {
+    e.stopPropagation();
+    
+    if (!isAuthenticated) {
+      setShowAuthPrompt(true);
+      return;
+    }
+    
+    setShowRequestForm(true);
+    document.body.style.overflow = "hidden";
+  };
+
+  // Close all modals
+  const closeAllModals = () => {
+    if (submitting) return;
+
+    setShowRequestDetails(false);
+    setShowRequestForm(false);
+    setShowAuthPrompt(false);
     setSelectedRequest(null);
+    setBarangayDropdownOpen(false);
+    setOrganizationTypeDropdownOpen(false);
+    setRequestTypeDropdownOpen(false);
+
+    // Reset validation states
+    setFieldErrors({});
+    setTouched({});
+
     document.body.style.overflow = "auto";
   };
 
   // Filter dropdown handlers
-  const handleFilterChange = (category) => {
-    setCategoryFilter(category);
+  const handleFilterChange = (status) => {
+    setFilterStatus(status);
     setDropdownOpen(false);
   };
 
@@ -485,7 +542,7 @@ const SolicitationRequests = () => {
     setFormData({...formData, barangay: barangay});
     setBarangayDropdownOpen(false);
 
-     // Validate if touched
+    // Validate if touched
     if (touched.barangay) {
       validateField('barangay', barangay);
     }
@@ -500,7 +557,7 @@ const SolicitationRequests = () => {
     setOrganizationTypeDropdownOpen(false);
 
     if (touched.organizationType) {
-    validateField('organizationType', type);
+      validateField('organizationType', type);
     }
   };
 
@@ -529,28 +586,7 @@ const SolicitationRequests = () => {
     ).join(' ');
   };
 
-  // Close all modals
-  const closeAllModals = () => {
-    if (submitting) return;
-
-    setShowRequestForm(false);
-    setShowAuthModal(false);
-    setShowDetailsModal(false);
-    setSelectedRequest(null);
-    setBarangayDropdownOpen(false);
-    setOrganizationTypeDropdownOpen(false);
-    setRequestTypeDropdownOpen(false);
-
-    // Reset validation states
-    setFieldErrors({});
-    setTouched({});
-
-    document.body.style.overflow = "auto";
-  };
-
-  const organizationTypes = ['NGA', 'NGO', 'CSO', 'LGU', 'Barangay', 'SK', 'Others'];
-  const requestTypes = ['Medical', 'Financial', 'Construction Materials', 'Educational Supplies', 'Others'];
-
+  // Format date
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
@@ -559,7 +595,7 @@ const SolicitationRequests = () => {
     });
   };
   
-  function formatDateTime(dateString) {
+  const formatDateTime = (dateString) => {
     const date = new Date(dateString);
     return date.toLocaleString("en-US", {
       year: "numeric",
@@ -568,7 +604,7 @@ const SolicitationRequests = () => {
       hour: "2-digit",
       minute: "2-digit",
     });
-  }
+  };
 
   if (loading || authLoading) {
     return (
@@ -613,13 +649,13 @@ const SolicitationRequests = () => {
               onClick={toggleDropdown}
               className={`${styles.dropdownButton} ${dropdownOpen ? styles.active : ''}`}
             >
-              <span>{categoryFilter === 'all' ? 'All Categories' : categoryFilter}</span>
+              <span>{filterStatus === 'all' ? 'All Categories' : filterStatus}</span>
               <ChevronDown size={16} className={`${styles.dropdownArrow} ${dropdownOpen ? styles.open : ''}`} />
             </button>
             <div className={`${styles.dropdownContent} ${dropdownOpen ? styles.show : ''}`}>
               <button
                 onClick={() => handleFilterChange('all')}
-                className={`${styles.dropdownItem} ${categoryFilter === 'all' ? styles.active : ''}`}
+                className={`${styles.dropdownItem} ${filterStatus === 'all' ? styles.active : ''}`}
               >
                 All Categories
               </button>
@@ -627,7 +663,7 @@ const SolicitationRequests = () => {
                 <button
                   key={type}
                   onClick={() => handleFilterChange(type)}
-                  className={`${styles.dropdownItem} ${categoryFilter === type ? styles.active : ''}`}
+                  className={`${styles.dropdownItem} ${filterStatus === type ? styles.active : ''}`}
                 >
                   {type}
                 </button>
@@ -636,37 +672,126 @@ const SolicitationRequests = () => {
           </div>
         </div>
       </div>
-      
-      {/* View Details Modal */}
-      {showDetailsModal && selectedRequest && (
-        <div className={styles.modal} onClick={closeViewModal}>
+
+      {/* Content Section */}
+      <div className={styles.content}>
+        {/* Requests Grid */}
+        {filteredRequests.length === 0 && !searchTerm && filterStatus === 'all' ? (
+          <div className={styles.noRequests}>
+            <FileText size={80} />
+            <h3>No requests found</h3>
+            <p>There are no completed solicitation requests to display.</p>
+          </div>
+        ) : (
+          <div className={styles.requestsGrid}>
+            {/* Submit New Request Card - First item */}
+            <div
+              onClick={handleSubmitClick}
+              className={styles.submitCard}
+            >
+              <div className={styles.submitCardContent}>
+                <div className={styles.submitIconContainer}>
+                  <Plus size={48} className={styles.submitIcon} />
+                </div>
+                <h3 className={styles.submitTitle}>Submit New Request</h3>
+                <p className={styles.submitDescription}>
+                  Submit a new solicitation request for assistance
+                </p>
+              </div>
+            </div>
+
+            {filteredRequests.length === 0 ? (
+              <div className={styles.noRequests}>
+                <FileText size={80} />
+                <h3>No requests found</h3>
+                <p>
+                  {searchTerm || filterStatus !== 'all' 
+                    ? 'Try adjusting your search or filter criteria' 
+                    : 'There are no completed solicitation requests to display.'}
+                </p>
+              </div>
+            ) : (
+              filteredRequests.map((request) => (
+                <div
+                  key={request._id}
+                  onClick={() => handleRequestClick(request)}
+                  className={styles.requestCard}
+                >
+                  {/* Request Type Badge - Updated to use shortened names */}
+                  <div className={`${styles.requestTypeBadge} ${styles[getRequestTypeCssClass(request.requestType)]}`}>
+                    {getRequestTypeBadgeName(request.requestType)}
+                  </div>
+
+                  {/* Organization Name */}
+                  <h3 className={styles.organizationName}>{request.organizationName}</h3>
+
+                  {/* Request Info */}
+                  <div className={styles.requestInfo}>
+                    <div className={styles.infoItem}>
+                      <User size={16} />
+                      <span>{request.contactPerson}</span>
+                    </div>
+                    <div className={styles.infoItem}>
+                      <Building2 size={16} />
+                      <span>{request.organizationType}</span>
+                    </div>
+                  </div>
+
+                  {/* Purpose Preview */}
+                  <div className={styles.purpose}>
+                    <strong>Purpose:</strong>
+                    <p>{request.purpose.substring(0, 100)}...</p>
+                  </div>
+
+                  {/* Card Actions */}
+                  <div className={styles.cardActions}>
+                    <button 
+                      className={styles.viewMoreBtn}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleRequestClick(request);
+                      }}
+                    >
+                      View Details
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Request Details Modal */}
+      {showRequestDetails && selectedRequest && (
+        <div className={styles.modal} onClick={closeAllModals}>
           <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
             <div className={styles.modalHeader}>
               <div className={styles.modalTitle}>
                 <h2>{selectedRequest.organizationName}</h2>
-                <span className={`${styles.requestTypeBadge} ${styles.large} ${styles[selectedRequest.requestType.toLowerCase().replace(' ', '-')]}`}>
-                  {selectedRequest.requestType}
+                <span className={`${styles.requestTypeBadge} ${styles[getRequestTypeCssClass(selectedRequest.requestType)]}`}>
+                  {getRequestTypeBadgeName(selectedRequest.requestType)}
                 </span>
               </div>
-              <button onClick={closeViewModal} className={styles.closeButton}>
+              <button onClick={closeAllModals} className={styles.closeButton}>
                 ×
               </button>
             </div>
             
             <div className={styles.modalBody}>        
               {/* Request Details Grid */}
-              <div className={styles.detailsGrid}>
+              <div className={styles.requestDetailsGrid}>
                 <div className={styles.detailItem}>
                   <User size={20} />
                   <div>
-                    <strong>Contact Person: </strong>{selectedRequest.contactPerson}
+                    <strong>Contact Person:</strong> {selectedRequest.contactPerson}
                   </div>
                 </div>
                 
                 <div className={styles.detailItem}>
                   <Building2 size={20} />
                   <div>
-                    <strong>Organization Type: </strong>{selectedRequest.organizationType}
+                    <strong>Organization Type:</strong> {selectedRequest.organizationType}
                   </div>
                 </div>
               </div>
@@ -674,7 +799,7 @@ const SolicitationRequests = () => {
               {/* Purpose */}
               <div className={styles.section}>
                 <h4>Purpose</h4>
-                <p className={styles.requirements}>{selectedRequest.purpose}</p>
+                <p className={styles.description}>{selectedRequest.purpose}</p>
               </div>
               
               {/* Requested Assistance Details */}
@@ -700,86 +825,6 @@ const SolicitationRequests = () => {
         </div>
       )}
 
-      {/* Requests Grid with Add New Request Card */}
-      {filteredRequests.length === 0 && !searchTerm && categoryFilter === 'all' ? (
-        <div className={styles.noRequests}>
-          <FileText size={64} className={styles.noRequestsIcon} />
-          <h3>No requests found</h3>
-          <p>There are no completed solicitation requests to display.</p>
-        </div>
-      ) : (
-        <div className={styles.content}>
-          <div className={styles.requestsGrid}>
-            {/* Add New Solicitation Request */}
-            <div
-              onClick={handleRequestClick}
-              className={styles.addRequestCard}
-            >
-              <div className={styles.addRequestContent}>
-                <div className={styles.addRequestIconContainer}>
-                  <Plus size={48} className={styles.addRequestIcon} />
-                </div>
-                <h3 className={styles.addRequestTitle}>Submit New Request</h3>
-                <p className={styles.addRequestDescription}>
-                  Submit a new solicitation request for assistance
-                </p>
-              </div>
-            </div>
-
-            {filteredRequests.length === 0 ? (
-              <div className={styles.noFilteredRequests}>
-                <FileText size={64} className={styles.noRequestsIcon} />
-                <h3>No requests found</h3>
-                <p>Try adjusting your search or filter criteria</p>
-              </div>
-            ) : (
-              filteredRequests.map((request) => (
-                <div
-                  key={request._id}
-                  onClick={() => openDetailsModal(request)}
-                  className={styles.requestCard}
-                >
-                  <div className={styles.requestCardHeader}>
-                    <div className={styles.organizationInfo}>
-                      <h3 className={styles.organizationName}>{request.organizationName}</h3>
-                    </div>
-                    <div className={`${styles.requestTypeBadge} ${styles[request.requestType.toLowerCase().replace(' ', '-')]}`}>
-                      {request.requestType}
-                    </div>
-                  </div>
-
-                  <div className={styles.requestDetails}>
-                    <div className={styles.detailItem}>
-                      <User size={16} />
-                      <span>{`${request.contactPerson}`}</span>
-                    </div>
-                    <div className={styles.detailItem}>
-                      <Building2 size={16} />
-                      <span>{(request.organizationType)}</span>
-                    </div>
-                  </div>
-                  
-                  {/* Purpose Preview */}
-                  <div className={styles.purpose}>
-                    <strong>Purpose:</strong>
-                    <p>{request.purpose.substring(0, 100)}...</p>
-                  </div>
-                  
-                  <div className={styles.cardFooter}>
-                    <span className={styles.publishDate}>
-                      {formatDate(request.createdAt)}
-                    </span>
-                    <button className={styles.viewDetailsButton}>
-                      View Details
-                    </button>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
-      )}
-
       {/* Solicitation Request Form Modal */}
       {showRequestForm && (
         <div className={styles.modal} onClick={closeAllModals}>
@@ -796,29 +841,6 @@ const SolicitationRequests = () => {
             <div className={styles.modalBody}>
               <form onSubmit={handleFormSubmit} className={styles.applicationForm}>
                 <div className={styles.formGrid}>
-                  {/* Contact Person First Name */}
-                  <div className={styles.formGroup}>
-                    <label>Contact Person First Name *</label>
-                    <div className={styles.inputWrapper}>
-                      <User size={16} className={styles.inputIcon} />
-                      <input
-                        type="text"
-                        value={formData.contactPersonFirstName}
-                        onChange={(e) => handleInputChange('contactPersonFirstName', e.target.value)}
-                        onBlur={(e) => handleInputBlur('contactPersonFirstName', e.target.value)}
-                        required
-                        placeholder="First Name"
-                        className={getInputClass('contactPersonFirstName')}
-                        maxLength={50}
-                      />
-                    </div>
-                      {touched.contactPersonFirstName && fieldErrors.contactPersonFirstName && (
-                        <div className={styles.errorMessage}>
-                          {fieldErrors.contactPersonFirstName}
-                        </div>
-                      )}
-                  </div>
-
                   {/* Contact Person Last Name */}
                   <div className={styles.formGroup}>
                     <label>Contact Person Last Name *</label>
@@ -1155,9 +1177,9 @@ const SolicitationRequests = () => {
         </div>
       )}
       
-      {/* Authentication Modal */}
-      {showAuthModal && (
-        <div className={styles.modal} onClick={() => setShowAuthModal(false)}>
+      {/* Authentication Prompt Modal */}
+      {showAuthPrompt && (
+        <div className={styles.modal} onClick={closeAllModals}>
           <div className={styles.authPrompt} onClick={(e) => e.stopPropagation()}>
             <div className={styles.authPromptHeader}>
               <User size={32} />
@@ -1165,8 +1187,18 @@ const SolicitationRequests = () => {
             </div>
             <p>You need to have an account to submit a solicitation request.</p>
             <div className={styles.authActions}>
-              <a href="/login" className={styles.loginBtn}>Login</a>
-              <a href="/register" className={styles.registerBtn}>Register</a>
+              <button 
+                className={styles.loginBtn}
+                onClick={() => window.location.href = '/login'}
+              >
+                Login
+              </button>
+              <button 
+                className={styles.registerBtn}
+                onClick={() => window.location.href = '/register'}
+              >
+                Create Account
+              </button>
             </div>
           </div>
         </div>

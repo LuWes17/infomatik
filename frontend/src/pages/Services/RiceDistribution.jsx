@@ -360,41 +360,6 @@ const RiceDistribution = () => {
             })}
           </div>
         )}
-
-        {/* Pagination - Like Job Openings if it had pagination */}
-        {pagination.pages > 1 && (
-          <div className={styles.pagination}>
-            <button
-              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-              disabled={currentPage === 1}
-              className={`${styles.pageBtn} ${currentPage === 1 ? styles.disabled : ''}`}
-            >
-              <ChevronLeft size={16} />
-              Previous
-            </button>
-            
-            <div className={styles.pageNumbers}>
-              {Array.from({ length: pagination.pages }, (_, i) => i + 1).map(page => (
-                <button
-                  key={page}
-                  onClick={() => setCurrentPage(page)}
-                  className={`${styles.pageBtn} ${currentPage === page ? styles.active : ''}`}
-                >
-                  {page}
-                </button>
-              ))}
-            </div>
-
-            <button
-              onClick={() => setCurrentPage(prev => Math.min(prev + 1, pagination.pages))}
-              disabled={currentPage === pagination.pages}
-              className={`${styles.pageBtn} ${currentPage === pagination.pages ? styles.disabled : ''}`}
-            >
-              Next
-              <ChevronRight size={16} />
-            </button>
-          </div>
-        )}
       </div>
 
       {/* Modal - Exactly like Job Openings modal structure */}
