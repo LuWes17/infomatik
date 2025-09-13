@@ -50,11 +50,29 @@ exports.getJobPostingById = asyncHandler(async (req, res) => {
   });
 });
 
-// Create job posting (Admin)
 exports.createJobPosting = asyncHandler(async (req, res) => {
   req.body.createdBy = req.user.id;
   
   const jobPosting = await JobPosting.create(req.body);
+  
+  // NEW: Send notification SMS to all users about new job opening
+  if (jobPosting.status === 'open') {
+    try {
+      const users = await User.find({ 
+        isActive: true, 
+        role: 'citizen' 
+      });
+      
+      const message = `NEW JOB OPENING: ${jobPosting.title} is now available! Apply now through our website.`;
+      
+      const phoneNumbers = users.map(user => user.contactNumber);
+      await smsService.sendBulkSMS(phoneNumbers, message);
+      
+      console.log(`Sent new job opening notification to ${users.length} users`);
+    } catch (error) {
+      console.error('Failed to send job opening notifications:', error);
+    }
+  }
   
   res.status(201).json({
     success: true,
@@ -63,19 +81,40 @@ exports.createJobPosting = asyncHandler(async (req, res) => {
   });
 });
 
-// Update job posting (Admin)
+// Update job posting (Admin) - ENHANCED VERSION
 exports.updateJobPosting = asyncHandler(async (req, res) => {
+  const previousJob = await JobPosting.findById(req.params.id);
+  
+  if (!previousJob) {
+    return res.status(404).json({
+      success: false,
+      message: 'Job posting not found'
+    });
+  }
+  
   const jobPosting = await JobPosting.findByIdAndUpdate(
     req.params.id,
     req.body,
     { new: true, runValidators: true }
   );
   
-  if (!jobPosting) {
-    return res.status(404).json({
-      success: false,
-      message: 'Job posting not found'
-    });
+  // NEW: Send notification if job was closed and now opened
+  if (previousJob.status === 'closed' && jobPosting.status === 'open') {
+    try {
+      const users = await User.find({ 
+        isActive: true, 
+        role: 'citizen' 
+      });
+      
+      const message = `JOB REOPENED: ${jobPosting.title} is now open for applications again! Apply now through our website.`;
+      
+      const phoneNumbers = users.map(user => user.contactNumber);
+      await smsService.sendBulkSMS(phoneNumbers, message);
+      
+      console.log(`Sent job reopening notification to ${users.length} users`);
+    } catch (error) {
+      console.error('Failed to send job reopening notifications:', error);
+    }
   }
   
   res.status(200).json({
@@ -113,12 +152,41 @@ exports.toggleJobStatus = asyncHandler(async (req, res) => {
     });
   }
   
+  const previousStatus = jobPosting.status;
   jobPosting.status = jobPosting.status === 'open' ? 'closed' : 'open';
+  
   await jobPosting.save();
+  
+  // NEW: Notify pending applicants if job is being closed
+  if (previousStatus === 'open' && jobPosting.status === 'closed') {
+    // Find all pending applications for this job
+    const pendingApplications = await JobApplication.find({
+      jobPosting: jobPosting._id,
+      status: 'pending'
+    }).populate('applicant');
+    
+    // Send SMS notifications to pending applicants
+    for (const application of pendingApplications) {
+      try {
+        await smsService.sendJobClosureNotificationSMS(
+          application.applicant,
+          jobPosting.title
+        );
+        
+        // Mark SMS as sent
+        application.smsNotificationSent = true;
+        await application.save();
+      } catch (error) {
+        console.error(`Failed to send SMS to ${application.applicant.contactNumber}:`, error);
+      }
+    }
+    
+    console.log(`Sent job closure notifications to ${pendingApplications.length} pending applicants`);
+  }
   
   res.status(200).json({
     success: true,
-    message: `Job posting ${jobPosting.status === 'open' ? 'opened' : 'closed'} successfully`,
+    message: `Job ${jobPosting.status === 'open' ? 'opened' : 'closed'} successfully`,
     data: jobPosting
   });
 });

@@ -245,6 +245,18 @@ class SMSService {
     const phoneNumbers = users.map(user => user.contactNumber);
     return await this.sendBulkSMS(phoneNumbers, message);
   }
+
+  /**
+   * Send job closure notification SMS to pending applicants
+   * @param {Object} user - User object
+   * @param {string} jobTitle - Job title
+   * @returns {Promise<Object>} - SMS result
+   */
+  async sendJobClosureNotificationSMS(user, jobTitle) {
+    const message = `Hello ${user.firstName}, the job opening "${jobTitle}" that you applied for has been closed. Please check other available opportunities on our website.`;
+    
+    return await this.sendSMS(user.contactNumber, message);
+  }
 }
 
 module.exports = new SMSService();
