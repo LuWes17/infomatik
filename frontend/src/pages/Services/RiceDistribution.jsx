@@ -323,11 +323,11 @@ const RiceDistribution = () => {
                       <div className={styles.distributionDetails}>
                         <div className={styles.detailItem}>
                           <Calendar size={14} />
-                          <span><strong>Pick-up Date:</strong> {formatDate(userSchedule.date)}</span>
+                          <span>{formatDate(userSchedule.date)}</span>
                         </div>
                         <div className={styles.detailItem}>
                           <MapPin size={14} />
-                          <span><strong>Pick-up Location:</strong> {userSchedule.location}</span>
+                          <span>{userSchedule.location}</span>
                         </div>
                       </div>
                     </div>
