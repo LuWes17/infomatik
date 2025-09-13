@@ -79,9 +79,19 @@ const Feedback = () => {
     return shortLabels[category] || category;
   };
 
-  // Function to get CSS class name for category badges
-  const getCategoryCssClass = (category) => {
-    return category.toLowerCase().replace(/\s+/g, '-');
+  // Function to get status display text
+  const getStatusDisplay = (status) => {
+    const statusMap = {
+      'pending': 'Pending',
+      'in_progress': 'In Progress', 
+      'resolved': 'Resolved'
+    };
+    return statusMap[status] || status;
+  };
+
+  // Function to get CSS class name for status badges
+  const getStatusCssClass = (status) => {
+    return status.toLowerCase().replace(/\s+/g, '-').replace(/_/g, '-');
   };
 
   // Fetch public feedback
@@ -542,9 +552,9 @@ const Feedback = () => {
                   onClick={() => handleFeedbackClick(feedback)}
                   className={styles.feedbackCard}
                 >
-                  {/* Category Badge - Using short label */}
-                  <div className={`${styles.categoryBadge} ${styles[getCategoryCssClass(feedback.category)]}`}>
-                    {getShortCategoryLabel(feedback.category)}
+                  {/* Status Badge - Replaced category badge */}
+                  <div className={`${styles.statusBadge} ${styles[getStatusCssClass(feedback.status || 'pending')]}`}>
+                    {getStatusDisplay(feedback.status || 'pending')}
                   </div>
 
                   {/* Subject */}
@@ -558,7 +568,7 @@ const Feedback = () => {
                     </div>
                     <div className={styles.infoItem}>
                       <Tag size={16} />
-                      <span>{getShortCategoryLabel(feedback.category)}</span>
+                      <span>{(feedback.category)}</span>
                     </div>
                   </div>
 
@@ -594,9 +604,9 @@ const Feedback = () => {
             <div className={styles.modalHeader}>
               <div className={styles.modalTitle}>
                 <h2>{selectedFeedback.subject}</h2>
-                {/* Category Badge - Using short label */}
-                <span className={`${styles.categoryBadge} ${styles[getCategoryCssClass(selectedFeedback.category)]}`}>
-                  {getShortCategoryLabel(selectedFeedback.category)}
+                {/* Status Badge - Replaced category badge */}
+                <span className={`${styles.statusBadge} ${styles[getStatusCssClass(selectedFeedback.status || 'pending')]}`}>
+                  {getStatusDisplay(selectedFeedback.status || 'pending')}
                 </span>
               </div>
               <button onClick={closeAllModals} className={styles.closeButton}>
@@ -617,7 +627,7 @@ const Feedback = () => {
                 <div className={styles.detailItem}>
                   <Tag size={20} />
                   <div>
-                    <strong>Tag:</strong> {selectedFeedback.category}
+                    <strong>Category:</strong> {selectedFeedback.category}
                   </div>
                 </div>
               </div>

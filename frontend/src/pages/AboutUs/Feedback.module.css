@@ -1,4 +1,4 @@
-/* Feedback.module.css - Refactored to match SolicitationRequests structure */
+/* Feedback.module.css - Refactored to use status badges instead of category badges */
 
 .feedbackPage {
   padding: 0;
@@ -344,8 +344,8 @@
   box-shadow: 0 5px 10px #9AAACF;
 }
 
-/* Category Badge */
-.categoryBadge {
+/* Status Badge - Replaced category badge */
+.statusBadge {
   position: absolute;
   top: 1.5rem;
   right: 1.5rem;
@@ -358,39 +358,20 @@
   white-space: nowrap;
 }
 
-.categoryBadge.general-feedback {
-  background-color: #dbeafe;
-  color: #1e40af;
-}
-
-.categoryBadge.service-complaint {
-  background-color: #fee2e2;
-  color: #991b1b;
-}
-
-.categoryBadge.service-commendation {
-  background-color: #d1fae5;
-  color: #065f46;
-}
-
-.categoryBadge.suggestion {
+/* Status Badge Styles */
+.statusBadge.pending {
   background-color: #fef3c7;
   color: #92400e;
 }
 
-.categoryBadge.inquiry {
-  background-color: #e0e7ff;
-  color: #3730a3;
+.statusBadge.in-progress {
+  background-color: #dbeafe;
+  color: #1e40af;
 }
 
-.categoryBadge.report-issue {
-  background-color: #fce7f3;
-  color: #9f1239;
-}
-
-.categoryBadge.other {
-  background-color: #f3e8ff;
-  color: #7c3aed;
+.statusBadge.resolved {
+  background-color: #d1fae5;
+  color: #065f46;
 }
 
 /* Feedback Subject */
@@ -457,36 +438,6 @@
   overflow: hidden;
   word-wrap: break-word;
   overflow-wrap: break-word;
-}
-
-/* Status Section */
-.statusSection {
-  margin-bottom: 1rem;
-}
-
-.statusBadge {
-  display: inline-block;
-  padding: 0.25rem 0.75rem;
-  border-radius: 12px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.statusBadge.pending {
-  background-color: #fef3c7;
-  color: #92400e;
-}
-
-.statusBadge.acknowledged {
-  background-color: #dbeafe;
-  color: #1e40af;
-}
-
-.statusBadge.resolved {
-  background-color: #d1fae5;
-  color: #065f46;
 }
 
 /* Card Actions */
@@ -583,7 +534,7 @@
   hyphens: auto;
 }
 
-.modalTitle .categoryBadge {
+.modalTitle .statusBadge {
   position: static;
   display: inline-block;
   margin: 0;
@@ -1251,7 +1202,7 @@
     padding: 1.25rem;
   }
 
-  .categoryBadge {
+  .statusBadge {
     top: 1.25rem;
     right: 1.25rem;
     font-size: 0.65rem;
@@ -1290,7 +1241,7 @@
     font-size: 1.25rem;
   }
 
-  .modalTitle .categoryBadge {
+  .modalTitle .statusBadge {
     font-size: 0.7rem;
     padding: 0.25rem 0.625rem;
   }
@@ -1426,7 +1377,7 @@
     padding: 0 0.75rem;
   }
 
-  .categoryBadge {
+  .statusBadge {
     top: 1rem;
     right: 1rem;
     font-size: 0.6rem;
@@ -1470,7 +1421,7 @@
     line-height: 1.3;
   }
 
-  .modalTitle .categoryBadge {
+  .modalTitle .statusBadge {
     font-size: 0.65rem;
     padding: 0.25rem 0.5rem;
   }
