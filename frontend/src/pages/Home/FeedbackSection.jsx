@@ -1,8 +1,9 @@
 // FeedbackSection.jsx - Component for Home page
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import styles from './FeedbackSection.module.css';
+import { User } from 'lucide-react';
 
 const FeedbackSection = () => {
   const navigate = useNavigate();
@@ -68,40 +69,26 @@ const FeedbackSection = () => {
 
       {/* Login Prompt Modal */}
       {showLoginPrompt && (
-        <div className={styles.modalOverlay} onClick={closeLoginPrompt}>
-          <div className={styles.loginPromptModal} onClick={(e) => e.stopPropagation()}>
-            <div className={styles.modalHeader}>
-              <h2>Login Required</h2>
-              <button 
-                className={styles.closeButton}
-                onClick={closeLoginPrompt}
-              >
-                ✕
-              </button>
-            </div>
-
-            <div className={styles.loginPromptContent}>
-              <div className={styles.loginPromptIcon}>🔒</div>
+        <div className={styles.modal} onClick={closeLoginPrompt}>
+          <div className={styles.authPrompt} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.authPromptHeader}>
+              <User size={32} />
               <h3>Account Required</h3>
-              <p>
-                You need to be registered and logged in to submit feedback. 
-                Creating an account is quick and free!
-              </p>
-
-              <div className={styles.loginPromptActions}>
-                <button 
-                  className={styles.loginButton}
-                  onClick={handleLoginClick}
-                >
-                  Login
-                </button>
-                <button 
-                  className={styles.registerButton}
-                  onClick={handleRegisterClick}
-                >
-                  Create Account
-                </button>
-              </div>
+            </div>
+            <p>You need to have an account to submit a feedback.</p>
+            <div className={styles.authActions}>
+              <button 
+                className={styles.loginBtn}
+                onClick={() => window.location.href = '/login'}
+              >
+                Login
+              </button>
+              <button 
+                className={styles.registerBtn}
+                onClick={() => window.location.href = '/register'}
+              >
+                Create Account
+              </button>
             </div>
           </div>
         </div>

@@ -113,7 +113,7 @@
   background: var(--white, #ffffff);
   border-radius: 20px;
   padding: 2rem;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
   border: 1px solid rgba(28, 98, 187, 0.1);
   min-width: 0;
   width: 100%;
@@ -230,7 +230,7 @@
   background: var(--white, #ffffff);
   border-radius: 20px;
   padding: 2rem;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
   border: 1px solid rgba(28, 98, 187, 0.1);
   min-width: 0;
   width: 100%;
@@ -257,6 +257,7 @@
   overflow-y: auto;
   min-height: 0;
   padding-right: 0.5rem;
+  padding: 0.5rem;
 }
 
 .eventsList::-webkit-scrollbar{
