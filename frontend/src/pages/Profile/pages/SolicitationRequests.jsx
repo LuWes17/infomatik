@@ -212,9 +212,6 @@ const SolicitationRequests = () => {
                 </div>
 
                 <div className={styles.cardFooter}>
-                  <span className={styles.submittedDate}>
-                    Submitted: {formatDate(request.createdAt)}
-                  </span>
                   <button 
                     className={styles.viewButton}
                   >

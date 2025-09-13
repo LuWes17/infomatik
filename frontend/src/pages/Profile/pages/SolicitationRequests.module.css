@@ -273,8 +273,9 @@
 }
 
 .viewButton {
+  flex: 1;
   display: flex;
-  align-items: center;
+  justify-content: center;
   background: var(--primary-color);
   color: white;
   border: none;
@@ -286,7 +287,6 @@
   transition: all 0.1s ease;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   white-space: nowrap;
-  flex-shrink: 0;
 }
 
 .viewButton:hover {

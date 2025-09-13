@@ -196,9 +196,6 @@ const FeedbackSent = () => {
                 </div>
 
                 <div className={styles.cardFooter}>
-                  <span className={styles.submittedDate}>
-                    Submitted: {formatDate(feedback.createdAt)}
-                  </span>
                   <button className={styles.viewButton}>
                     View Details
                   </button>
