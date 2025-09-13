@@ -84,10 +84,6 @@ useEffect(() => {
       inputRefs.current[index + 1]?.focus();
     }
 
-    // Auto-submit when all fields are filled
-    if (newOtp.every(digit => digit !== '') && newOtp.join('').length === 6) {
-      handleVerify(newOtp.join(''));
-    }
   };
 
   // Handle backspace
@@ -110,8 +106,6 @@ useEffect(() => {
     // Focus last input
     inputRefs.current[5]?.focus();
     
-    // Auto-submit
-    handleVerify(pastedData);
   };
 
   // Handle verification
@@ -207,9 +201,9 @@ useEffect(() => {
             <button
               className={styles.verifyButton}
               onClick={() => handleVerify()}
-              disabled={isLoading || otp.some(digit => digit === '')}
+              disabled={isLoading || otp.some(digit => digit === '') || otp.join('').length !== 6}
             >
-              {isLoading ? 'Verifying...' : 'Verify'}
+              {isLoading ? 'Verifying...' : 'Verify Code'}
             </button>
 
             <div className={styles.resendContainer}>

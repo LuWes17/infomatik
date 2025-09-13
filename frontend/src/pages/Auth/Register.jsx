@@ -394,7 +394,7 @@ const Register = () => {
         console.log('❌ OTP FAILED - Setting error:', result.error);
         console.log('❌ showOTPPopup should still be:', showOTPPopup);
         console.log('❌ otpError now set to:', result.error || 'Invalid OTP');
-        showError(error || 'OTP verification failed. Please try again.');
+        showError(error || 'Invalid OTP entered. Please try again.');
       }
     } catch (error) {
       console.error('Verify OTP error:', error);
