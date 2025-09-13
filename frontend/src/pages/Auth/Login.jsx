@@ -260,11 +260,6 @@ const Login = () => {
       // Navigation will happen automatically via useEffect due to isAuthenticated change
       console.log('Login successful');
       showSuccess('Welcome back! Redirecting to your dashboard...', { duration: 3000 });
-
-      setTimeout(() => {
-          const from = location.state?.from?.pathname || '/profile';
-          navigate(from, { replace: true });
-        }, 2000); 
     } else {
         console.error('Login failed:', result.error);
         showError('Invalid account details. Account does not exist')
