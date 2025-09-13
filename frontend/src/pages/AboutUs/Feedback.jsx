@@ -14,6 +14,7 @@ import {
 import { useAuth } from '../../contexts/AuthContext';
 import styles from './Feedback.module.css';
 import { useNotification } from '../../contexts/NotificationContext';
+import { useLocation } from 'react-router-dom';
 
 const Feedback = () => {
   // Auth context
@@ -45,6 +46,8 @@ const Feedback = () => {
   // Field validation states
   const [fieldErrors, setFieldErrors] = useState({});
   const [touched, setTouched] = useState({});
+
+  const location = useLocation();
 
   // Form data
   const [formData, setFormData] = useState({
@@ -93,6 +96,21 @@ const Feedback = () => {
   const getStatusCssClass = (status) => {
     return status.toLowerCase().replace(/\s+/g, '-').replace(/_/g, '-');
   };
+
+  useEffect(() => {
+    if (location.state?.openForm && isAuthenticated) {
+      setShowFeedbackForm(true);
+      document.body.style.overflow = "hidden";
+      
+      // Clear the state to prevent reopening on refresh
+      window.history.replaceState({}, document.title);
+    } else if (location.state?.openForm && !isAuthenticated) {
+      setShowAuthPrompt(true);
+      
+      // Clear the state to prevent reopening on refresh
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state, isAuthenticated]);
 
   // Fetch public feedback
   const fetchFeedback = async () => {
