@@ -177,7 +177,7 @@ const FeedbackSent = () => {
                 <div className={styles.cardContent}>
                   <div className={styles.feedbackInfo}>
                     <div className={styles.infoRow}>
-                      {getCategoryIcon(feedback.category)}
+                      <Tag size={16} />
                       <span>{feedback.category}</span>
                     </div>
                   </div>
@@ -240,8 +240,8 @@ const FeedbackSent = () => {
                     <div className={styles.infoItemHeader}>
                       <Tag size={16} />
                       <span className={styles.infoLabel}>Category:</span>
+                      <span>{selectedFeedback.category}</span>
                     </div>
-                    <span>{selectedFeedback.category}</span>
                   </div>
                 </div>
               </div>
