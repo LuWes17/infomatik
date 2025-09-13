@@ -244,13 +244,13 @@ const SolicitationRequests = () => {
             <div className={styles.modalBody}>
               {/* Status Section */}
               <div className={styles.statusSection}>
+                <p className={styles.requestDate}>
+                  Submitted on {formatDate(selectedRequest.createdAt)}
+                </p>
                 <div className={`${styles.statusBadge} ${styles.large} ${getStatusDisplay(selectedRequest.status).className}`}>
                   {getStatusDisplay(selectedRequest.status).icon}
                   <span>{getStatusDisplay(selectedRequest.status).text}</span>
                 </div>
-                <p className={styles.requestDate}>
-                  Submitted on {formatDate(selectedRequest.createdAt)}
-                </p>
               </div>
 
               {/* Organization Details Section */}

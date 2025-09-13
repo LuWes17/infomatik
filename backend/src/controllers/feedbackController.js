@@ -192,11 +192,6 @@ exports.deleteAdminResponse = asyncHandler(async (req, res) => {
   // Remove the admin response
   feedback.adminResponse = undefined;
   
-  // If status was acknowledged due to response, revert to pending
-  if (feedback.status === 'acknowledged') {
-    feedback.status = 'pending';
-  }
-  
   await feedback.save();
   
   // Populate the response data before sending back
@@ -243,8 +238,7 @@ exports.updateFeedbackStatus = asyncHandler(async (req, res) => {
 // Get feedback statistics (Admin)
 exports.getFeedbackStatistics = asyncHandler(async (req, res) => {
   const total = await Feedback.countDocuments();
-  const pending = await Feedback.countDocuments({ status: 'pending' });
-  const acknowledged = await Feedback.countDocuments({ status: 'acknowledged' });
+  const pending = await Feedback.countDocuments({ status: 'pending' });;
   const resolved = await Feedback.countDocuments({ status: 'resolved' });
   
   const byCategory = await Feedback.aggregate([
@@ -257,7 +251,6 @@ exports.getFeedbackStatistics = asyncHandler(async (req, res) => {
     data: {
       total,
       pending,
-      acknowledged,
       resolved,
       byCategory
     }

@@ -43,7 +43,7 @@ const feedbackSchema = new mongoose.Schema({
   // Status tracking
   status: {
     type: String,
-    enum: ['pending', 'acknowledged', 'in-progress', 'resolved', 'closed'],
+    enum: ['pending', 'in-progress', 'resolved'],
     default: 'pending'
   },
   
@@ -122,18 +122,6 @@ feedbackSchema.virtual('responseCount').get(function() {
   return count;
 });
 
-// Methods for admin response management
-feedbackSchema.methods.addResponse = function(message, adminId, isPublic = true) {
-  this.adminResponse = {
-    message,
-    respondedBy: adminId,
-    respondedAt: new Date(),
-    isPublic,
-    isEdited: false
-  };
-  this.status = 'acknowledged';
-  return this.save();
-};
 
 feedbackSchema.methods.resolve = function(adminId, notes) {
   this.status = 'resolved';

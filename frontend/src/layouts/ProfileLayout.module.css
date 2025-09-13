@@ -226,8 +226,7 @@
   }
 
   .logoutButton {
-    width: auto;
-    min-width: 120px;
+    display: none;
   }
 }
 
@@ -273,5 +272,9 @@
 
   .profileMain {
     padding: 1rem;
+  }
+
+  .logoutButton {
+    display: none;
   }
 }

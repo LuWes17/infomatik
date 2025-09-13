@@ -36,10 +36,8 @@ const AdminFeedback = () => {
 
   const statusOptions = [
     'pending',
-    'acknowledged', 
     'in-progress',
-    'resolved',
-    'closed'
+    'resolved'
   ];
 
   useEffect(() => {
@@ -268,10 +266,8 @@ const AdminFeedback = () => {
   const getStatusBadgeClass = (status) => {
     switch (status) {
       case 'pending': return styles.statusPending;
-      case 'acknowledged': return styles.statusAcknowledged;
       case 'in-progress': return styles.statusInProgress;
       case 'resolved': return styles.statusResolved;
-      case 'closed': return styles.statusClosed;
       default: return styles.statusPending;
     }
   };
@@ -329,13 +325,6 @@ const AdminFeedback = () => {
           <div className={styles.statContent}>
             <div className={styles.statValue}>{statistics.pending || 0}</div>
             <div className={styles.statLabel}>Pending</div>
-          </div>
-        </div>
-        <div className={styles.statCard}>
-          <div className={styles.statIcon}>✅</div>
-          <div className={styles.statContent}>
-            <div className={styles.statValue}>{statistics.acknowledged || 0}</div>
-            <div className={styles.statLabel}>Acknowledged</div>
           </div>
         </div>
         <div className={styles.statCard}>

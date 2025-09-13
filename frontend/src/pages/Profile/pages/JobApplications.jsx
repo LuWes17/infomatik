@@ -322,13 +322,13 @@ const JobApplications = () => {
             <div className={styles.modalBody}>
               {/* Status Section */}
               <div className={styles.statusSection}>
+                <p className={styles.applicationDate}>
+                  Applied on {formatDate(selectedApplication.createdAt)}
+                </p>
                 <div className={`${styles.statusBadge} ${getStatusDisplay(selectedApplication.status).className}`}>
                   {getStatusDisplay(selectedApplication.status).icon}
                   <span>{getStatusDisplay(selectedApplication.status).text}</span>
                 </div>
-                <p className={styles.applicationDate}>
-                  Applied on {formatDate(selectedApplication.createdAt)}
-                </p>
               </div>
 
               {/* Job Details Section */}
