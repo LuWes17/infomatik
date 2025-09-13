@@ -1,59 +1,60 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useAuth } from '../../contexts/AuthContext';
-import { useNotification } from '../../contexts/NotificationContext';
 import { 
-  MessageSquare, 
+  MessageSquare,
+  Filter, 
   Plus, 
-  User, 
-  Calendar, 
-  Eye, 
-  EyeOff, 
   Search, 
-  Filter,
-  ThumbsUp,
-  MessageCircle,
-  Clock,
-  CheckCircle,
-  AlertTriangle,
-  X,
+  User, 
+  Calendar,
+  FileText, 
+  Tag,
   ChevronDown,
-  FileText,
-  Tag
+  Clock
 } from 'lucide-react';
+import { useAuth } from '../../contexts/AuthContext';
 import styles from './Feedback.module.css';
+import { useNotification } from '../../contexts/NotificationContext';
 
 const Feedback = () => {
-  const { user, isAuthenticated } = useAuth();
-  const { showSuccess, showError, showInfo } = useNotification();
+  // Auth context
+  const { user, isAuthenticated, isLoading: authLoading } = useAuth();
+  const { showSuccess, showError } = useNotification();
 
   // State management
-  const [feedback, setFeedback] = useState([]);
+  const [feedbackList, setFeedbackList] = useState([]);
   const [filteredFeedback, setFilteredFeedback] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [showFeedbackForm, setShowFeedbackForm] = useState(false);
-  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [selectedFeedback, setSelectedFeedback] = useState(null);
-  const [showDetailsModal, setShowDetailsModal] = useState(false);
-
-  // Filter and search state
+  const [showFeedbackDetails, setShowFeedbackDetails] = useState(false);
+  const [showFeedbackForm, setShowFeedbackForm] = useState(false);
+  const [showAuthPrompt, setShowAuthPrompt] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  
+  // Filter and search states
+  const [filterCategory, setFilterCategory] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState('all');
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
-  
-  // Validation state
+
+  // Custom dropdown states
+  const [categoryDropdownOpen, setCategoryDropdownOpen] = useState(false);
+  const [visibilityDropdownOpen, setVisibilityDropdownOpen] = useState(false);
+  const categoryDropdownRef = useRef(null);
+  const visibilityDropdownRef = useRef(null);
+
+  // Field validation states
   const [fieldErrors, setFieldErrors] = useState({});
   const [touched, setTouched] = useState({});
-  const [submitting, setSubmitting] = useState(false);
 
-  // Form state
+  // Form data
   const [formData, setFormData] = useState({
     subject: '',
     message: '',
-    category: 'General Feedback',
-    isPublic: true
+    category: '',
+    isPublic: 'yes'
   });
 
+  // Categories constant
   const categories = [
     'General Feedback',
     'Service Complaint', 
@@ -63,12 +64,63 @@ const Feedback = () => {
     'Report Issue',
     'Other'
   ];
-  
+
+  // Function to get short category label for display
+  const getShortCategoryLabel = (category) => {
+    const shortLabels = {
+      'General Feedback': 'General',
+      'Service Complaint': 'Complaint',
+      'Service Commendation': 'Commendation',
+      'Suggestion': 'Suggestion',
+      'Inquiry': 'Inquiry',
+      'Report Issue': 'Report Issue',
+      'Other': 'Other'
+    };
+    return shortLabels[category] || category;
+  };
+
+  // Function to get CSS class name for category badges
+  const getCategoryCssClass = (category) => {
+    return category.toLowerCase().replace(/\s+/g, '-');
+  };
+
+  // Fetch public feedback
+  const fetchFeedback = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('http://localhost:4000/api/feedback/public');
+      const data = await response.json();
+      
+      if (data.success) {
+        // Sort by latest created first
+        const sortedFeedback = data.data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        setFeedbackList(sortedFeedback);
+        setFilteredFeedback(sortedFeedback);
+      }
+    } catch (error) {
+      console.error('Error fetching feedback:', error);
+      setFeedbackList([]);
+      setFilteredFeedback([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchFeedback();
+  }, []);
+
   // Close dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setDropdownOpen(false);
+      }
+      if (categoryDropdownRef.current && !categoryDropdownRef.current.contains(event.target)) {
+        setCategoryDropdownOpen(false);
+      }
+      if (visibilityDropdownRef.current && !visibilityDropdownRef.current.contains(event.target)) {
+        setVisibilityDropdownOpen(false);
       }
     };
 
@@ -78,27 +130,26 @@ const Feedback = () => {
     };
   }, []);
 
-  // Fetch public feedback
-  const fetchFeedback = async () => {
-    try {
-      setIsLoading(true);
-      const response = await fetch('/api/feedback/public');
+  // Filter and search functionality
+  useEffect(() => {
+    let filtered = [...feedbackList];
 
-      if (!response.ok) {
-        throw new Error('Failed to fetch feedback');
-      }
-
-      const data = await response.json();
-      setFeedback(data.data || []);
-      setFilteredFeedback(data.data || []);
-    } catch (error) {
-      console.error('Error fetching feedback:', error);
-      setFeedback([]);
-      setFilteredFeedback([]);
-    } finally {
-      setIsLoading(false);
+    // Category filter
+    if (filterCategory !== 'all') {
+      filtered = filtered.filter(feedback => feedback.category === filterCategory);
     }
-  };
+
+    // Search filter
+    if (searchTerm.trim()) {
+      filtered = filtered.filter(feedback =>
+        feedback.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        feedback.message.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        `${feedback.submittedBy.firstName} ${feedback.submittedBy.lastName}`.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    setFilteredFeedback(filtered);
+  }, [feedbackList, filterCategory, searchTerm]);
 
   // Field validation function
   const getFieldValidation = (name, value) => {
@@ -136,6 +187,13 @@ const Feedback = () => {
         if (!value) {
           isValid = false;
           errorMessage = 'Please select a category.';
+        }
+        break;
+      
+      case 'isPublic':
+        if (!value) {
+          isValid = false;
+          errorMessage = 'Please select visibility.';
         }
         break;
       
@@ -190,14 +248,15 @@ const Feedback = () => {
     const newTouched = {
       subject: true,
       message: true,
-      category: true
+      category: true,
+      isPublic: true
     };
     setTouched(newTouched);
 
     let isFormValid = true;
     const newFieldErrors = {};
     
-    ['subject', 'message', 'category'].forEach(key => {
+    Object.keys(formData).forEach(key => {
       const validation = getFieldValidation(key, formData[key]);
       newFieldErrors[key] = validation.errorMessage;
       if (!validation.isValid) {
@@ -209,131 +268,150 @@ const Feedback = () => {
     return isFormValid;
   };
 
-  // Submit feedback
+  // Handle feedback form submission
   const handleFormSubmit = async (e) => {
     e.preventDefault();
     
     if (!isAuthenticated) {
-      showError('Please login to submit feedback');
+      setShowAuthPrompt(true);
       return;
     }
-
+    
     if (!validateForm()) {
       showError('Please fix the errors in the form before proceeding.');
       return;
     }
-
-    setSubmitting(true);
-
+    
     try {
-      const response = await fetch('/api/feedback', {
+      setSubmitting(true);
+
+      const submitData = {
+        subject: formData.subject,
+        message: formData.message,
+        category: formData.category,
+        isPublic: formData.isPublic === 'yes'
+      };
+
+      const response = await fetch(`/api/feedback`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(submitData)
       });
 
       const data = await response.json();
 
       if (data.success) {
-        showSuccess('Feedback submitted successfully!');
+        setShowFeedbackForm(false);
         resetForm();
-        fetchFeedback(); // Refresh feedback list
+        showSuccess('Feedback submitted successfully!');
+        fetchFeedback();
       } else {
-        throw new Error(data.message);
+        throw new Error(data.message || 'Failed to submit feedback');
       }
     } catch (error) {
-      console.error('Error submitting feedback:', error);
-      showError(error.message || 'Failed to submit feedback');
+      console.error('Error submitting form:', error);
+      showError('Failed to submit feedback. Please try again.');
     } finally {
       setSubmitting(false);
     }
   };
 
+  // Reset form
   const resetForm = () => {
     setFormData({
       subject: '',
       message: '',
-      category: 'General Feedback',
-      isPublic: true
+      category: '',
+      isPublic: 'yes'
     });
+
     setFieldErrors({});
     setTouched({});
     setSubmitting(false);
+    
     setShowFeedbackForm(false);
     document.body.style.overflow = "auto";
   };
 
-  const toggleDropdown = () => {
-    setDropdownOpen(!dropdownOpen);
-  };
-
-  const handleFilterChange = (category) => {
-    setCategoryFilter(category);
-    setDropdownOpen(false);
-  };
-
-  const handleFeedbackClick = () => {
-    if (!isAuthenticated) {
-      setShowAuthModal(true);
-    } else {
-      setShowFeedbackForm(true);
-      document.body.style.overflow = "hidden";
-    }
-  };
-
-  const openDetailsModal = (feedbackItem) => {
-    setSelectedFeedback(feedbackItem);
-    setShowDetailsModal(true);
+  // Handle feedback click
+  const handleFeedbackClick = (feedback) => {
+    setSelectedFeedback(feedback);
+    setShowFeedbackDetails(true);
     document.body.style.overflow = "hidden";
   };
 
-  const closeViewModal = () => {
-    setShowDetailsModal(false);
-    setSelectedFeedback(null);
-    document.body.style.overflow = "auto";
+  // Handle submit button click
+  const handleSubmitClick = (e) => {
+    e.stopPropagation();
+    
+    if (!isAuthenticated) {
+      setShowAuthPrompt(true);
+      return;
+    }
+    
+    setShowFeedbackForm(true);
+    document.body.style.overflow = "hidden";
   };
 
   // Close all modals
   const closeAllModals = () => {
     if (submitting) return;
 
+    setShowFeedbackDetails(false);
     setShowFeedbackForm(false);
-    setShowAuthModal(false);
-    setShowDetailsModal(false);
+    setShowAuthPrompt(false);
     setSelectedFeedback(null);
+    setCategoryDropdownOpen(false);
+    setVisibilityDropdownOpen(false);
+
+    // Reset validation states
     setFieldErrors({});
     setTouched({});
+
     document.body.style.overflow = "auto";
   };
 
-  useEffect(() => {
-    fetchFeedback();
-  }, []);
-  
-  // Filter feedback based on search and filters
-  useEffect(() => {
-    let filtered = [...feedback];
+  // Filter dropdown handlers
+  const handleFilterChange = (category) => {
+    setFilterCategory(category);
+    setDropdownOpen(false);
+  };
 
-    // Search filter
-    if (searchTerm) {
-      filtered = filtered.filter(item =>
-        item.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.message.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        `${item.submittedBy.firstName} ${item.submittedBy.lastName}`.toLowerCase().includes(searchTerm.toLowerCase())
-      );
+  const toggleDropdown = () => {
+    setDropdownOpen(!dropdownOpen);
+  };
+
+  // Custom dropdown handlers
+  const handleCategoryChange = (category) => {
+    setFormData({...formData, category: category});
+    setCategoryDropdownOpen(false);
+
+    if (touched.category) {
+      validateField('category', category);
     }
+  };
 
-    // Category filter
-    if (categoryFilter !== 'all') {
-      filtered = filtered.filter(item => item.category === categoryFilter);
+  const toggleCategoryDropdown = () => {
+    setCategoryDropdownOpen(!categoryDropdownOpen);
+  };
+
+  const handleVisibilityChange = (visibility) => {
+    setFormData({...formData, isPublic: visibility});
+    setVisibilityDropdownOpen(false);
+
+    if (touched.isPublic) {
+      validateField('isPublic', visibility);
     }
+  };
 
-    setFilteredFeedback(filtered);
-  }, [feedback, searchTerm, categoryFilter]);
+  const toggleVisibilityDropdown = () => {
+    setVisibilityDropdownOpen(!visibilityDropdownOpen);
+  };
 
+  // Format date
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
@@ -353,7 +431,7 @@ const Feedback = () => {
     });
   };
 
-  if (isLoading) {
+  if (loading || authLoading) {
     return (
       <div className={styles.feedbackPage}>
         <div className={styles.loadingContainer}>
@@ -366,18 +444,18 @@ const Feedback = () => {
 
   return (
     <div className={styles.feedbackPage}>
-      {/* Header Section */}
+      {/* Header */}
       <div className={styles.header}>
-        <div className={styles.titleSection}>
-          <MessageSquare size={92} className={styles.headerIcon} />
+        <div className={styles.headerText}>
+          <MessageSquare size={92} className={styles.icon} />
           <div className={styles.headerContent}>
             <h1>Community Feedback</h1>
-            <p>Share your thoughts and read feedback from fellow community members</p>
+            <p>Share your thoughts and read feedback from fellow community members.</p>
           </div>
         </div>
 
-        {/* Search and Filter Controls */}
         <div className={styles.filterSection}>
+          {/* Search Bar */}
           <div className={styles.searchContainer}>
             <Search size={20} className={styles.searchIcon} />
             <input
@@ -387,21 +465,22 @@ const Feedback = () => {
               onChange={(e) => setSearchTerm(e.target.value)}
               className={styles.searchInput}
             />
-          </div>        
+          </div>
 
+          {/* Filter Dropdown */}
           <div className={styles.filterDropdown} ref={dropdownRef}>
             <Filter size={20} className={styles.filterIcon} />
             <button
               onClick={toggleDropdown}
               className={`${styles.dropdownButton} ${dropdownOpen ? styles.active : ''}`}
             >
-              <span>{categoryFilter === 'all' ? 'All Categories' : categoryFilter}</span>
+              <span>{filterCategory === 'all' ? 'All Categories' : filterCategory}</span>
               <ChevronDown size={16} className={`${styles.dropdownArrow} ${dropdownOpen ? styles.open : ''}`} />
             </button>
             <div className={`${styles.dropdownContent} ${dropdownOpen ? styles.show : ''}`}>
               <button
                 onClick={() => handleFilterChange('all')}
-                className={`${styles.dropdownItem} ${categoryFilter === 'all' ? styles.active : ''}`}
+                className={`${styles.dropdownItem} ${filterCategory === 'all' ? styles.active : ''}`}
               >
                 All Categories
               </button>
@@ -409,7 +488,7 @@ const Feedback = () => {
                 <button
                   key={category}
                   onClick={() => handleFilterChange(category)}
-                  className={`${styles.dropdownItem} ${categoryFilter === category ? styles.active : ''}`}
+                  className={`${styles.dropdownItem} ${filterCategory === category ? styles.active : ''}`}
                 >
                   {category}
                 </button>
@@ -419,76 +498,85 @@ const Feedback = () => {
         </div>
       </div>
 
-      {/* Content Grid */}
-      {filteredFeedback.length === 0 && !searchTerm && categoryFilter === 'all' ? (
-        <div className={styles.noRequests}>
-          <FileText size={64} className={styles.noRequestsIcon} />
-          <h3>No feedback found</h3>
-          <p>There is no feedback to display.</p>
-        </div>
-      ) : (
-        <div className={styles.content}>
-          <div className={styles.requestsGrid}>
-            {/* Add New Feedback Card */}
+      {/* Content Section */}
+      <div className={styles.content}>
+        {/* Feedback Grid */}
+        {filteredFeedback.length === 0 && !searchTerm && filterCategory === 'all' ? (
+          <div className={styles.noFeedback}>
+            <FileText size={80} />
+            <h3>No feedback found</h3>
+            <p>There is no community feedback to display.</p>
+          </div>
+        ) : (
+          <div className={styles.feedbackGrid}>
+            {/* Submit New Feedback Card - First item */}
             <div
-              onClick={handleFeedbackClick}
-              className={styles.addRequestCard}
+              onClick={handleSubmitClick}
+              className={styles.submitCard}
             >
-              <div className={styles.addRequestContent}>
-                <div className={styles.addRequestIconContainer}>
-                  <Plus size={48} className={styles.addRequestIcon} />
+              <div className={styles.submitCardContent}>
+                <div className={styles.submitIconContainer}>
+                  <Plus size={48} className={styles.submitIcon} />
                 </div>
-                <h3 className={styles.addRequestTitle}>Submit New Feedback</h3>
-                <p className={styles.addRequestDescription}>
+                <h3 className={styles.submitTitle}>Submit New Feedback</h3>
+                <p className={styles.submitDescription}>
                   Share your thoughts and feedback with the community
                 </p>
               </div>
             </div>
 
             {filteredFeedback.length === 0 ? (
-              <div className={styles.noFilteredRequests}>
-                <FileText size={64} className={styles.noRequestsIcon} />
+              <div className={styles.noFeedback}>
+                <FileText size={80} />
                 <h3>No feedback found</h3>
-                <p>Try adjusting your search or filter criteria</p>
+                <p>
+                  {searchTerm || filterCategory !== 'all' 
+                    ? 'Try adjusting your search or filter criteria' 
+                    : 'There is no community feedback to display.'}
+                </p>
               </div>
             ) : (
-              filteredFeedback.map((feedbackItem) => (
+              filteredFeedback.map((feedback) => (
                 <div
-                  key={feedbackItem._id}
-                  onClick={() => openDetailsModal(feedbackItem)}
-                  className={styles.requestCard}
+                  key={feedback._id}
+                  onClick={() => handleFeedbackClick(feedback)}
+                  className={styles.feedbackCard}
                 >
-                  <div className={styles.requestCardHeader}>
-                    <div className={styles.organizationInfo}>
-                      <h3 className={styles.organizationName}>{feedbackItem.subject}</h3>
-                    </div>
-                      <div className={`${styles.statusBadge} ${styles[feedbackItem.status.toLowerCase()]}`}>
-                        {feedbackItem.status.charAt(0).toUpperCase() + feedbackItem.status.slice(1)}
-                      </div>
+                  {/* Category Badge - Using short label */}
+                  <div className={`${styles.categoryBadge} ${styles[getCategoryCssClass(feedback.category)]}`}>
+                    {getShortCategoryLabel(feedback.category)}
                   </div>
 
-                  <div className={styles.requestDetails}>
-                    <div className={styles.detailItem}>
+                  {/* Subject */}
+                  <h3 className={styles.feedbackSubject}>{feedback.subject}</h3>
+
+                  {/* Feedback Info */}
+                  <div className={styles.feedbackInfo}>
+                    <div className={styles.infoItem}>
                       <User size={16} />
-                      <span>{`${feedbackItem.submittedBy.firstName} ${feedbackItem.submittedBy.lastName}`}</span>
+                      <span>{`${feedback.submittedBy.firstName} ${feedback.submittedBy.lastName}`}</span>
                     </div>
-                    <div className={styles.detailItem}>
+                    <div className={styles.infoItem}>
                       <Tag size={16} />
-                      <span>{feedbackItem.category}</span>
+                      <span>{getShortCategoryLabel(feedback.category)}</span>
                     </div>
                   </div>
-                  
+
                   {/* Message Preview */}
-                  <div className={styles.purpose}>
+                  <div className={styles.messagePreview}>
                     <strong>Message:</strong>
-                    <p>{feedbackItem.message.substring(0, 100)}...</p>
+                    <p>{feedback.message.substring(0, 100)}...</p>
                   </div>
-                  
-                  <div className={styles.cardFooter}>
-                    <span className={styles.publishDate}>
-                      {formatDate(feedbackItem.createdAt)}
-                    </span>
-                    <button className={styles.viewDetailsButton}>
+
+                  {/* Card Actions */}
+                  <div className={styles.cardActions}>
+                    <button 
+                      className={styles.viewMoreBtn}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleFeedbackClick(feedback);
+                      }}
+                    >
                       View Details
                     </button>
                   </div>
@@ -496,57 +584,58 @@ const Feedback = () => {
               ))
             )}
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
-      {/* View Details Modal */}
-      {showDetailsModal && selectedFeedback && (
-        <div className={styles.modal} onClick={closeViewModal}>
+      {/* Feedback Details Modal */}
+      {showFeedbackDetails && selectedFeedback && (
+        <div className={styles.modal} onClick={closeAllModals}>
           <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
             <div className={styles.modalHeader}>
               <div className={styles.modalTitle}>
                 <h2>{selectedFeedback.subject}</h2>
-                <span className={`${styles.requestTypeBadge} ${styles.large} ${styles[selectedFeedback.category.toLowerCase().replace(' ', '-')]}`}>
-                  {selectedFeedback.category}
+                {/* Category Badge - Using short label */}
+                <span className={`${styles.categoryBadge} ${styles[getCategoryCssClass(selectedFeedback.category)]}`}>
+                  {getShortCategoryLabel(selectedFeedback.category)}
                 </span>
               </div>
-              <button onClick={closeViewModal} className={styles.closeButton}>
+              <button onClick={closeAllModals} className={styles.closeButton}>
                 ×
               </button>
             </div>
             
             <div className={styles.modalBody}>        
               {/* Feedback Details Grid */}
-              <div className={styles.detailsGrid}>
+              <div className={styles.feedbackDetailsGrid}>
                 <div className={styles.detailItem}>
                   <User size={20} />
                   <div>
-                    <strong>Submitted By: </strong>{`${selectedFeedback.submittedBy.firstName} ${selectedFeedback.submittedBy.lastName}`}
+                    <strong>Submitted By:</strong> {`${selectedFeedback.submittedBy.firstName} ${selectedFeedback.submittedBy.lastName}`}
                   </div>
                 </div>
                 
                 <div className={styles.detailItem}>
-                  <Calendar size={20} />
+                  <Tag size={20} />
                   <div>
-                    <strong>Date: </strong>{formatDate(selectedFeedback.createdAt)}
+                    <strong>Tag:</strong> {selectedFeedback.category}
                   </div>
                 </div>
               </div>
               
-              {/* Feedback Message */}
+              {/* Message */}
               <div className={styles.section}>
                 <h4>Feedback Message</h4>
                 <p className={styles.description}>{selectedFeedback.message}</p>
               </div>
-
-              {/* Admin Response Section */}
+              
+              {/* Admin Response if exists */}
               {selectedFeedback.adminResponse && selectedFeedback.adminResponse.message && (
                 <div className={styles.section}>
                   <h4>Admin Response</h4>
-                  <div className={styles.adminResponseContainer}>
+                  <div className={styles.adminResponseBox}>
                     <p className={styles.description}>{selectedFeedback.adminResponse.message}</p>
                     <div className={styles.responseMetadata}>
-                      <small className={styles.responseDate}>
+                      <small>
                         Responded on {formatDateTime(selectedFeedback.adminResponse.respondedAt)}
                         {selectedFeedback.adminResponse.isEdited && (
                           <span className={styles.editedIndicator}> (edited)</span>
@@ -560,16 +649,13 @@ const Feedback = () => {
               {/* Modal Metadata */}
               <div className={styles.modalMetadata}>
                 <div className={styles.metaItem}>
-                  <strong>Published:</strong> {formatDateTime(selectedFeedback.createdAt)}
+                  <strong>Submitted:</strong> {formatDateTime(selectedFeedback.createdAt)}
                 </div>
                 {selectedFeedback.updatedAt !== selectedFeedback.createdAt && (
                   <div className={styles.metaItem}>
                     <strong>Last Updated:</strong> {formatDateTime(selectedFeedback.updatedAt)}
                   </div>
                 )}
-                <div className={styles.metaItem}>
-                  <strong>Status:</strong> {selectedFeedback.status.charAt(0).toUpperCase() + selectedFeedback.status.slice(1)}
-                </div>
               </div>
             </div>
           </div>
@@ -615,24 +701,44 @@ const Feedback = () => {
                     )}
                   </div>
 
-                  {/* Category */}
+                  {/* Category - Custom Dropdown */}
                   <div className={styles.formGroup}>
                     <label>Category *</label>
                     <div className={styles.inputWrapper}>
                       <Tag size={16} className={styles.inputIcon} />
-                      <select
-                        value={formData.category}
-                        onChange={(e) => handleInputChange('category', e.target.value)}
-                        onBlur={(e) => handleInputBlur('category', e.target.value)}
-                        required
-                        className={getInputClass('category')}
-                      >
-                        {categories.map((category) => (
-                          <option key={category} value={category}>
-                            {category}
-                          </option>
-                        ))}
-                      </select>
+                      <div className={styles.customDropdown} ref={categoryDropdownRef}>
+                        <button
+                          type="button"
+                          onClick={toggleCategoryDropdown}
+                          onBlur={(e) => {
+                            if (!categoryDropdownRef.current?.contains(e.relatedTarget)) {
+                              handleInputBlur('category', formData.category);
+                            }
+                          }}
+                          className={`${styles.customDropdownButton} ${categoryDropdownOpen ? styles.active : ''} ${!formData.category ? styles.placeholder : ''} ${touched.category && fieldErrors.category ? styles.inputInvalid : touched.category ? styles.inputValid : ''}`}
+                          required
+                        >
+                          <span>
+                            {formData.category || 'Select category'}
+                          </span>
+                          <ChevronDown size={16} className={`${styles.dropdownArrow} ${categoryDropdownOpen ? styles.open : ''}`} />
+                        </button>
+                        <div className={`${styles.customDropdownContent} ${categoryDropdownOpen ? styles.show : ''}`}>
+                          {categories.map((category) => (
+                            <button
+                              key={category}
+                              type="button"
+                              onClick={() => {
+                                handleCategoryChange(category);
+                                setTouched(prev => ({ ...prev, category: true }));
+                              }}
+                              className={`${styles.customDropdownItem} ${formData.category === category ? styles.active : ''}`}
+                            >
+                              {category}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
                     </div>
                     {touched.category && fieldErrors.category && (
                       <div className={styles.errorMessage}>
@@ -659,6 +765,9 @@ const Feedback = () => {
                         {fieldErrors.message}
                       </div>
                     )}
+                    <small className={styles.charCount}>
+                      {formData.message.length}/2000 characters
+                    </small>
                   </div>
                 </div>
 
@@ -685,9 +794,9 @@ const Feedback = () => {
         </div>
       )}
       
-      {/* Authentication Modal */}
-      {showAuthModal && (
-        <div className={styles.modal} onClick={() => setShowAuthModal(false)}>
+      {/* Authentication Prompt Modal */}
+      {showAuthPrompt && (
+        <div className={styles.modal} onClick={closeAllModals}>
           <div className={styles.authPrompt} onClick={(e) => e.stopPropagation()}>
             <div className={styles.authPromptHeader}>
               <User size={32} />
@@ -695,8 +804,18 @@ const Feedback = () => {
             </div>
             <p>You need to have an account to submit feedback.</p>
             <div className={styles.authActions}>
-              <a href="/login" className={styles.loginBtn}>Login</a>
-              <a href="/register" className={styles.registerBtn}>Register</a>
+              <button 
+                className={styles.loginBtn}
+                onClick={() => window.location.href = '/login'}
+              >
+                Login
+              </button>
+              <button 
+                className={styles.registerBtn}
+                onClick={() => window.location.href = '/register'}
+              >
+                Create Account
+              </button>
             </div>
           </div>
         </div>
