@@ -654,7 +654,7 @@ const toggleBarangayDropdown = () => {
                     <span>
                     {formatDate(job.applicationDeadline)}
                       {isDeadlinePassed(job.applicationDeadline) && (
-                        <span className={styles.expired}> (Expired)</span>
+                        <span className={styles.expired}> (Closed)</span>
                       )}
                     </span>
                   </div>
@@ -740,7 +740,7 @@ const toggleBarangayDropdown = () => {
                   <div>
                     <strong>Application Deadline:</strong> {formatDate(selectedJob.applicationDeadline)}
                     {isDeadlinePassed(selectedJob.applicationDeadline) && (
-                      <span className={styles.expired}> (Expired)</span>
+                      <span className={styles.expired}> (Closed)</span>
                     )}
                   </div>
                 </div>

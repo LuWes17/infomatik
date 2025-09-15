@@ -63,7 +63,7 @@ class OTPService {
       console.log('========================');
 
       // In production, uncomment this line to actually send SMS:
-      // await smsService.sendSMS(formattedNumber, `Your City Councilor verification code is: ${otp}. Valid for 5 minutes.`);
+       await smsService.sendSMS(formattedNumber, `Your Infomatik verification code is: ${otp}. Valid for 5 minutes.`);
 
       return {
         success: true,
@@ -177,7 +177,7 @@ class OTPService {
     console.log('==================');
 
     // In production, uncomment this line:
-    // await smsService.sendSMS(contactNumber, `Your new City Councilor verification code is: ${newOTP}. Valid for 5 minutes.`);
+    await smsService.sendSMS(contactNumber, `Your new Infomatik verification code is: ${newOTP}. Valid for 5 minutes.`);
 
     return {
       success: true,
@@ -283,7 +283,7 @@ async sendForgotPasswordOTP(contactNumber, user) {
     console.log('===========================');
 
     // In production, uncomment this line to actually send SMS:
-    // await smsService.sendSMS(formattedNumber, `Your password reset code is: ${otp}. Valid for 5 minutes. If you didn't request this, please ignore.`);
+    await smsService.sendSMS(formattedNumber, `Your password reset code is: ${otp}. Valid for 5 minutes. If you didn't request this, please ignore.`);
 
     return {
       success: true,
@@ -398,7 +398,7 @@ async resendForgotPasswordOTP(contactNumber) {
   console.log('==================================');
 
   // In production, uncomment this line:
-  // await smsService.sendSMS(contactNumber, `Your new password reset code is: ${newOTP}. Valid for 5 minutes.`);
+  await smsService.sendSMS(contactNumber, `Your new password reset code is: ${newOTP}. Valid for 5 minutes.`);
 
   return {
     success: true,

@@ -384,14 +384,7 @@ This is an excellent opportunity for someone passionate about public health and 
           respondedBy: admin._id,
           respondedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000), // 1 day ago
           isPublic: true
-        },
-        followUpResponses: [
-          {
-            message: 'UPDATE: Our maintenance team has completed the inspection and ordered the necessary replacement parts. Installation is scheduled for next Monday morning.',
-            respondedBy: admin._id,
-            respondedAt: new Date()
-          }
-        ]
+        }
       },
       {
         submittedBy: sampleUsers[2]._id, // Pedro Reyes
@@ -608,12 +601,6 @@ This is an excellent opportunity for someone passionate about public health and 
     });
 
     console.log('\n✅ Enhanced sample data seeding completed successfully!');
-    console.log('💡 You can now test all features including:');
-    console.log('   - Job applications and solicitation requests');
-    console.log('   - Community feedback system');
-    console.log('   - Local policies management');
-    console.log('   - Rice distribution tracking');
-    console.log('   - Announcements and accomplishments');
 
   } catch (error) {
     console.error('❌ Error seeding sample data:', error.message);
@@ -623,6 +610,64 @@ This is an excellent opportunity for someone passionate about public health and 
       console.log('💡 Try running the script with different values or clear existing data first');
     }
     
+  } finally {
+    await mongoose.disconnect();
+    console.log('🔌 Disconnected from MongoDB');
+    process.exit(0);
+  }
+};
+
+// Function to delete ALL users from the database
+const deleteAllUsers = async () => {
+  try {
+    console.log('🔄 Connecting to MongoDB...');
+    await mongoose.connect(process.env.MONGODB_URI);
+    console.log('✅ Connected to MongoDB');
+
+    console.log('⚠️  WARNING: This will delete ALL users from the database!');
+    console.log('🗑️  Deleting all users...');
+    
+    const result = await User.deleteMany({});
+    
+    console.log(`✅ Successfully deleted ${result.deletedCount} users from the database`);
+    
+    if (result.deletedCount === 0) {
+      console.log('ℹ️  No users found in the database');
+    } else {
+      console.log('💡 All users have been removed. You may want to create a new admin user next.');
+    }
+
+  } catch (error) {
+    console.error('❌ Error deleting users:', error.message);
+  } finally {
+    await mongoose.disconnect();
+    console.log('🔌 Disconnected from MongoDB');
+    process.exit(0);
+  }
+};
+
+// Function to delete all users except admin
+const deleteNonAdminUsers = async () => {
+  try {
+    console.log('🔄 Connecting to MongoDB...');
+    await mongoose.connect(process.env.MONGODB_URI);
+    console.log('✅ Connected to MongoDB');
+
+    console.log('🗑️  Deleting all non-admin users...');
+    
+    const result = await User.deleteMany({ role: { $ne: 'admin' } });
+    
+    console.log(`✅ Successfully deleted ${result.deletedCount} non-admin users from the database`);
+    
+    const remainingAdmins = await User.countDocuments({ role: 'admin' });
+    console.log(`ℹ️  ${remainingAdmins} admin user(s) remain in the database`);
+    
+    if (result.deletedCount === 0) {
+      console.log('ℹ️  No non-admin users found in the database');
+    }
+
+  } catch (error) {
+    console.error('❌ Error deleting non-admin users:', error.message);
   } finally {
     await mongoose.disconnect();
     console.log('🔌 Disconnected from MongoDB');
@@ -671,118 +716,253 @@ const clearSampleData = async () => {
   }
 };
 
+// Function to create only admin user
+const createAdminOnly = async () => {
+  try {
+    console.log('🔄 Connecting to MongoDB...');
+    await mongoose.connect(process.env.MONGODB_URI);
+    console.log('✅ Connected to MongoDB');
+
+    // Check if admin already exists
+    const existingAdmin = await User.findOne({ role: 'admin' });
+    if (existingAdmin) {
+      console.log('ℹ️  Admin user already exists:');
+      console.log(`   Name: ${existingAdmin.fullName}`);
+      console.log(`   Contact: ${existingAdmin.contactNumber}`);
+      return;
+    }
+
+    console.log('👤 Creating admin user...');
+    const admin = await User.create({
+      firstName: 'System',
+      lastName: 'Administrator',
+      contactNumber: '09123456789',
+      password: 'Admin@123',
+      barangay: 'agnas',
+      role: 'admin',
+      isVerified: true,
+      isActive: true
+    });
+
+    console.log('✅ Admin user created successfully!');
+    console.log(`   Name: ${admin.fullName}`);
+    console.log(`   Contact: ${admin.contactNumber}`);
+    console.log(`   Password: Admin@123`);
+    console.log('⚠️  Please change the default password after first login!');
+
+  } catch (error) {
+    console.error('❌ Error creating admin user:', error.message);
+    
+    if (error.code === 11000) {
+      console.log('⚠️  Admin user with this contact number already exists');
+    }
+  } finally {
+    await mongoose.disconnect();
+    console.log('🔌 Disconnected from MongoDB');
+    process.exit(0);
+  }
+};
+
+// Function to show database statistics
+const showStats = async () => {
+  try {
+    console.log('🔄 Connecting to MongoDB...');
+    await mongoose.connect(process.env.MONGODB_URI);
+    console.log('✅ Connected to MongoDB');
+
+    console.log('\n📊 DATABASE STATISTICS:');
+    console.log('='.repeat(50));
+
+    const userCount = await User.countDocuments();
+    const adminCount = await User.countDocuments({ role: 'admin' });
+    const citizenCount = await User.countDocuments({ role: 'citizen' });
+    const jobPostingCount = await JobPosting.countDocuments();
+    const jobApplicationCount = await JobApplication.countDocuments();
+    const solicitationCount = await SolicitationRequest.countDocuments();
+    const announcementCount = await Announcement.countDocuments();
+    const accomplishmentCount = await Accomplishment.countDocuments();
+    const policyCount = await LocalPolicy.countDocuments();
+    const feedbackCount = await Feedback.countDocuments();
+    const riceDistributionCount = await RiceDistributionRecord.countDocuments();
+
+    console.log(`👥 Users: ${userCount} total`);
+    console.log(`   - Admins: ${adminCount}`);
+    console.log(`   - Citizens: ${citizenCount}`);
+    console.log(`💼 Job Postings: ${jobPostingCount}`);
+    console.log(`📄 Job Applications: ${jobApplicationCount}`);
+    console.log(`📋 Solicitation Requests: ${solicitationCount}`);
+    console.log(`📢 Announcements: ${announcementCount}`);
+    console.log(`🏆 Accomplishments: ${accomplishmentCount}`);
+    console.log(`📜 Local Policies: ${policyCount}`);
+    console.log(`💬 Feedback Entries: ${feedbackCount}`);
+    console.log(`🌾 Rice Distribution Records: ${riceDistributionCount}`);
+    console.log('='.repeat(50));
+
+    if (userCount > 0) {
+      console.log('\n👥 USER DETAILS:');
+      const users = await User.find({}).select('firstName lastName contactNumber role barangay').sort({ role: -1, createdAt: 1 });
+      users.forEach(user => {
+        console.log(`   ${user.role.toUpperCase()}: ${user.fullName} (${user.contactNumber}) - ${user.barangay}`);
+      });
+    }
+
+  } catch (error) {
+    console.error('❌ Error retrieving database statistics:', error.message);
+  } finally {
+    await mongoose.disconnect();
+    console.log('🔌 Disconnected from MongoDB');
+    process.exit(0);
+  }
+};
+
 // Run based on command line argument
 const command = process.argv[2];
 
-if (command === 'clear') {
-  clearSampleData();
-} else {
-  seedSampleData();
+switch (command) {
+  case 'clear':
+    clearSampleData();
+    break;
+  case 'delete-all-users':
+    console.log('⚠️  WARNING: This will delete ALL users including admins!');
+    console.log('⏳ Starting in 3 seconds... Press Ctrl+C to cancel');
+    setTimeout(deleteAllUsers, 3000);
+    break;
+  case 'delete-non-admin':
+    deleteNonAdminUsers();
+    break;
+  case 'admin-only':
+    createAdminOnly();
+    break;
+  case 'stats':
+    showStats();
+    break;
+  case 'help':
+    console.log('\n🔧 AVAILABLE COMMANDS:');
+    console.log('='.repeat(50));
+    console.log('node src/scripts/seedSampleData.js                    - Seed sample data');
+    console.log('node src/scripts/seedSampleData.js clear              - Clear sample data only');
+    console.log('node src/scripts/seedSampleData.js delete-all-users   - Delete ALL users (⚠️  DANGEROUS)');
+    console.log('node src/scripts/seedSampleData.js delete-non-admin   - Delete non-admin users only');
+    console.log('node src/scripts/seedSampleData.js admin-only         - Create admin user only');
+    console.log('node src/scripts/seedSampleData.js stats              - Show database statistics');
+    console.log('node src/scripts/seedSampleData.js help               - Show this help message');
+    console.log('='.repeat(50));
+    process.exit(0);
+  default:
+    seedSampleData();
 }
 
 /* 
-USAGE INSTRUCTIONS:
+ENHANCED USAGE INSTRUCTIONS:
 
-1. To add sample data:
+🔧 AVAILABLE COMMANDS:
+=====================================
+
+1. Seed sample data (default):
    node src/scripts/seedSampleData.js
 
-2. To clear sample data:
+2. Clear sample data only:
    node src/scripts/seedSampleData.js clear
 
-3. Make sure your .env file has MONGODB_URI set properly
+3. Delete ALL users (including admins) - ⚠️ DANGEROUS:
+   node src/scripts/seedSampleData.js delete-all-users
 
-4. The script will create comprehensive sample data including:
-   - 1 Admin user (if doesn't exist)
-   - 6 Sample citizen users
-   - 1 Approved solicitation request
-   - 1 Open job posting with 4 applications (various statuses)
-   - 2 Sample announcements (1 event, 1 update)
-   - 2 Sample accomplishments (health & social programs)
-   - 3 Sample local policies (2 ordinances, 1 resolution)
-   - 5 Sample feedback entries with admin responses
-   - 2 Sample rice distribution records (1 completed, 1 ongoing)
+4. Delete non-admin users only:
+   node src/scripts/seedSampleData.js delete-non-admin
 
-5. Features you can test with this data:
-   ✅ Job Application System
-      - View job openings
-      - Apply for jobs
-      - Admin job management
-      - SMS notifications simulation
-   
-   ✅ Solicitation Request System
-      - Submit solicitation requests
-      - Admin approval process
-      - Public viewing of approved requests
-   
-   ✅ Community Feedback System
-      - Submit feedback (authenticated users)
-      - Public viewing of feedback
-      - Admin responses with edit/delete capability
-      - Follow-up responses
-   
-   ✅ Local Policies Management
-      - View ordinances and resolutions
-      - Download policy documents (simulated paths)
-      - Admin policy management
-   
-   ✅ Rice Distribution System
-      - Monthly distribution planning
-      - Barangay selection and scheduling
-      - SMS notification tracking
-      - Distribution completion tracking
-   
-   ✅ Announcements & Accomplishments
-      - Public announcements with events
-      - Community accomplishments showcase
-      - Admin content management
+5. Create admin user only:
+   node src/scripts/seedSampleData.js admin-only
 
-6. All users have standard passwords: User@123 or Admin@123
-   Change these in production!
+6. Show database statistics:
+   node src/scripts/seedSampleData.js stats
 
-7. File paths in the sample data are examples - ensure you create 
-   proper upload directories and file handling for full functionality
+7. Show help:
+   node src/scripts/seedSampleData.js help
 
-8. SMS integration points are included but require actual SMS service setup
+🚨 IMPORTANT SAFETY NOTES:
+=========================
 
-9. The sample data includes realistic scenarios:
-   - Different barangays represented
-   - Various feedback categories and responses
-   - Multiple policy types and categories
-   - Detailed rice distribution logistics
-   - Mixed application statuses for testing
+- The 'delete-all-users' command will remove EVERY user from the database
+- There's a 3-second warning before execution - use Ctrl+C to cancel
+- Always backup your database before running destructive commands
+- Use 'delete-non-admin' if you want to keep admin users
+- Use 'stats' command to check what's in your database before deletion
 
-10. For production deployment:
-    - Change default passwords
-    - Set up proper file upload directories
-    - Configure SMS service integration
-    - Adjust barangay lists as needed
-    - Review and customize sample content
+🎯 TYPICAL WORKFLOWS:
+====================
 
-MODULAR CSS STYLING RECOMMENDATION:
-When implementing the frontend components, use modular CSS with the following structure:
+Fresh Start:
+1. node src/scripts/seedSampleData.js delete-all-users
+2. node src/scripts/seedSampleData.js admin-only
+3. node src/scripts/seedSampleData.js (to add sample data)
+
+Clean Reset:
+1. node src/scripts/seedSampleData.js clear
+2. node src/scripts/seedSampleData.js delete-non-admin
+
+Check Database:
+1. node src/scripts/seedSampleData.js stats
+
+🔒 SECURITY REMINDERS:
+=====================
+
+- Change default passwords in production
+- Never run delete commands on production databases
+- Always verify your database connection string
+- Consider using database migrations for production deployments
+
+📁 CSS STRUCTURE RECOMMENDATION:
+===============================
+
+When implementing frontend components, use this modular CSS approach:
 
 /src/styles/
-  ├── modules/
-  │   ├── JobApplication.module.css
-  │   ├── Feedback.module.css
-  │   ├── LocalPolicy.module.css
-  │   ├── RiceDistribution.module.css
-  │   ├── Announcements.module.css
-  │   └── Accomplishments.module.css
-  ├── components/
-  │   ├── Button.module.css
-  │   ├── Form.module.css
-  │   ├── Modal.module.css
-  │   └── Card.module.css
-  └── globals/
-      ├── variables.css
-      ├── mixins.css
-      └── reset.css
+├── modules/
+│   ├── JobApplication.module.css
+│   ├── Feedback.module.css
+│   ├── LocalPolicy.module.css
+│   ├── RiceDistribution.module.css
+│   ├── Announcements.module.css
+│   └── Accomplishments.module.css
+├── components/
+│   ├── Button.module.css
+│   ├── Form.module.css
+│   ├── Modal.module.css
+│   └── Card.module.css
+└── globals/
+    ├── variables.css
+    ├── mixins.css
+    └── reset.css
 
-This approach provides:
-- Component isolation
-- Reusable utility classes
-- Easy maintenance
-- No naming conflicts
-- Better organization
+🌐 API INTEGRATION:
+==================
+
+When calling APIs from your frontend:
+
+```javascript
+// Use fetch for all API calls
+const response = await fetch('/api/endpoint', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${token}`
+  },
+  body: JSON.stringify(data)
+});
+
+const result = await response.json();
+```
+
+💡 COLOR SCHEME CONSISTENCY:
+============================
+
+Check existing pages for color schemes and use consistent:
+- Primary colors
+- Secondary colors  
+- Accent colors
+- Text colors
+- Background colors
+- Border colors
+
+This ensures visual consistency across your barangay management system.
 */

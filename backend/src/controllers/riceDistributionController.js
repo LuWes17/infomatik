@@ -9,11 +9,60 @@ exports.createDistribution = asyncHandler(async (req, res) => {
   
   const distribution = await RiceDistributionRecord.create(req.body);
   
-  res.status(201).json({
-    success: true,
-    message: 'Rice distribution record created successfully',
-    data: distribution
-  });
+  // 🚨 ADD THIS: Automatically send SMS notifications to selected barangays
+  try {
+    // Get users from selected barangays
+    const users = await User.find({
+      barangay: { $in: distribution.selectedBarangays.map(b => b.toLowerCase()) },
+      isActive: true
+    });
+    
+    if (users.length > 0) {
+      // Prepare distribution info for SMS
+      const distributionInfo = {
+        date: distribution.distributionSchedule[0]?.date ? 
+               new Date(distribution.distributionSchedule[0].date).toLocaleDateString('en-US', {
+                 year: 'numeric', 
+                 month: 'long', 
+                 day: 'numeric'
+               }) : 'TBA',
+        location: distribution.distributionSchedule[0]?.location || 'TBA',
+        barangays: distribution.selectedBarangays
+      };
+      
+      // Send SMS notifications
+      await smsService.sendRiceDistributionSMS(users, distributionInfo);
+      
+      await distribution.save();
+      
+      console.log(`✅ Rice distribution created and SMS notifications sent to ${users.length} users in barangays: ${distribution.selectedBarangays.join(', ')}`);
+      
+      res.status(201).json({
+        success: true,
+        message: `Rice distribution record created successfully. SMS notifications sent to ${users.length} residents.`,
+        data: distribution
+      });
+    } else {
+      console.log(`⚠️ No active users found in selected barangays: ${distribution.selectedBarangays.join(', ')}`);
+      
+      res.status(201).json({
+        success: true,
+        message: 'Rice distribution record created successfully. No active users found in selected barangays for SMS notifications.',
+        data: distribution
+      });
+    }
+    
+  } catch (smsError) {
+    console.error('Error sending rice distribution SMS notifications:', smsError);
+    
+    // Distribution was created successfully, but SMS failed
+    res.status(201).json({
+      success: true,
+      message: 'Rice distribution record created successfully, but SMS notifications failed to send.',
+      data: distribution,
+      warning: 'SMS notifications could not be sent. You can manually send them later.'
+    });
+  }
 });
 
 exports.getAllDistributions = asyncHandler(async (req, res) => {

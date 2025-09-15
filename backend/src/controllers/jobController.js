@@ -1,5 +1,6 @@
 const JobPosting = require('../models/JobPosting');
 const JobApplication = require('../models/JobApplication');
+const User = require('../models/User');
 const asyncHandler = require('../middleware/async');
 const smsService = require('../services/smsService');
 const { uploadToB2, deleteFromB2 } = require('../config/upload');
@@ -102,7 +103,6 @@ exports.updateJobPosting = asyncHandler(async (req, res) => {
   if (previousJob.status === 'closed' && jobPosting.status === 'open') {
     try {
       const users = await User.find({ 
-        isActive: true, 
         role: 'citizen' 
       });
       
@@ -110,6 +110,8 @@ exports.updateJobPosting = asyncHandler(async (req, res) => {
       
       const phoneNumbers = users.map(user => user.contactNumber);
       await smsService.sendBulkSMS(phoneNumbers, message);
+
+      console.log(message);
       
       console.log(`Sent job reopening notification to ${users.length} users`);
     } catch (error) {
@@ -177,7 +179,7 @@ exports.toggleJobStatus = asyncHandler(async (req, res) => {
         application.smsNotificationSent = true;
         await application.save();
       } catch (error) {
-        console.error(`Failed to send SMS to ${application.applicant.contactNumber}:`, error);
+
       }
     }
     

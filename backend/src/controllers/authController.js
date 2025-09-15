@@ -3,6 +3,7 @@ const User = require('../models/User');
 const { createTokenResponse, verifyRefreshToken, generateToken } = require('../utils/auth');
 const asyncHandler = require('../middleware/async');
 const otpService = require('../services/otpService');
+const smsService = require('../services/smsService');
 
 // @desc    Send OTP for registration
 // @route   POST /api/auth/send-otp
@@ -112,7 +113,7 @@ exports.verifyOTP = asyncHandler(async (req, res) => {
     otpService.cleanupOTP(contactNumber);
 
     // Send welcome SMS (optional, since we're testing)
-    // await smsService.sendWelcomeSMS(user);
+    await smsService.sendWelcomeSMS(user);
 
     // Send token response
     createTokenResponse(user, 201, res, 'Registration completed successfully');

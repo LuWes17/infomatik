@@ -2,6 +2,7 @@
 const SolicitationRequest = require('../models/SolicitationRequest');
 const asyncHandler = require('../middleware/async');
 const { uploadToB2, deleteFromB2 } = require('../config/upload');
+const smsService = require('../services/smsService');
 
 // Get approved solicitations (public)
 exports.getApprovedSolicitations = asyncHandler(async (req, res) => {
@@ -155,12 +156,12 @@ exports.getSolicitationById = asyncHandler(async (req, res) => {
   });
 });
 
-// Update solicitation status (Admin)
 exports.updateSolicitationStatus = asyncHandler(async (req, res) => {
   try {
     const { status, adminNotes, approvedAmount, approvalConditions } = req.body;
     
-    const solicitation = await SolicitationRequest.findById(req.params.id);
+    const solicitation = await SolicitationRequest.findById(req.params.id)
+      .populate('submittedBy', 'firstName lastName barangay contactNumber'); // ADD .populate() to get user details
     
     if (!solicitation) {
       return res.status(404).json({
@@ -182,13 +183,25 @@ exports.updateSolicitationStatus = asyncHandler(async (req, res) => {
     
     await solicitation.save();
     
-    // Populate for response
-    await solicitation.populate('submittedBy', 'firstName lastName barangay contactNumber');
+    // 🚨 ADD THIS: Send SMS notification to the user who submitted the request
+    try {
+      await smsService.sendSolicitationStatusSMS(
+        solicitation.submittedBy, 
+        status === 'approved' ? 'APPROVED' : 'REJECTED'
+      );
+      
+      console.log(`SMS notification sent to ${solicitation.submittedBy.contactNumber} for solicitation ${status}`);
+    } catch (smsError) {
+      console.error(`Failed to send SMS notification for solicitation ${status}:`, smsError);
+      // Don't fail the entire operation if SMS fails
+    }
+    
+    // Populate for response (re-populate since we saved)
     await solicitation.populate('reviewedBy', 'firstName lastName');
     
     res.status(200).json({
       success: true,
-      message: 'Solicitation status updated successfully',
+      message: `Solicitation ${status} successfully. SMS notification sent to applicant.`,
       data: solicitation
     });
   } catch (error) {
