@@ -51,12 +51,13 @@ exports.getJobPostingById = asyncHandler(async (req, res) => {
   });
 });
 
+// Create job posting (Admin) - UPDATED VERSION
 exports.createJobPosting = asyncHandler(async (req, res) => {
   req.body.createdBy = req.user.id;
   
   const jobPosting = await JobPosting.create(req.body);
   
-  // NEW: Send notification SMS to all users about new job opening
+  // Send notification SMS to all users about new job opening
   if (jobPosting.status === 'open') {
     try {
       const users = await User.find({ 
@@ -64,11 +65,8 @@ exports.createJobPosting = asyncHandler(async (req, res) => {
         role: 'citizen' 
       });
       
-      const message = `NEW JOB OPENING: ${jobPosting.title} is now available! Apply now through our website.`;
-      
-      const phoneNumbers = users.map(user => user.contactNumber);
-      await smsService.sendBulkSMS(phoneNumbers, message);
-      
+      // Use the dedicated SMS service method
+      await smsService.sendNewJobOpeningNotificationSMS(users, jobPosting.title);
       console.log(`Sent new job opening notification to ${users.length} users`);
     } catch (error) {
       console.error('Failed to send job opening notifications:', error);
@@ -99,26 +97,6 @@ exports.updateJobPosting = asyncHandler(async (req, res) => {
     { new: true, runValidators: true }
   );
   
-  // NEW: Send notification if job was closed and now opened
-  if (previousJob.status === 'closed' && jobPosting.status === 'open') {
-    try {
-      const users = await User.find({ 
-        role: 'citizen' 
-      });
-      
-      const message = `JOB REOPENED: ${jobPosting.title} is now open for applications again! Apply now through our website.`;
-      
-      const phoneNumbers = users.map(user => user.contactNumber);
-      await smsService.sendBulkSMS(phoneNumbers, message);
-
-      console.log(message);
-      
-      console.log(`Sent job reopening notification to ${users.length} users`);
-    } catch (error) {
-      console.error('Failed to send job reopening notifications:', error);
-    }
-  }
-  
   res.status(200).json({
     success: true,
     message: 'Job posting updated successfully',
@@ -143,7 +121,7 @@ exports.deleteJobPosting = asyncHandler(async (req, res) => {
   });
 });
 
-// Toggle job status (Admin)
+// Toggle job status (Admin) - FIXED VERSION
 exports.toggleJobStatus = asyncHandler(async (req, res) => {
   const jobPosting = await JobPosting.findById(req.params.id);
   
@@ -159,31 +137,50 @@ exports.toggleJobStatus = asyncHandler(async (req, res) => {
   
   await jobPosting.save();
   
-  // NEW: Notify pending applicants if job is being closed
+  // Handle SMS notifications based on status change
   if (previousStatus === 'open' && jobPosting.status === 'closed') {
-    // Find all pending applications for this job
-    const pendingApplications = await JobApplication.find({
-      jobPosting: jobPosting._id,
-      status: 'pending'
-    }).populate('applicant');
-    
-    // Send SMS notifications to pending applicants
-    for (const application of pendingApplications) {
-      try {
-        await smsService.sendJobClosureNotificationSMS(
-          application.applicant,
-          jobPosting.title
-        );
-        
-        // Mark SMS as sent
-        application.smsNotificationSent = true;
-        await application.save();
-      } catch (error) {
-
+    // JOB BEING CLOSED: Notify pending applicants
+    try {
+      const pendingApplications = await JobApplication.find({
+        jobPosting: jobPosting._id,
+        status: 'pending'
+      }).populate('applicant');
+      
+      // Send SMS notifications to pending applicants
+      for (const application of pendingApplications) {
+        try {
+          await smsService.sendJobClosureNotificationSMS(
+            application.applicant,
+            jobPosting.title
+          );
+          
+          // Mark SMS as sent
+          application.smsNotificationSent = true;
+          await application.save();
+        } catch (smsError) {
+          console.error(`Failed to send closure SMS to ${application.applicant.firstName}:`, smsError);
+        }
       }
+      
+      console.log(`Sent job closure notifications to ${pendingApplications.length} pending applicants`);
+    } catch (error) {
+      console.error('Failed to send job closure notifications:', error);
     }
-    
-    console.log(`Sent job closure notifications to ${pendingApplications.length} pending applicants`);
+  } 
+  else if (previousStatus === 'closed' && jobPosting.status === 'open') {
+    // JOB BEING REOPENED: Notify all citizens
+    try {
+      const users = await User.find({ 
+        isActive: true,
+        role: 'citizen' 
+      });
+      
+      // Use the dedicated SMS service method
+      await smsService.sendJobReopeningNotificationSMS(users, jobPosting.title);
+      console.log(`Sent job reopening notification to ${users.length} users`);
+    } catch (error) {
+      console.error('Failed to send job reopening notifications:', error);
+    }
   }
   
   res.status(200).json({

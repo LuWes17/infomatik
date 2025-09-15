@@ -259,6 +259,50 @@ formatPhoneNumber(number) {
   }
 
   /**
+ * Send job reopening notification SMS to all citizens
+ * @param {Array} users - Array of citizen users
+ * @param {string} jobTitle - Job title
+ * @returns {Promise<Object>} - Bulk SMS result
+ */
+async sendJobReopeningNotificationSMS(users, jobTitle) {
+  const message = `JOB REOPENED: ${jobTitle} is now open for applications again! Apply now through our website.`;
+  
+  console.log(message);
+  const phoneNumbers = users
+    .map(user => user.contactNumber)
+    .filter(phone => phone && phone.trim() !== ''); // Filter out empty/null phone numbers
+  
+  if (phoneNumbers.length === 0) {
+    console.log('No valid phone numbers found for job reopening notification');
+    return { success: false, error: 'No valid phone numbers found' };
+  }
+  
+  return await this.sendBulkSMS(phoneNumbers, message);
+}
+
+/**
+ * Send new job opening notification SMS to all citizens
+ * @param {Array} users - Array of citizen users  
+ * @param {string} jobTitle - Job title
+ * @returns {Promise<Object>} - Bulk SMS result
+ */
+async sendNewJobOpeningNotificationSMS(users, jobTitle) {
+  const message = `NEW JOB OPENING: ${jobTitle} is now available! Apply now through our website.`;
+  
+  console.log(message);
+  const phoneNumbers = users
+    .map(user => user.contactNumber)
+    .filter(phone => phone && phone.trim() !== ''); // Filter out empty/null phone numbers
+  
+  if (phoneNumbers.length === 0) {
+    console.log('No valid phone numbers found for new job opening notification');
+    return { success: false, error: 'No valid phone numbers found' };
+  }
+  
+  return await this.sendBulkSMS(phoneNumbers, message);
+}
+
+  /**
    * Send solicitation request status SMS with different messages for approved/rejected
    * @param {Object} user - User object
    * @param {string} status - Request status ('APPROVED' or 'REJECTED')
