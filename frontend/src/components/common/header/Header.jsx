@@ -363,9 +363,7 @@ const Header = () => {
                 </div>
               </li>
             </ul>
-          </nav>
-
-          {/* Mobile Auth Section */}
+            {/* Mobile Auth Section */}
             <div className={styles.sidebarAuthButtons}>
               {isAuthenticated ? (
               <button 
@@ -383,6 +381,8 @@ const Header = () => {
               </Link>
             )}
             </div>
+          </nav>
+
         </div>
       </div>
 
