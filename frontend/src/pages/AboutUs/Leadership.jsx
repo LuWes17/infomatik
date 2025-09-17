@@ -72,7 +72,7 @@ const Leadership = () => {
         <div className={styles.staffContent}>
           <div className={styles.staffHeader}>
             <h3 className={styles.staffTitle}>Our Staff</h3>
-            <p className={styles.staffSubtitle}>Dedicated public servants working for the community</p>
+            <p className={styles.staffSubtitle}>Dedicated legislative staff working for the community</p>
           </div>
           
           <div className={styles.staffGrid}>

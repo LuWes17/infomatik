@@ -4,7 +4,6 @@ import {
   MapPin, 
   BriefcaseBusiness, 
   Filter, 
-  X, 
   User,
   Phone,
   Upload,
@@ -164,18 +163,34 @@ const toggleBarangayDropdown = () => {
 
     // Apply status filter
     if (filterStatus !== 'all') {
-      filtered = filtered.filter(job => job.status === filterStatus);
-    }
+    filtered = filtered.filter(job => {
+      if (filterStatus === 'open') {
+        return job.status === 'open' && !isDeadlinePassed(job.applicationDeadline);
+      }
+      if (filterStatus === 'closed') {
+        return job.status === 'closed' || isDeadlinePassed(job.applicationDeadline);
+      }
+      return true;
+    });
+  }
+  
+  if (searchTerm.trim()) {
+    filtered = filtered.filter(job => 
+      job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      job.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      job.requirements.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (job.location && job.location.toLowerCase().includes(searchTerm.toLowerCase()))
+    );
+  }
 
-    // Apply search filter
-    if (searchTerm.trim()) {
-      filtered = filtered.filter(job => 
-        job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        job.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        job.requirements.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (job.location && job.location.toLowerCase().includes(searchTerm.toLowerCase()))
-      );
-    }
+  if (searchTerm.trim()) {
+    filtered = filtered.filter(job => 
+      job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      job.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      job.requirements.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (job.location && job.location.toLowerCase().includes(searchTerm.toLowerCase()))
+    );
+  }
 
     setFilteredJobs(filtered);
   }, [jobs, filterStatus, searchTerm]);
@@ -559,7 +574,7 @@ const toggleBarangayDropdown = () => {
           <BriefcaseBusiness size={92} className={styles.icon} />
           <div className={styles.headerContent}>
             <h1>Job Openings</h1>
-            <p>Mga trabahong pagkakataon sa aming komunidad. Makakasama namin kayo sa paglilingkod sa bayan.</p>
+            <p>Employment opportunities in our community. We invite you to join us in serving the people.</p>
           </div>
         </div>
         
@@ -587,6 +602,12 @@ const toggleBarangayDropdown = () => {
               <ChevronDown size={16} className={`${styles.dropdownArrow} ${dropdownOpen ? styles.open : ''}`} />
             </button>
             <div className={`${styles.dropdownContent} ${dropdownOpen ? styles.show : ''}`}>
+               <button
+                onClick={() => handleFilterChange('all')}
+                className={`${styles.dropdownItem} ${filterStatus === 'all' ? styles.active : ''}`}
+              >
+                All
+              </button>
               <button
                 onClick={() => handleFilterChange('open')}
                 className={`${styles.dropdownItem} ${filterStatus === 'open' ? styles.active : ''}`}
@@ -598,12 +619,6 @@ const toggleBarangayDropdown = () => {
                 className={`${styles.dropdownItem} ${filterStatus === 'closed' ? styles.active : ''}`}
               >
                 Closed 
-              </button>
-              <button
-                onClick={() => handleFilterChange('all')}
-                className={`${styles.dropdownItem} ${filterStatus === 'all' ? styles.active : ''}`}
-              >
-                All
               </button>
             </div>
           </div>
@@ -632,8 +647,8 @@ const toggleBarangayDropdown = () => {
                 onClick={() => handleJobClick(job)}
               >
                 {/* Job Status Badge */}
-                <div className={`${styles.statusBadge} ${styles[job.status]}`}>
-                  {job.status === 'open' ? 'Open' : 'Closed'}
+                <div className={`${styles.statusBadge} ${styles[job.status === 'open' && isDeadlinePassed(job.applicationDeadline) ? 'closed' : job.status]}`}>
+                  {job.status === 'open' && !isDeadlinePassed(job.applicationDeadline) ? 'Open' : 'Closed'}
                 </div>
 
                 {/* Job Title */}
@@ -653,9 +668,7 @@ const toggleBarangayDropdown = () => {
                     <Calendar size={16} />
                     <span>
                     {formatDate(job.applicationDeadline)}
-                      {isDeadlinePassed(job.applicationDeadline) && (
-                        <span className={styles.expired}> (Closed)</span>
-                      )}
+                      {isDeadlinePassed(job.applicationDeadline)}
                     </span>
                   </div>
                 </div>
@@ -739,9 +752,7 @@ const toggleBarangayDropdown = () => {
                   <Calendar size={20} />
                   <div>
                     <strong>Application Deadline:</strong> {formatDate(selectedJob.applicationDeadline)}
-                    {isDeadlinePassed(selectedJob.applicationDeadline) && (
-                      <span className={styles.expired}> (Closed)</span>
-                    )}
+                    {isDeadlinePassed(selectedJob.applicationDeadline)}
                   </div>
                 </div>
               

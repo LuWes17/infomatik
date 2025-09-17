@@ -200,7 +200,7 @@ const PublicAnnouncements = () => {
           <img src={megaphone} alt="Megaphone" className={styles.icon} />
           <div className={styles.headerContent}>
             <h1>Community Announcements</h1>
-            <p>Narito ang mga pinakabagong balita, paalala, at impormasyon para sa ating komunidad, mula sa aming opisina.</p>
+            <p>Here are the latest updates and events for our community, from our office.</p>
           </div>
         </div>
         

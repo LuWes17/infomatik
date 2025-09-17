@@ -165,7 +165,7 @@ const Ordinance = () => {
           <div className={styles.headerContent}>
             <h1 className={styles.title}>Local Resolutions</h1>
             <p className={styles.subtitle}>
-              Mga resolusyon ipinatutupad ng aming pamunuan. Alamin ang mga desisyong nagbibigay gabay at direksyon sa ating komunidad.
+            Local resolutions implemented by our leadership. Learn about the decisions that provide guidance and direction for our community.
             </p>
           </div>
         </div>

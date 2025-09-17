@@ -165,7 +165,7 @@ const Ordinance = () => {
           <div className={styles.headerContent}>
             <h1 className={styles.title}>Local Ordinances</h1>
             <p className={styles.subtitle}>
-              Mga lokal na ordinansa at patakaran ng aming pamunuan. Alamin ang mga batas na umiiral sa ating komunidad.
+            Local ordinances and policies of our leadership. Learn about the laws that are in effect in our community.
             </p>
           </div>
         </div>

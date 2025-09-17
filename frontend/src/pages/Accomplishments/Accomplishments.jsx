@@ -217,7 +217,7 @@ useEffect(() => {
           <ClipboardCheck size={92} className={styles.icon} />
           <div className={styles.headerContent}>
             <h1>Our Accomplishments</h1>
-            <p>Mga natapos namin na proyekto at programa para sa aming komunidad. Tingnan ang aming mga tagumpay at patuloy na pag-unlad.</p>
+            <p>Our completed projects and programs for the community. Take a look at our achievements and continuous progress.</p>
           </div>
         </div>
         
