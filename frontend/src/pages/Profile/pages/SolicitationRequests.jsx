@@ -19,6 +19,8 @@ import {
 } from 'lucide-react';
 import styles from './SolicitationRequests.module.css';
 
+const API_BASE = import.meta.env.VITE_API_URL; // e.g. http://localhost:4000/api
+
 const SolicitationRequests = () => {
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -32,7 +34,7 @@ const SolicitationRequests = () => {
   const fetchMyRequests = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/solicitations/my', {
+      const response = await fetch(`${API_BASE}/solicitations/my`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }

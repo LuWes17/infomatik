@@ -7,6 +7,8 @@ import { UserRound, Phone, Lock, Eye, EyeOff, MapPin, CheckCircle, ChevronDown }
 import OTPVerificationPopup from '../../components/OTP/OTPVerificationPopup';
 import { useNotification } from '../../contexts/NotificationContext';
 
+const API_BASE = import.meta.env.VITE_API_URL; // e.g. http://localhost:4000/api
+
 const Register = () => {
   const navigate = useNavigate();
 
@@ -309,7 +311,7 @@ const Register = () => {
       `0${formData.contactNumber}` : formData.contactNumber;
       
       console.log('Sending phone number:', phoneNumber); // Debug log
-      const response = await fetch('/api/auth/send-otp', {
+      const response = await fetch(`${API_BASE}/auth/send-otp`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -410,7 +412,7 @@ const handleResendOTP = async () => {
   setOtpError('');
 
   try {
-    const response = await fetch('/api/auth/resend-otp', {
+    const response = await fetch(`${API_BASE}/auth/resend-otp`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

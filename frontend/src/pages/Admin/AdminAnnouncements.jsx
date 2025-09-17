@@ -27,7 +27,7 @@ const AdminAnnouncements = () => {
     try {
       setLoading(true);
       const token = localStorage.getItem('token');
-      const response = await fetch('/api/announcements?page=1&limit=50', {
+      const response = await fetch(`${API_BASE}/announcements?page=1&limit=50`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -156,7 +156,7 @@ const AdminAnnouncements = () => {
         submitData.append('images', photo.file);
       });
 
-      const response = await fetch('/api/announcements', {
+      const response = await fetch(`${API_BASE}/announcements`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -225,7 +225,7 @@ const AdminAnnouncements = () => {
         }
       });
 
-      const response = await fetch(`/api/announcements/${selectedAnnouncement._id}`, {
+      const response = await fetch(`${API_BASE}/announcements/${selectedAnnouncement._id}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -262,7 +262,7 @@ const AdminAnnouncements = () => {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`/api/announcements/${id}`, {
+      const response = await fetch(`${API_BASE}/announcements/${id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`

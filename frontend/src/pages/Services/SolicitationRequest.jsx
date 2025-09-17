@@ -19,6 +19,8 @@ import { useAuth } from '../../contexts/AuthContext';
 import styles from './SolicitationRequests.module.css';
 import { useNotification } from '../../contexts/NotificationContext';
 
+const API_BASE = import.meta.env.VITE_API_URL; // e.g. http://localhost:4000/api
+
 const SolicitationRequests = () => {
   // Auth context
   const { user, isAuthenticated, isLoading: authLoading } = useAuth();
@@ -110,7 +112,7 @@ const SolicitationRequests = () => {
   const fetchSolicitationRequests = async () => {
     try {
       setLoading(true);
-      const response = await fetch('http://localhost:4000/api/solicitations/approved');
+      const response = await fetch(`${API_BASE}/solicitations/approved`);
       const data = await response.json();
       
       if (data.success) {
@@ -438,7 +440,7 @@ const SolicitationRequests = () => {
       submitData.append('purpose', formData.purpose);
       submitData.append('solicitationLetter', formData.solicitationLetter);
 
-      const response = await fetch(`http://localhost:4000/api/solicitations/`, {
+      const response = await fetch(`${API_BASE}/solicitations/`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`

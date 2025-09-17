@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import styles from './styles/AdminRiceDistribution.module.css';
 import { Plus } from 'lucide-react';
 
+const API_BASE = import.meta.env.VITE_API_URL; // e.g. http://localhost:4000/api
+
 const BARANGAYS = [
   'agnas', 'bacolod', 'bangkilingan', 'bantayan', 'baranghawon', 'basagan', 
   'basud', 'bognabong', 'bombon', 'bonot', 'san isidro', 'buang', 'buhian', 
@@ -50,7 +52,7 @@ const AdminRiceDistribution = () => {
     try {
       setLoading(true);
       const token = localStorage.getItem('token');
-      const response = await fetch(`/api/rice-distribution?page=${page}&limit=10`, {
+      const response = await fetch(`${API_BASE}/rice-distribution?page=${page}&limit=10`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -207,8 +209,8 @@ const AdminRiceDistribution = () => {
     try {
       const token = localStorage.getItem('token');
       const url = selectedDistribution 
-        ? `/api/rice-distribution/${selectedDistribution._id}`
-        : '/api/rice-distribution';
+        ? `${API_BASE}/rice-distribution/${selectedDistribution._id}`
+        : `${API_BASE}/rice-distribution`;
       
       const method = selectedDistribution ? 'PUT' : 'POST';
 
@@ -247,7 +249,7 @@ const AdminRiceDistribution = () => {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`/api/rice-distribution/${distributionId}`, {
+      const response = await fetch(`${API_BASE}/rice-distribution/${distributionId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -270,7 +272,7 @@ const AdminRiceDistribution = () => {
   const handleUpdateStatus = async (distributionId, newStatus) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http:/api/rice-distribution/${distributionId}`, {
+      const response = await fetch(`${API_BASE}/rice-distribution/${distributionId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

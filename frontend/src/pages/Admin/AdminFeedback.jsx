@@ -3,6 +3,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'react-hot-toast';
 import styles from './styles/AdminFeedback.module.css';
 
+const API_BASE = import.meta.env.VITE_API_URL; // e.g. http://localhost:4000/api
+
 const AdminFeedback = () => {
   const { user } = useAuth();
   const [feedbacks, setFeedbacks] = useState([]);
@@ -54,7 +56,7 @@ const AdminFeedback = () => {
       if (filterStatus !== 'all') params.append('status', filterStatus);
       if (filterCategory !== 'all') params.append('category', filterCategory);
       
-      const response = await fetch(`/api/feedback/all`, {
+      const response = await fetch(`${API_BASE}/feedback/all`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -75,7 +77,7 @@ const AdminFeedback = () => {
   const fetchStatistics = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('/api/feedback/statistics', {
+      const response = await fetch(`${API_BASE}/feedback/statistics`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -109,7 +111,7 @@ const AdminFeedback = () => {
     try {
       setIsSubmitting(true);
       const token = localStorage.getItem('token');
-      const response = await fetch(`/api/feedback/${selectedFeedback._id}/respond`, {
+      const response = await fetch(`${API_BASE}/feedback/${selectedFeedback._id}/respond`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -151,7 +153,7 @@ const AdminFeedback = () => {
     try {
       setIsSubmitting(true);
       const token = localStorage.getItem('token');
-      const response = await fetch(`/api/feedback/${selectedFeedback._id}/response`, {
+      const response = await fetch(`${API_BASE}/feedback/${selectedFeedback._id}/response`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -192,7 +194,7 @@ const AdminFeedback = () => {
     try {
       setIsSubmitting(true);
       const token = localStorage.getItem('token');
-      const response = await fetch(`/api/feedback/${selectedFeedback._id}/response`, {
+      const response = await fetch(`${API_BASE}/feedback/${selectedFeedback._id}/response`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -231,7 +233,7 @@ const AdminFeedback = () => {
     try {
       setIsSubmitting(true);
       const token = localStorage.getItem('token');
-      const response = await fetch(`/api/feedback/${selectedFeedback._id}/status`, {
+      const response = await fetch(`${API_BASE}/feedback/${selectedFeedback._id}/status`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

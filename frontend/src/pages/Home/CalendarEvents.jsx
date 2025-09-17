@@ -4,6 +4,8 @@ import { Link } from 'react-router-dom';
 import { Calendar, MapPin, Clock, ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react';
 import styles from './CalendarEvents.module.css';
 
+const API_BASE = import.meta.env.VITE_API_URL; // e.g. http://localhost:4000/api
+
 const CalendarEvents = () => {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -18,7 +20,7 @@ const CalendarEvents = () => {
     try {
       setLoading(true);
       // Fetch announcements with Event category
-      const response = await fetch('/api/announcements?category=Event&limit=50');
+      const response = await fetch(`${API_BASE}/announcements?category=Event&limit=50`);
       
       if (!response.ok) {
         throw new Error('Failed to fetch events');

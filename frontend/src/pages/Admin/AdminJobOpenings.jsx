@@ -19,6 +19,8 @@ import {
 } from 'lucide-react';
 import './styles/AdminJobOpenings.css';
 
+const API_BASE = import.meta.env.VITE_API_URL; // e.g. http://localhost:4000/api
+
 const AdminJobOpenings = () => {
   const [jobOpenings, setJobOpenings] = useState([]);
   const [showCreateForm, setShowCreateForm] = useState(false);
@@ -42,7 +44,7 @@ const AdminJobOpenings = () => {
   const fetchJobOpenings = async () => {
     try {
       setLoading(true);
-      const response = await fetch('http://localhost:4000/api/jobs', {
+      const response = await fetch(`${API_BASE}/jobs`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -61,7 +63,7 @@ const AdminJobOpenings = () => {
   // Fetch applications for a specific job
   const fetchApplications = async (jobId) => {
     try {
-      const response = await fetch(`http://localhost:4000/api/jobs/applications/all?jobId=${jobId}`, {
+      const response = await fetch(`${API_BASE}/jobs/applications/all?jobId=${jobId}`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -109,8 +111,8 @@ const AdminJobOpenings = () => {
 
     try {
       const url = editMode 
-        ? `http://localhost:4000/api/jobs/${selectedJob._id}`
-        : 'http://localhost:4000/api/jobs';
+        ? `${API_BASE}/jobs/${selectedJob._id}`
+        : `${API_BASE}/jobs`;
       
       const method = editMode ? 'PUT' : 'POST';
       
@@ -139,7 +141,7 @@ const AdminJobOpenings = () => {
     if (!window.confirm('Are you sure you want to delete this job opening?')) return;
     
     try {
-      const response = await fetch(`http://localhost:4000/api/jobs/${jobId}`, {
+      const response = await fetch(`${API_BASE}/jobs/${jobId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -160,7 +162,7 @@ const AdminJobOpenings = () => {
   // Toggle job status
   const toggleJobStatus = async (jobId) => {
     try {
-      const response = await fetch(`http://localhost:4000/api/jobs/${jobId}/toggle-status`, {
+      const response = await fetch(`${API_BASE}/jobs/${jobId}/toggle-status`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -182,7 +184,7 @@ const AdminJobOpenings = () => {
     if (!window.confirm(`Accept application from ${applicant.fullName}? This will send an SMS notification.`)) return;
     
     try {
-      const response = await fetch(`http://localhost:4000/api/jobs/applications/${applicationId}/status`, {
+      const response = await fetch(`${API_BASE}/jobs/applications/${applicationId}/status`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -211,7 +213,7 @@ const AdminJobOpenings = () => {
     if (!window.confirm(`Reject application from ${applicant.fullName}?`)) return;
     
     try {
-      const response = await fetch(`http://localhost:4000/api/jobs/applications/${applicationId}/status`, {
+      const response = await fetch(`${API_BASE}/jobs/applications/${applicationId}/status`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

@@ -16,6 +16,8 @@ import styles from './Feedback.module.css';
 import { useNotification } from '../../contexts/NotificationContext';
 import { useLocation } from 'react-router-dom';
 
+const API_BASE = import.meta.env.VITE_API_URL; // e.g. http://localhost:4000/api
+
 const Feedback = () => {
   // Auth context
   const { user, isAuthenticated, isLoading: authLoading } = useAuth();
@@ -116,7 +118,7 @@ const Feedback = () => {
   const fetchFeedback = async () => {
     try {
       setLoading(true);
-      const response = await fetch('http://localhost:4000/api/feedback/public');
+      const response = await fetch(`${API_BASE}/feedback/public`);
       const data = await response.json();
       
       if (data.success) {
@@ -320,7 +322,7 @@ const Feedback = () => {
         isPublic: formData.isPublic === 'yes'
       };
 
-      const response = await fetch(`/api/feedback`, {
+      const response = await fetch(`${API_BASE}/feedback`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

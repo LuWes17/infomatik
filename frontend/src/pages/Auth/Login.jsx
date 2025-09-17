@@ -6,6 +6,8 @@ import infomatiklogo from '../../assets/infomatik-logo.png';
 import { Phone, Lock, Eye, EyeOff, X, AlertCircle } from 'lucide-react';
 import { useNotification } from '../../contexts/NotificationContext';
 
+const API_BASE = import.meta.env.VITE_API_URL; // e.g. http://localhost:4000/api
+
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [activeTab, setActiveTab] = useState('login');
@@ -393,7 +395,7 @@ const Login = () => {
       const phoneNumber = forgotPasswordData.contactNumber.length === 10 ? 
         `0${forgotPasswordData.contactNumber}` : forgotPasswordData.contactNumber;
 
-      const response = await fetch('/api/auth/forgot-password', {
+      const response = await fetch(`${API_BASE}/auth/forgot-password`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -448,7 +450,7 @@ const Login = () => {
       const phoneNumber = forgotPasswordData.contactNumber.length === 10 ? 
         `0${forgotPasswordData.contactNumber}` : forgotPasswordData.contactNumber;
 
-      const response = await fetch('/api/auth/reset-password', {
+      const response = await fetch(`${API_BASE}/auth/reset-password`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -482,7 +484,7 @@ const Login = () => {
       const phoneNumber = forgotPasswordData.contactNumber.length === 10 ? 
         `0${forgotPasswordData.contactNumber}` : forgotPasswordData.contactNumber;
 
-      const response = await fetch('/api/auth/resend-forgot-password-otp', {
+      const response = await fetch(`${API_BASE}/auth/resend-forgot-password-otp`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
