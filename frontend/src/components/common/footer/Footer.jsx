@@ -31,13 +31,20 @@ const Footer = () => {
             {/* Facebook */}
             <div className={styles.contactItem}>
               <div className={styles.hotlineLabel}>Facebook:</div>
-              <span className={styles.hotlineDetail}>&nbsp; fb.com/councilorbon</span>
+              <a 
+                href="https://www.facebook.com/roy.bon2" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className={styles.hotlineDetail}
+              >
+                &nbsp;Konsi Roy Bon
+              </a>
             </div>
         
             {/* Gmail */}
             <div className={styles.contactItem}>
               <div className={styles.hotlineLabel}>Gmail:</div>
-              <span className={styles.hotlineDetail}>&nbsp; gmail@gmail.com</span>
+              <span className={styles.hotlineDetail}>&nbsp; konsiroy@gmail.com</span>
             </div>
           </div>
         </div>
