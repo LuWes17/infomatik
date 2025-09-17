@@ -16,6 +16,8 @@ import { useAuth } from '../../contexts/AuthContext';
 import styles from './JobOpenings.module.css';
 import { useNotification } from '../../contexts/NotificationContext';
 
+const API_BASE = import.meta.env.VITE_API_URL; // e.g. http://localhost:4000/api
+
 const JobOpenings = () => {
   const { isAuthenticated, user } = useAuth();
   const [jobs, setJobs] = useState([]);
@@ -92,7 +94,7 @@ const toggleBarangayDropdown = () => {
     
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:4000/api/jobs/my/applications', {
+      const response = await fetch(`${API_BASE}/jobs/my/applications`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -122,7 +124,7 @@ const toggleBarangayDropdown = () => {
   const fetchJobs = async () => {
     try {
       setLoading(true);
-      const response = await fetch('http://localhost:4000/api/jobs');
+      const response = await fetch(`${API_BASE}/jobs`);
       const data = await response.json();
       
       if (data.success) {
@@ -485,7 +487,7 @@ const toggleBarangayDropdown = () => {
       formData.append('address', `${applicationData.street}, ${applicationData.barangay}`);
       formData.append('cvFile', applicationData.cvFile);
       
-      const response = await fetch(`http://localhost:4000/api/jobs/${selectedJob._id}/apply`, {
+      const response = await fetch(`${API_BASE}/jobs/${selectedJob._id}/apply`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`

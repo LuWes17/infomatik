@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import './styles/AdminSolicitationRequests.css';
 
+const API_BASE = import.meta.env.VITE_API_URL; // e.g. http://localhost:4000/api
+
 const AdminSolicitationRequests = () => {
   const [requests, setRequests] = useState([]);
   const [filteredRequests, setFilteredRequests] = useState([]);
@@ -35,7 +37,7 @@ const AdminSolicitationRequests = () => {
         queryParams.append('status', statusFilter);
       }
 
-      const response = await fetch(`/api/solicitations/all?${queryParams}`, {
+      const response = await fetch(`${API_BASE}/solicitations/all?${queryParams}`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -58,7 +60,7 @@ const AdminSolicitationRequests = () => {
   // Fetch single solicitation details
   const fetchSolicitationDetails = async (requestId) => {
     try {
-      const response = await fetch(`/api/solicitations/${requestId}`, {
+      const response = await fetch(`${API_BASE}/solicitations/${requestId}`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -107,7 +109,7 @@ const AdminSolicitationRequests = () => {
     }
 
     try {
-      const response = await fetch(`/api/solicitations/${requestId}/status`, {
+      const response = await fetch(`${API_BASE}/solicitations/${requestId}/status`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -145,7 +147,7 @@ const AdminSolicitationRequests = () => {
     }
 
     try {
-      const response = await fetch(`/api/solicitations/${requestId}/status`, {
+      const response = await fetch(`${API_BASE}/solicitations/${requestId}/status`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -177,7 +179,7 @@ const AdminSolicitationRequests = () => {
     }
 
     try {
-      const response = await fetch(`/api/solicitations/${requestId}/status`, {
+      const response = await fetch(`${API_BASE}/solicitations/${requestId}/status`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

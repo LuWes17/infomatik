@@ -19,6 +19,8 @@ import { useAuth } from '../../contexts/AuthContext';
 import styles from './SolicitationRequests.module.css';
 import { useNotification } from '../../contexts/NotificationContext';
 
+const API_BASE = import.meta.env.VITE_API_URL; // e.g. http://localhost:4000/api
+
 const SolicitationRequests = () => {
   // Auth context
   const { user, isAuthenticated, isLoading: authLoading } = useAuth();
@@ -110,7 +112,7 @@ const SolicitationRequests = () => {
   const fetchSolicitationRequests = async () => {
     try {
       setLoading(true);
-      const response = await fetch('http://localhost:4000/api/solicitations/approved');
+      const response = await fetch(`${API_BASE}/solicitations/approved`);
       const data = await response.json();
       
       if (data.success) {
@@ -438,7 +440,7 @@ const SolicitationRequests = () => {
       submitData.append('purpose', formData.purpose);
       submitData.append('solicitationLetter', formData.solicitationLetter);
 
-      const response = await fetch(`http://localhost:4000/api/solicitations/`, {
+      const response = await fetch(`${API_BASE}/solicitations/`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -675,91 +677,84 @@ const SolicitationRequests = () => {
 
       {/* Content Section */}
       <div className={styles.content}>
-        {/* Requests Grid */}
-        {filteredRequests.length === 0 && !searchTerm && filterStatus === 'all' ? (
-          <div className={styles.noRequests}>
-            <FileText size={80} />
-            <h3>No requests found</h3>
-            <p>There are no completed solicitation requests to display.</p>
-          </div>
-        ) : (
-          <div className={styles.requestsGrid}>
-            {/* Submit New Request Card - First item */}
-            <div
-              onClick={handleSubmitClick}
-              className={styles.submitCard}
-            >
-              <div className={styles.submitCardContent}>
-                <div className={styles.submitIconContainer}>
-                  <Plus size={48} className={styles.submitIcon} />
-                </div>
-                <h3 className={styles.submitTitle}>Submit New Request</h3>
-                <p className={styles.submitDescription}>
-                  Submit a new solicitation request for assistance
-                </p>
+        {/* Always show the requests grid */}
+        <div className={styles.requestsGrid}>
+          {/* Submit New Request Card - Always first item */}
+          <div
+            onClick={handleSubmitClick}
+            className={styles.submitCard}
+          >
+            <div className={styles.submitCardContent}>
+              <div className={styles.submitIconContainer}>
+                <Plus size={48} className={styles.submitIcon} />
               </div>
+              <h3 className={styles.submitTitle}>Submit New Request</h3>
+              <p className={styles.submitDescription}>
+                Submit a new solicitation request for assistance
+              </p>
             </div>
+          </div>
 
-            {filteredRequests.length === 0 ? (
-              <div className={styles.noRequests}>
-                <FileText size={80} />
-                <h3>No requests found</h3>
-                <p>
-                  {searchTerm || filterStatus !== 'all' 
-                    ? 'Try adjusting your search or filter criteria' 
-                    : 'There are no completed solicitation requests to display.'}
-                </p>
-              </div>
-            ) : (
-              filteredRequests.map((request) => (
-                <div
-                  key={request._id}
-                  onClick={() => handleRequestClick(request)}
-                  className={styles.requestCard}
-                >
-                  {/* Request Type Badge - Updated to use shortened names */}
-                  <div className={`${styles.requestTypeBadge} ${styles[getRequestTypeCssClass(request.requestType)]}`}>
-                    {getRequestTypeBadgeName(request.requestType)}
+          {/* Conditionally render either "no requests" message or the actual request cards */}
+          {filteredRequests.length === 0 ? (
+            <div className={styles.noRequests}>
+              <FileText size={80} />
+              <h3>No requests found</h3>
+              <p>
+                {searchTerm || filterStatus !== 'all' 
+                  ? 'Try adjusting your search or filter criteria' 
+                  : 'There are no completed solicitation requests to display.'}
+              </p>
+            </div>
+          ) : (
+            filteredRequests.map((request) => (
+              <div
+                key={request._id}
+                onClick={() => handleRequestClick(request)}
+                className={styles.requestCard}
+              >
+                {/* Request Type Badge - Updated to use shortened names */}
+                <div className={`${styles.requestTypeBadge} ${styles[getRequestTypeCssClass(request.requestType)]}`}>
+                  {getRequestTypeBadgeName(request.requestType)}
+                </div>
+
+                {/* Organization Name */}
+                <h3 className={styles.organizationName}>{request.organizationName}</h3>
+
+                {/* Request Info */}
+                <div className={styles.requestInfo}>
+                  <div className={styles.infoItem}>
+                    <User size={16} />
+                    <span>{request.contactPerson}</span>
                   </div>
-
-                  {/* Organization Name */}
-                  <h3 className={styles.organizationName}>{request.organizationName}</h3>
-
-                  {/* Request Info */}
-                  <div className={styles.requestInfo}>
-                    <div className={styles.infoItem}>
-                      <User size={16} />
-                      <span>{request.contactPerson}</span>
-                    </div>
-                    <div className={styles.infoItem}>
-                      <Building2 size={16} />
-                      <span>{request.organizationType}</span>
-                    </div>
-                  </div>
-
-                  {/* Purpose Preview */}
-                  <div className={styles.purpose}>
-                    <strong>Purpose:</strong>
-                    <p>{request.purpose.substring(0, 100)}...</p>
-                  </div>
-
-                  {/* Card Actions */}
-                  <div className={styles.cardActions}>
-                    <button 
-                      className={styles.viewMoreBtn}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleRequestClick(request);
-                      }}
-                    >
-                      View Details
-                    </button>
+                  <div className={styles.infoItem}>
+                    <Building2 size={16} />
+                    <span>{request.organizationType}</span>
                   </div>
                 </div>
-              ))
-            )}
-          </div>
-        )}
+
+                {/* Purpose Preview */}
+                <div className={styles.purpose}>
+                  <strong>Purpose:</strong>
+                  <p>{request.purpose.substring(0, 100)}...</p>
+                </div>
+
+                {/* Card Actions */}
+                <div className={styles.cardActions}>
+                  <button 
+                    className={styles.viewMoreBtn}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleRequestClick(request);
+                    }}
+                  >
+                    View Details
+                  </button>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
       </div>
 
       {/* Request Details Modal */}

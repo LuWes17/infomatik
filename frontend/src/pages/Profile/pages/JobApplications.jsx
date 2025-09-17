@@ -15,6 +15,8 @@ import {
 } from 'lucide-react';
 import styles from './JobApplications.module.css';
 
+const API_BASE = import.meta.env.VITE_API_URL; // e.g. http://localhost:4000/api
+
 const JobApplications = () => {
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -28,7 +30,7 @@ const JobApplications = () => {
       setLoading(true);
       const token = localStorage.getItem('token');
       
-      const response = await fetch('http://localhost:4000/api/jobs/my/applications', {
+      const response = await fetch(`${API_BASE}/jobs/my/applications`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -56,7 +58,7 @@ const JobApplications = () => {
     try {
       const token = localStorage.getItem('token');
       
-      const response = await fetch(`http://localhost:4000/api/jobs/${jobId}`, {
+      const response = await fetch(`${API_BASE}/jobs/${jobId}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'

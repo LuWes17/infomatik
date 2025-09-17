@@ -24,7 +24,7 @@ const AdminAccomplishments = () => {
     try {
       setLoading(true);
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:4000/api/accomplishments?page=1&limit=50', {
+      const response = await fetch(`${API_BASE}/accomplishments?page=1&limit=50`, {
         headers: {
           'Authorization' : `Bearer ${token}`
         }
@@ -171,8 +171,8 @@ const AdminAccomplishments = () => {
       }
 
       const url = isEditMode 
-        ? `http://localhost:4000/api/accomplishments/${selectedAccomplishment._id}`
-        : 'http://localhost:4000/api/accomplishments';
+        ? `${API_BASE}/accomplishments/${selectedAccomplishment._id}`
+        : `${API_BASE}/accomplishments`;
         
       const method = isEditMode ? 'PUT' : 'POST';
 
@@ -210,7 +210,7 @@ const AdminAccomplishments = () => {
 
   try {
     const token = localStorage.getItem('token');
-    const response = await fetch(`http://localhost:4000/api/accomplishments/${id}`, {
+    const response = await fetch(`${API_BASE}/accomplishments/${id}`, {
       method: 'DELETE',
       headers: {
         'Authorization': `Bearer ${token}`,

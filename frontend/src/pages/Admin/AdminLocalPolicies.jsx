@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import styles from './styles/AdminLocalPolicies.module.css';
 
+const API_BASE = import.meta.env.VITE_API_URL; // e.g. http://localhost:4000/api
+
 const AdminLocalPolicies = () => {
   const [policies, setPolicies] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -39,7 +41,7 @@ const AdminLocalPolicies = () => {
       const token = localStorage.getItem('token');
       
       // Use admin-specific endpoint or add admin parameter to get all policies
-      const response = await fetch('/api/policies?admin=true', {
+      const response = await fetch(`${API_BASE}/policies?admin=true`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -121,7 +123,7 @@ const AdminLocalPolicies = () => {
       // FIXED: Ensure the policy is published by default for admin creation
       formDataToSend.append('isPublished', 'true');
 
-      const url = isEditing ? `/api/policies/${selectedPolicy._id}` : '/api/policies';
+      const url = isEditing ? `${API_BASE}/policies/${selectedPolicy._id}` : `${API_BASE}/policies`;
       const method = isEditing ? 'PUT' : 'POST';
 
       const response = await fetch(url, {
@@ -167,7 +169,7 @@ const AdminLocalPolicies = () => {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`/api/policies/${policyId}`, {
+      const response = await fetch(`${API_BASE}/policies/${policyId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`

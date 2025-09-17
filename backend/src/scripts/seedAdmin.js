@@ -763,6 +763,58 @@ const createAdminOnly = async () => {
   }
 };
 
+// Function to delete all feedback data
+const deleteAllFeedback = async () => {
+  try {
+    console.log('🔄 Connecting to MongoDB...');
+    await mongoose.connect(process.env.MONGODB_URI);
+    console.log('✅ Connected to MongoDB');
+
+    console.log('🗑️  Deleting all feedback data...');
+    
+    const result = await Feedback.deleteMany({});
+    
+    console.log(`✅ Successfully deleted ${result.deletedCount} feedback entries from the database`);
+    
+    if (result.deletedCount === 0) {
+      console.log('ℹ️  No feedback data found in the database');
+    }
+
+  } catch (error) {
+    console.error('❌ Error deleting feedback data:', error.message);
+  } finally {
+    await mongoose.disconnect();
+    console.log('🔌 Disconnected from MongoDB');
+    process.exit(0);
+  }
+};
+
+// Function to delete all solicitation requests
+const deleteAllSolicitationRequests = async () => {
+  try {
+    console.log('🔄 Connecting to MongoDB...');
+    await mongoose.connect(process.env.MONGODB_URI);
+    console.log('✅ Connected to MongoDB');
+
+    console.log('🗑️  Deleting all solicitation requests...');
+    
+    const result = await SolicitationRequest.deleteMany({});
+    
+    console.log(`✅ Successfully deleted ${result.deletedCount} solicitation requests from the database`);
+    
+    if (result.deletedCount === 0) {
+      console.log('ℹ️  No solicitation requests found in the database');
+    }
+
+  } catch (error) {
+    console.error('❌ Error deleting solicitation requests:', error.message);
+  } finally {
+    await mongoose.disconnect();
+    console.log('🔌 Disconnected from MongoDB');
+    process.exit(0);
+  }
+};
+
 // Function to show database statistics
 const showStats = async () => {
   try {
@@ -835,6 +887,12 @@ switch (command) {
     break;
   case 'stats':
     showStats();
+    break;
+  case 'delete-feedback':
+    deleteAllFeedback();
+    break;
+  case 'delete-solicitations':
+    deleteAllSolicitationRequests();
     break;
   case 'help':
     console.log('\n🔧 AVAILABLE COMMANDS:');

@@ -18,6 +18,8 @@ import {
 } from 'lucide-react';
 import styles from './FeedbackSent.module.css';
 
+const API_BASE = import.meta.env.VITE_API_URL; // e.g. http://localhost:4000/api
+
 const FeedbackSent = () => {
   const [feedbacks, setFeedbacks] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -31,7 +33,7 @@ const FeedbackSent = () => {
   const fetchMyFeedbacks = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/feedback/my', {
+      const response = await fetch(`${API_BASE}/feedback/my`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
