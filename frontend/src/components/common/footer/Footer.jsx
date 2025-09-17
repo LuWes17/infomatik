@@ -120,7 +120,6 @@ const Footer = () => {
 
                 <div className={styles.footerBottom}>
                     <div className={styles.copyright}>2025 © | Councilor Generoso I. Bon</div>
-                    <div className={styles.poweredBy}>Powered by XXX</div>
                 </div>
             </div>    
         </footer>
