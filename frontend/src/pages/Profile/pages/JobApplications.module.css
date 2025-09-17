@@ -52,24 +52,6 @@
   max-width: 100%;
 }
 
-.header {
-  margin-bottom: var(--spacing-2xl);
-  padding-bottom: var(--spacing-lg);
-  border-bottom: 2px solid var(--gray-200);
-}
-
-.header h2 {
-  margin: 0 0 var(--spacing-sm) 0;
-  color: var(--gray-800);
-  font-size: var(--font-size-2xl);
-  font-weight: 600;
-}
-
-.subtitle {
-  color: var(--gray-600);
-  font-size: var(--font-size-base);
-  margin: 0;
-}
 
 /* Loading State */
 .loadingContainer {
@@ -145,8 +127,6 @@
   text-align: center;
   background: var(--white);
   border-radius: var(--border-radius-xl);
-  box-shadow: var(--shadow-md);
-  border: 1px solid var(--gray-200);
 }
 
 .emptyIcon {
@@ -256,21 +236,18 @@
 }
 
 .statusPending {
-  background-color: var(--warning-50);
-  color: var(--warning-700);
-  border: 1px solid var(--warning-500);
+  background-color: #fef3c7;
+  color: #92400e;
 }
 
 .statusAccepted {
-  background-color: var(--success-50);
-  color: var(--success-700);
-  border: 1px solid var(--success-500);
+  background-color: #d1fae5;
+  color: #065f46;
 }
 
 .statusRejected {
-  background-color: var(--error-50);
-  color: var(--error-700);
-  border: 1px solid var(--error-500);
+  background: #fae2e2;
+  color: #dc2626;
 }
 
 .cardBody {
@@ -747,14 +724,10 @@
   }
 
   .cardHeader {
-    flex-direction: column;
     align-items: flex-start;
     gap: var(--spacing-lg);
   }
   
-  .cardTitle {
-    width: 100%; /* Full width on mobile */
-  }
   
   .cardTitle h3 {
     white-space: normal; /* Allow wrapping on mobile */

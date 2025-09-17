@@ -4,26 +4,6 @@
   max-width: 100%;
 }
 
-/* Header */
-.header {
-  margin-bottom: var(--spacing-2xl);
-  padding-bottom: var(--spacing-lg);
-  border-bottom: 2px solid var(--gray-200);
-}
-
-.header h2 {
-  margin: 0 0 var(--spacing-sm) 0;
-  color: var(--gray-800);
-  font-size: var(--font-size-2xl);
-  font-weight: 600;
-}
-
-.subtitle {
-  color: var(--gray-600);
-  font-size: var(--font-size-base);
-  margin: 0;
-}
-
 /* Loading */
 .loadingContainer {
   display: flex;

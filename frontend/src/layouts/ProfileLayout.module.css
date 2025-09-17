@@ -22,6 +22,7 @@
   box-shadow: var(--shadow-md);
   padding: 2rem;
   border: 1px solid var(--gray-200);
+  position: relative;
 }
 
 .profileHeader {
@@ -32,6 +33,13 @@
   margin-bottom: 2rem;
   padding-bottom: 2rem;
   border-bottom: 1px solid var(--gray-200);
+  position: relative;
+}
+
+/* Profile Avatar with Edit Icon */
+.profileAvatarContainer {
+  position: relative;
+  display: inline-block;
 }
 
 .profileAvatar {
@@ -45,6 +53,38 @@
   color: var(--white);
   margin-bottom: 1rem;
   box-shadow: var(--shadow-md);
+}
+
+/* Modern Edit Icon */
+.profileEditIcon {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 28px;
+  height: 28px;
+  background: var(--white);
+  border: 2px solid var(--primary-color);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: var(--shadow-sm);
+  color: var(--primary-color);
+  opacity: 0; /* Hidden by default */
+}
+
+.profileEditIcon:hover {
+  background: var(--primary-color);
+  color: var(--white);
+  transform: scale(1.1);
+  box-shadow: var(--shadow-md);
+}
+
+/* Show edit icon on desktop hover or mobile always */
+.profileCard:hover .profileEditIcon {
+  opacity: 1;
 }
 
 .profileInfo {
@@ -127,7 +167,6 @@
   flex-direction: column;
   gap: 0;
 }
-
 .profileNav {
   background: var(--white);
   border-radius: var(--border-radius-xl) var(--border-radius-xl) 0 0;
@@ -137,19 +176,28 @@
   border: 1px solid var(--gray-200);
   border-bottom: none;
   overflow: hidden;
+  position: relative;
 }
 
 .navLink {
   flex: 1;
   padding: 1.25rem 1.5rem;
   text-decoration: none;
-  color: var(--gray-600);
-  font-weight: 500;
-  background: var(--gray-50);
-  border-right: 1px solid var(--gray-200);
+  color: var(--gray-400);
+  font-weight: 400;
   text-align: center;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   position: relative;
+  border-bottom: 3px solid var(--gray-200);
+  opacity: 0.7;
+  white-space: nowrap;
+  overflow: hidden;
+  transform: translateZ(0);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  user-select: none;
 }
 
 .navLink:last-child {
@@ -157,8 +205,8 @@
 }
 
 .navLink:hover {
-  background: var(--gray-100);
   color: var(--primary-color);
+  opacity: 0.9;
 }
 
 .navLinkActive {
@@ -166,16 +214,40 @@
   color: var(--primary-color) !important;
   font-weight: 600;
   position: relative;
+  opacity: 1 !important;
+  border-bottom: 3px solid var(--primary-color);
 }
 
-.navLinkActive::after {
+/* Enhanced background animation effect */
+.navLink::before {
   content: '';
   position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: var(--primary-color);
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  transition: left 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  z-index: -1;
+}
+
+.navLink:hover::before {
+  left: 100%;
+}
+
+/* Remove the old ::after pseudo-element since we're using border-bottom now */
+.navLink::after {
+  display: none;
+}
+
+/* Active state touch interaction */
+.navLink:active {
+  background-color: var(--gray-50);
+  transform: translateY(1px) scale(0.98) translateZ(0);
+
+}
+
+.navLinkActive:active {
+  transform: translateY(0) scale(0.98) translateZ(0);
 }
 
 .profileMain {
@@ -186,6 +258,56 @@
   min-height: 500px;
   border: 1px solid var(--gray-200);
   border-top: none;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* Mobile Action Menu */
+.mobileActionMenu {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--white);
+  border-top: 1px solid var(--gray-200);
+  padding: 1rem;
+  display: none;
+  gap: 1rem;
+  z-index: 1000;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.mobileActionBtn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.75rem;
+  background: var(--gray-50);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--border-radius-md);
+  color: var(--gray-700);
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.mobileActionBtn:hover {
+  background: var(--primary-color);
+  color: var(--white);
+  border-color: var(--primary-color);
+}
+
+.mobileLogoutBtn {
+  background: #dc2626;
+  color: var(--white);
+  border-color: #dc2626;
+}
+
+.mobileLogoutBtn:hover {
+  background: #b91c1c;
+  border-color: #b91c1c;
 }
 
 /* Responsive Design */
@@ -221,6 +343,12 @@
     margin-right: 1rem;
   }
 
+  .profileEditIcon {
+    width: 24px;
+    height: 24px;
+    opacity: 1; /* Always show on tablet */
+  }
+
   .profileActions {
     flex-direction: row;
   }
@@ -232,49 +360,314 @@
 
 @media (max-width: 768px) {
   .profileContainer {
-    padding: 0.5rem;
+    padding: 1rem 0.5rem;
+    padding-bottom: 6rem; /* Space for mobile action menu */
   }
 
   .profileSidebar {
     flex-direction: column;
+    gap: 0;
+  }
+
+  .profileCard {
+    padding: 1.5rem;
+    border-radius: var(--border-radius-lg);
+  }
+
+  .profileHeader {
+    flex-direction: column;
+    text-align: center;
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+  }
+
+  .profileAvatar {
+    width: 70px;
+    height: 70px;
+    margin-right: 0;
+    margin-bottom: 1rem;
+  }
+
+  .profileEditIcon {
+    width: 26px;
+    height: 26px;
+    opacity: 1; /* Always visible on mobile */
+    top: 0;
+    right: 0;
+  }
+
+  /* Hide desktop action buttons on mobile */
+  .profileActions {
+    display: none;
+  }
+
+  /* Show mobile action menu */
+  .mobileActionMenu {
+    display: flex;
+  }
+
+  /* Enhanced Mobile Navigation - Horizontal Scroll with Smooth Transitions */
+  .profileNav {
+    border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+    scroll-behavior: smooth; /* Smooth scrolling */
+    position: relative;
+    scroll-snap-type: x mandatory; /* Enable scroll snapping */
+  }
+
+  .profileNav::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+  }
+
+  /* Add subtle gradient indicators for scrollable content */
+  .profileNav::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 30px;
+    height: 100%;
+    background: linear-gradient(to left, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.3), transparent);
+    pointer-events: none;
+    z-index: 2;
+    opacity: 0;
+    transition: opacity 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+
+  .profileNav::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 30px;
+    height: 100%;
+    background: linear-gradient(to right, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.3), transparent);
+    pointer-events: none;
+    z-index: 2;
+    opacity: 0;
+    transition: opacity 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+
+  .profileNav.showScrollIndicator::before,
+  .profileNav.showScrollIndicator::after {
+    opacity: 1;
+  }
+
+  .navLink {
+    min-width: 150px; /* Slightly increased minimum width */
+    padding: 1rem 1.5rem;
+    border-bottom: 3px solid var(--gray-200);
+    font-size: var(--font-size-sm);
+    white-space: nowrap;
+    flex-shrink: 0; /* Prevent shrinking */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    cursor: pointer;
+    user-select: none; /* Prevent text selection during swipe */
+    scroll-snap-align: center; /* Center items when scrolling */
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    transform: translateZ(0); /* Hardware acceleration */
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Add subtle background animation */
+  .navLink::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(var(--primary-rgb, 59, 130, 246), 0.1), transparent);
+    transition: left 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    z-index: -1;
+  }
+
+  .navLink:hover::before {
+    left: 100%;
+  }
+
+  .navLink:last-child {
+    border-right: none;
+    margin-right: 30px; /* Add margin to show scroll indicator */
+  }
+
+  .navLink:first-child {
+    margin-left: 30px; /* Add margin to show left scroll indicator */
+  }
+
+  .navLinkActive {
+    background: var(--white) !important;
+    border-bottom: 3px solid var(--primary-color);
+    font-weight: 600;
+    color: var(--primary-color) !important;
+    transform: translateY(-1px) translateZ(0);
+  }
+
+  .navLinkActive::after {
+    display: none; /* Use border instead of pseudo-element */
+  }
+
+  /* Enhanced smooth touch interactions */
+  .navLink:active {
+    background-color: var(--gray-50);
+    transform: translateY(1px) scale(0.98) translateZ(0);
+    transition: all 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .navLinkActive:active {
+    transform: translateY(0) scale(0.98) translateZ(0);
+  }
+
+  /* Smooth hover states for non-touch devices */
+  @media (hover: hover) and (pointer: fine) {
+    .navLink:hover {
+      color: var(--primary-color);
+      background-color: rgba(var(--primary-rgb, 59, 130, 246), 0.05);
+      transform: translateY(-2px) translateZ(0);
+    }
+
+    .navLinkActive:hover {
+      transform: translateY(-3px) translateZ(0);
+    }
+  }
+
+  .profileMain {
+    padding: 1.5rem;
+    border-radius: 0 0 var(--border-radius-lg) var(--border-radius-lg);
+  }
+
+  .logoutButton {
+    display: none;
+  }
+}
+
+/* Very small screens */
+@media (max-width: 480px) {
+  .profileContainer {
+    padding: 0.5rem;
+    padding-bottom: 6rem;
   }
 
   .profileCard {
     padding: 1rem;
   }
 
-  .profileHeader {
-    flex-direction: column;
-    text-align: center;
-  }
-
   .profileAvatar {
-    margin-right: 0;
-    margin-bottom: 1rem;
+    width: 60px;
+    height: 60px;
   }
 
-  .profileActions {
-    flex-direction: column;
-  }
-
-  .profileNav {
-    flex-direction: column;
+  .profileEditIcon {
+    width: 22px;
+    height: 22px;
   }
 
   .navLink {
-    border-right: none;
-    border-bottom: 1px solid var(--gray-200);
-  }
-
-  .navLink:last-child {
-    border-bottom: none;
+    min-width: 130px;
+    padding: 0.875rem 1rem;
+    font-size: var(--font-size-xs);
   }
 
   .profileMain {
     padding: 1rem;
   }
 
-  .logoutButton {
+  .mobileActionMenu {
+    padding: 0.75rem;
+  }
+
+  .mobileActionBtn {
+    padding: 0.5rem;
+    font-size: 0.7rem;
+  }
+}
+
+/* Additional smooth scrolling enhancements for better UX */
+@media (hover: none) and (pointer: coarse) {
+  /* Touch devices only */
+  .profileNav {
+    scroll-snap-type: x mandatory;
+    overscroll-behavior-x: contain; /* Prevent overscroll bounce */
+  }
+  
+  .navLink {
+    scroll-snap-align: center;
+    scroll-snap-stop: normal;
+  }
+
+  /* Smooth momentum scrolling for iOS */
+  .profileNav {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+  }
+
+  /* Add subtle bounce effect when reaching scroll end */
+  .profileNav::-webkit-scrollbar {
     display: none;
+  }
+}
+
+/* Add CSS custom properties for primary color RGB */
+:root {
+  --primary-rgb: 59, 130, 246; /* Default blue - adjust to match your primary color */
+}
+
+/* Smooth transition for the entire navigation container */
+.profileContent {
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* Add loading state animations */
+@keyframes slideInFromRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Apply animations to navigation items */
+@media (max-width: 768px) {
+  .navLink {
+    animation: slideInFromRight 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  }
+
+  .navLink:nth-child(1) {
+    animation-delay: 0.1s;
+  }
+
+  .navLink:nth-child(2) {
+    animation-delay: 0.2s;
+  }
+
+  .navLink:nth-child(3) {
+    animation-delay: 0.3s;
+  }
+
+  .profileMain {
+    animation: fadeInScale 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.4s both;
   }
 }

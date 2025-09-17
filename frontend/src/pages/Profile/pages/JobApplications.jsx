@@ -226,11 +226,6 @@ const JobApplications = () => {
 
   return (
     <div className={styles.container}>
-      <div className={styles.header}>
-        <h2>My Job Applications</h2>
-        <p className={styles.subtitle}>Track your application status</p>
-      </div>
-
       {applications.length === 0 ? (
         <div className={styles.emptyState}>
           <FileText size={64} className={styles.emptyIcon} />

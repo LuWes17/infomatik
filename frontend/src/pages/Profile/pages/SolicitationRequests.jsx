@@ -152,14 +152,6 @@ const SolicitationRequests = () => {
 
   return (
     <div className={styles.container}>
-      <div className={styles.header}>
-        <div>
-          <h2>My Solicitation Requests</h2>
-          <p className={styles.subtitle}>
-            Track the status of your submitted solicitation requests
-          </p>
-        </div>
-      </div>
 
       {requests.length === 0 ? (
         <div className={styles.emptyState}>

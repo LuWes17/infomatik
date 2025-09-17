@@ -141,14 +141,6 @@ const FeedbackSent = () => {
 
   return (
     <div className={styles.container}>
-      <div className={styles.header}>
-        <div>
-          <h2>My Sent Feedbacks</h2>
-          <p className={styles.subtitle}>
-            Track the status of your submitted feedbacks
-          </p>
-        </div>
-      </div>
 
       {feedbacks.length === 0 ? (
         <div className={styles.emptyState}>

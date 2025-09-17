@@ -4,26 +4,6 @@
   max-width: 100%;
 }
 
-/* Header */
-.header {
-  margin-bottom: var(--spacing-2xl);
-  padding-bottom: var(--spacing-lg);
-  border-bottom: 2px solid var(--gray-200);
-}
-
-.header h2 {
-  margin: 0 0 var(--spacing-sm) 0;
-  color: var(--gray-800);
-  font-size: var(--font-size-2xl);
-  font-weight: 600;
-}
-
-.subtitle {
-  color: var(--gray-600);
-  font-size: var(--font-size-base);
-  margin: 0;
-}
-
 /* Loading */
 .loadingContainer {
   display: flex;
@@ -59,9 +39,6 @@
   padding: var(--spacing-4xl);
   text-align: center;
   background: var(--white);
-  border-radius: var(--border-radius-xl);
-  box-shadow: var(--shadow-sm);
-  color: var(--gray-600);
 }
 
 .emptyState svg {
@@ -162,27 +139,23 @@
 }
 
 .statusPending {
-  background-color: var(--warning-50);
-  color: var(--warning-700);
-  border: 1px solid var(--warning-500);
+  background-color: #fef3c7;
+  color: #92400e;
 }
 
 .statusApproved {
-  background-color: var(--success-50);
-  color: var(--success-700);
-  border: 1px solid var(--success-500);
+  background-color: #d1fae5;
+  color: #065f46;
 }
 
 .statusRejected {
-  background-color: var(--error-50);
-  color: var(--error-700);
-  border: 1px solid var(--error-500);
+  background: #fae2e2;
+  color: #dc2626;
 }
 
 .statusCompleted {
   background-color: #dbeafe; /* Light blue background */
   color: #1e40af; /* Dark blue text */
-  border: 1px solid #2563eb; /* Primary blue border */
 }
 
 .statusDefault {
