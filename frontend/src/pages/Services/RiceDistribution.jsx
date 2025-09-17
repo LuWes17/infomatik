@@ -333,16 +333,6 @@ const RiceDistribution = () => {
                     </div>
                   )}
 
-                  {/* Next Distribution - Like Job Openings requirements section */}
-                  {upcomingSchedules.length > 0 && (
-                    <div className={styles.nextDistribution}>
-                      <span className={styles.nextLabel}>Next Distribution:</span>
-                      <span className={styles.nextDate}>
-                        {formatDate(upcomingSchedules[0].date)}
-                      </span>
-                    </div>
-                  )}
-
                   {/* Card Actions - Exactly like Job Openings cardActions */}
                   <div className={styles.cardFooter}>
                     <button 
