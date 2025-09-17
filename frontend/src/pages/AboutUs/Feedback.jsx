@@ -9,7 +9,9 @@ import {
   FileText, 
   Tag,
   ChevronDown,
-  Clock
+  Clock,
+  Camera,
+  X
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import styles from './Feedback.module.css';
@@ -50,6 +52,14 @@ const Feedback = () => {
   const [touched, setTouched] = useState({});
 
   const location = useLocation();
+
+  // Photo upload state
+  const [selectedPhotos, setSelectedPhotos] = useState([]);
+  const [photoPreviewUrls, setPhotoPreviewUrls] = useState([]);
+  const fileInputRef = useRef(null);
+
+  const [showPhotoGallery, setShowPhotoGallery] = useState(false);
+  const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
 
   // Form data
   const [formData, setFormData] = useState({
@@ -139,6 +149,112 @@ const Feedback = () => {
   useEffect(() => {
     fetchFeedback();
   }, []);
+
+    // Handle photo file selection
+  const handlePhotoSelection = (e) => {
+    const files = Array.from(e.target.files);
+    
+    // Validate file count (max 4)
+    if (selectedPhotos.length + files.length > 4) {
+      showError('You can upload a maximum of 4 photos');
+      return;
+    }
+    
+    // Validate file types and sizes
+    const validFiles = [];
+    const validTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+    const maxSize = 10 * 1024 * 1024; // 10MB
+    
+    for (const file of files) {
+      if (!validTypes.includes(file.type)) {
+        showError(`${file.name} is not a valid image format. Please use JPEG, PNG, GIF, or WebP.`);
+        continue;
+      }
+      
+      if (file.size > maxSize) {
+        showError(`${file.name} is too large. Maximum file size is 10MB.`);
+        continue;
+      }
+      
+      validFiles.push(file);
+    }
+    
+    if (validFiles.length === 0) return;
+    
+    // Update selected photos
+    const newPhotos = [...selectedPhotos, ...validFiles];
+    setSelectedPhotos(newPhotos);
+    
+    // Create preview URLs
+    const newPreviewUrls = [...photoPreviewUrls];
+    validFiles.forEach(file => {
+      const url = URL.createObjectURL(file);
+      newPreviewUrls.push(url);
+    });
+    setPhotoPreviewUrls(newPreviewUrls);
+    
+    // Update form data
+    setFormData(prev => ({
+      ...prev,
+      photos: newPhotos
+    }));
+  };
+
+  // Remove photo
+  const removePhoto = (index) => {
+    const newPhotos = selectedPhotos.filter((_, i) => i !== index);
+    const newPreviewUrls = photoPreviewUrls.filter((_, i) => i !== index);
+    
+    // Revoke URL to prevent memory leaks
+    URL.revokeObjectURL(photoPreviewUrls[index]);
+    
+    setSelectedPhotos(newPhotos);
+    setPhotoPreviewUrls(newPreviewUrls);
+    setFormData(prev => ({
+      ...prev,
+      photos: newPhotos
+    }));
+  };
+
+  // Clear all photos
+  const clearAllPhotos = () => {
+    // Revoke all URLs
+    photoPreviewUrls.forEach(url => URL.revokeObjectURL(url));
+    
+    setSelectedPhotos([]);
+    setPhotoPreviewUrls([]);
+    setFormData(prev => ({
+      ...prev,
+      photos: []
+    }));
+    
+    // Reset file input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const handlePhotoClick = (index) => {
+    setCurrentPhotoIndex(index);
+    setShowPhotoGallery(true);
+  };
+
+  const handlePrevPhoto = () => {
+    setCurrentPhotoIndex((prev) => 
+      prev === 0 ? selectedFeedback.photos.length - 1 : prev - 1
+    );
+  };
+
+  const handleNextPhoto = () => {
+    setCurrentPhotoIndex((prev) => 
+      prev === selectedFeedback.photos.length - 1 ? 0 : prev + 1
+    );
+  };
+
+  const handleGalleryClose = () => {
+    setShowPhotoGallery(false);
+  };
+
 
   // Close dropdowns when clicking outside
   useEffect(() => {
@@ -315,20 +431,27 @@ const Feedback = () => {
     try {
       setSubmitting(true);
 
-      const submitData = {
-        subject: formData.subject,
-        message: formData.message,
-        category: formData.category,
-        isPublic: formData.isPublic === 'yes'
-      };
+      // Create FormData object for file upload
+      const submitData = new FormData();
+      
+      // Append text fields
+      submitData.append('subject', formData.subject);
+      submitData.append('message', formData.message);
+      submitData.append('category', formData.category);
+      submitData.append('isPublic', formData.isPublic === 'yes');
+
+      // Append photos
+      selectedPhotos.forEach((photo, index) => {
+        submitData.append('photos', photo);
+      });
 
       const response = await fetch(`${API_BASE}/feedback`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          // Remove Content-Type header - let the browser set it for FormData
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         },
-        body: JSON.stringify(submitData)
+        body: submitData // Send FormData directly
       });
 
       const data = await response.json();
@@ -355,8 +478,12 @@ const Feedback = () => {
       subject: '',
       message: '',
       category: '',
-      isPublic: 'yes'
+      isPublic: 'yes',
+      photos: []
     });
+
+    // Clear photos
+    clearAllPhotos();
 
     setFieldErrors({});
     setTouched({});
@@ -393,9 +520,13 @@ const Feedback = () => {
     setShowFeedbackDetails(false);
     setShowFeedbackForm(false);
     setShowAuthPrompt(false);
+    setShowPhotoGallery(false);
     setSelectedFeedback(null);
     setCategoryDropdownOpen(false);
     setVisibilityDropdownOpen(false);
+
+    // Clear photos
+    clearAllPhotos();
 
     // Reset validation states
     setFieldErrors({});
@@ -460,6 +591,14 @@ const Feedback = () => {
       minute: "2-digit",
     });
   };
+
+  // Cleanup effect for photo URLs
+  useEffect(() => {
+    return () => {
+      // Cleanup all object URLs when component unmounts
+      photoPreviewUrls.forEach(url => URL.revokeObjectURL(url));
+    };
+  }, []);
 
   if (loading || authLoading) {
     return (
@@ -650,6 +789,28 @@ const Feedback = () => {
                 <h4>Feedback Message</h4>
                 <p className={styles.description}>{selectedFeedback.message}</p>
               </div>
+
+              {/* Photos Section */}
+              {selectedFeedback.photos && selectedFeedback.photos.length > 0 && (
+                <div className={styles.section}>
+                  <h4>Attached Photos</h4>
+                  <div className={styles.photoGrid}>
+                    {selectedFeedback.photos.map((photo, index) => (
+                      <div 
+                        key={index} 
+                        className={styles.photoThumbnail}
+                        onClick={() => handlePhotoClick(index)}
+                      >
+                        <img 
+                          src={photo.filePath} 
+                          alt={photo.fileName}
+                          className={styles.thumbnailImage}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
               
               {/* Admin Response if exists */}
               {selectedFeedback.adminResponse && selectedFeedback.adminResponse.message && (
@@ -792,6 +953,75 @@ const Feedback = () => {
                       {formData.message.length}/2000 characters
                     </small>
                   </div>
+
+                  {/* Photo Upload Section */}
+                  <div className={styles.formGroup}>
+                    <label>Attach Photos (Optional)</label>
+                    <div className={styles.photoUploadSection}>
+                      {selectedPhotos.length < 4 && (
+                        <div className={styles.photoUploadArea}>
+                          <input
+                            type="file"
+                            ref={fileInputRef}
+                            onChange={handlePhotoSelection}
+                            accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
+                            multiple
+                            className={styles.hiddenFileInput}
+                            id="photo-upload"
+                          />
+                          <label htmlFor="photo-upload" className={styles.photoUploadLabel}>
+                            <Camera size={24} />
+                            <span>Add Photos</span>
+                            <small>Max 4 photos, 10MB each</small>
+                          </label>
+                        </div>
+                      )}
+                      
+                      {/* Photo Previews */}
+                      {selectedPhotos.length > 0 && (
+                        <div className={styles.photoPreviewGrid}>
+                          {selectedPhotos.map((photo, index) => (
+                            <div key={index} className={styles.photoPreviewItem}>
+                              <img
+                                src={photoPreviewUrls[index]}
+                                alt={`Preview ${index + 1}`}
+                                className={styles.photoPreview}
+                              />
+                              <button
+                                type="button"
+                                onClick={() => removePhoto(index)}
+                                className={styles.removePhotoBtn}
+                                title="Remove photo"
+                              >
+                                <X size={16} />
+                              </button>
+                              <div className={styles.photoInfo}>
+                                <span className={styles.photoName}>{photo.name}</span>
+                                <span className={styles.photoSize}>
+                                  {(photo.size / 1024 / 1024).toFixed(1)}MB
+                                </span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      
+                      {selectedPhotos.length > 0 && (
+                        <div className={styles.photoActions}>
+                          <button
+                            type="button"
+                            onClick={clearAllPhotos}
+                            className={styles.clearPhotosBtn}
+                          >
+                            Clear All Photos
+                          </button>
+                          <span className={styles.photoCount}>
+                            {selectedPhotos.length}/4 photos selected
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </div>
 
                 <div className={styles.formActions}>
@@ -840,6 +1070,49 @@ const Feedback = () => {
                 Create Account
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Photo Gallery Modal */}
+      {showPhotoGallery && selectedFeedback && selectedFeedback.photos && selectedFeedback.photos.length > 0 && (
+        <div className={styles.galleryModal} onClick={handleGalleryClose}>
+          <div className={styles.galleryContent} onClick={(e) => e.stopPropagation()}>
+            <button 
+              className={styles.galleryCloseButton} 
+              onClick={handleGalleryClose}
+              aria-label="Close gallery"
+              style={{ 
+                position: 'absolute', 
+                top: '20px', 
+                right: '20px', 
+                zIndex: 1000,
+                background: 'rgba(0,0,0,0.5)',
+                border: 'none',
+                borderRadius: '50%',
+                width: '40px',
+                height: '40px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: 'white',
+                cursor: 'pointer'
+              }}
+            >
+              <X size={24} />
+            </button>
+            
+            <img 
+              src={selectedFeedback.photos[currentPhotoIndex].filePath} 
+              alt={selectedFeedback.photos[currentPhotoIndex].fileName}
+              style={{
+                maxWidth: '100vw',
+                maxHeight: '100vh',
+                objectFit: 'contain',
+                display: 'block',
+                margin: 'auto'
+              }}
+            />
           </div>
         </div>
       )}

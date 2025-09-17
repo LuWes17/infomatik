@@ -1,5 +1,6 @@
 const Feedback = require('../models/Feedback');
 const asyncHandler = require('../middleware/async');
+const { uploadMultipleToB2, deleteFromB2 } = require('../config/upload');
 
 // Get public feedback
 exports.getPublicFeedback = asyncHandler(async (req, res) => {
@@ -30,9 +31,51 @@ exports.getPublicFeedback = asyncHandler(async (req, res) => {
   });
 });
 
-// Create feedback (User)
+// Create feedback (User) - Updated with photo upload
 exports.createFeedback = asyncHandler(async (req, res) => {
   req.body.submittedBy = req.user.id;
+  
+  let photos = [];
+  
+  // Handle photo uploads if present
+  if (req.files && req.files.length > 0) {
+    // Validate photo count (max 4)
+    if (req.files.length > 4) {
+      return res.status(400).json({
+        success: false,
+        message: 'Maximum 4 photos are allowed per feedback'
+      });
+    }
+    
+    console.log(`Uploading ${req.files.length} photos to B2...`);
+    
+    try {
+      const uploadResults = await uploadMultipleToB2(req.files, 'feedback');
+      
+      uploadResults.forEach(result => {
+        if (result.success) {
+          photos.push({
+            fileName: result.originalName,
+            filePath: result.fileUrl,
+            fileId: result.fileId,
+            uploadedAt: new Date()
+          });
+        }
+      });
+      
+      console.log(`Successfully uploaded ${photos.length} photos to B2`);
+    } catch (uploadError) {
+      console.error('Error uploading photos to B2:', uploadError);
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to upload photos',
+        error: uploadError.message
+      });
+    }
+  }
+  
+  // Add photos to feedback data
+  req.body.photos = photos;
   
   const feedback = await Feedback.create(req.body);
   
@@ -144,31 +187,24 @@ exports.editAdminResponse = asyncHandler(async (req, res) => {
     });
   }
   
-  if (!feedback.adminResponse || !feedback.adminResponse.message) {
-    return res.status(404).json({
+  try {
+    await feedback.editResponse(message, req.user.id, isPublic);
+    
+    // Populate the response data before sending back
+    await feedback.populate('submittedBy', 'firstName lastName contactNumber barangay');
+    await feedback.populate('adminResponse.respondedBy', 'firstName lastName');
+    
+    res.status(200).json({
+      success: true,
+      message: 'Response updated successfully',
+      data: feedback
+    });
+  } catch (error) {
+    res.status(400).json({
       success: false,
-      message: 'No admin response found to edit'
+      message: error.message
     });
   }
-  
-  // Update the admin response
-  feedback.adminResponse.message = message;
-  feedback.adminResponse.isPublic = isPublic;
-  feedback.adminResponse.isEdited = true;
-  feedback.adminResponse.editedAt = new Date();
-  feedback.adminResponse.editedBy = req.user.id;
-  
-  await feedback.save();
-  
-  // Populate the response data before sending back
-  await feedback.populate('submittedBy', 'firstName lastName contactNumber barangay');
-  await feedback.populate('adminResponse.respondedBy', 'firstName lastName');
-  
-  res.status(200).json({
-    success: true,
-    message: 'Response updated successfully',
-    data: feedback
-  });
 });
 
 // Delete admin response (Admin)
@@ -182,17 +218,7 @@ exports.deleteAdminResponse = asyncHandler(async (req, res) => {
     });
   }
   
-  if (!feedback.adminResponse || !feedback.adminResponse.message) {
-    return res.status(404).json({
-      success: false,
-      message: 'No admin response found to delete'
-    });
-  }
-  
-  // Remove the admin response
-  feedback.adminResponse = undefined;
-  
-  await feedback.save();
+  await feedback.deleteResponse();
   
   // Populate the response data before sending back
   await feedback.populate('submittedBy', 'firstName lastName contactNumber barangay');
@@ -217,12 +243,12 @@ exports.updateFeedbackStatus = asyncHandler(async (req, res) => {
     });
   }
   
-  feedback.status = status;
   if (status === 'resolved') {
     await feedback.resolve(req.user.id, resolutionNotes);
+  } else {
+    feedback.status = status;
+    await feedback.save();
   }
-  
-  await feedback.save();
   
   // Populate the response data before sending back
   await feedback.populate('submittedBy', 'firstName lastName contactNumber barangay');
@@ -230,29 +256,39 @@ exports.updateFeedbackStatus = asyncHandler(async (req, res) => {
   
   res.status(200).json({
     success: true,
-    message: 'Feedback status updated successfully',
+    message: 'Status updated successfully',
     data: feedback
   });
 });
 
 // Get feedback statistics (Admin)
 exports.getFeedbackStatistics = asyncHandler(async (req, res) => {
-  const total = await Feedback.countDocuments();
-  const pending = await Feedback.countDocuments({ status: 'pending' });;
-  const resolved = await Feedback.countDocuments({ status: 'resolved' });
-  
-  const byCategory = await Feedback.aggregate([
-    { $group: { _id: '$category', count: { $sum: 1 } } },
-    { $sort: { count: -1 } }
+  const stats = await Promise.all([
+    Feedback.countDocuments({ status: 'pending' }),
+    Feedback.countDocuments({ status: 'in-progress' }),
+    Feedback.countDocuments({ status: 'resolved' }),
+    Feedback.countDocuments({ isPublic: true }),
+    Feedback.countDocuments({})
   ]);
-  
+
+  const categoryStats = await Feedback.aggregate([
+    {
+      $group: {
+        _id: '$category',
+        count: { $sum: 1 }
+      }
+    }
+  ]);
+
   res.status(200).json({
     success: true,
     data: {
-      total,
-      pending,
-      resolved,
-      byCategory
+      pending: stats[0],
+      inProgress: stats[1],
+      resolved: stats[2],
+      public: stats[3],
+      total: stats[4],
+      byCategory: categoryStats
     }
   });
 });

@@ -23,6 +23,26 @@ const feedbackSchema = new mongoose.Schema({
     maxlength: [2000, 'Message cannot exceed 2000 characters']
   },
   
+  // Photo attachments (max 4 photos)
+  photos: [{
+    fileName: {
+      type: String,
+      required: true
+    },
+    filePath: {
+      type: String,
+      required: true
+    },
+    fileId: {
+      type: String,
+      required: true // B2 file ID for deletion
+    },
+    uploadedAt: {
+      type: Date,
+      default: Date.now
+    }
+  }],
+  
   // Feedback categorization
   category: {
     type: String,
@@ -122,7 +142,55 @@ feedbackSchema.virtual('responseCount').get(function() {
   return count;
 });
 
+// Virtual for photo count
+feedbackSchema.virtual('photoCount').get(function() {
+  return this.photos ? this.photos.length : 0;
+});
 
+// Method to add admin response
+feedbackSchema.methods.addResponse = function(message, adminId, isPublic = true) {
+  this.adminResponse = {
+    message,
+    respondedBy: adminId,
+    respondedAt: new Date(),
+    isPublic,
+    isEdited: false
+  };
+  this.status = 'in-progress';
+  return this.save();
+};
+
+// Method to edit admin response
+feedbackSchema.methods.editResponse = function(message, adminId, isPublic = true) {
+  if (!this.adminResponse || !this.adminResponse.message) {
+    throw new Error('No existing response to edit');
+  }
+  
+  this.adminResponse.message = message;
+  this.adminResponse.isPublic = isPublic;
+  this.adminResponse.isEdited = true;
+  this.adminResponse.editedAt = new Date();
+  this.adminResponse.editedBy = adminId;
+  
+  return this.save();
+};
+
+// Method to delete admin response
+feedbackSchema.methods.deleteResponse = function() {
+  this.adminResponse = {
+    message: null,
+    respondedBy: null,
+    respondedAt: null,
+    isPublic: true,
+    isEdited: false,
+    editedAt: null,
+    editedBy: null
+  };
+  this.status = 'pending';
+  return this.save();
+};
+
+// Method to resolve feedback
 feedbackSchema.methods.resolve = function(adminId, notes) {
   this.status = 'resolved';
   this.resolvedBy = adminId;

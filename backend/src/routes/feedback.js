@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { protect, adminOnly, optionalAuth } = require('../middleware/auth');
+const { upload } = require('../config/upload'); // Import upload middleware
 const {
   getPublicFeedback,
   createFeedback,
@@ -18,7 +19,8 @@ const {
 router.get('/public', optionalAuth, getPublicFeedback);
 
 // Protected routes - User
-router.post('/', protect, createFeedback);
+// Updated create feedback route with photo upload middleware (max 4 photos)
+router.post('/', protect, upload().array('photos', 4), createFeedback);
 router.get('/my', protect, getMyFeedback);
 
 // Admin routes
