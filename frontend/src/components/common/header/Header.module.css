@@ -535,13 +535,36 @@
 
 /* Responsive Styles */
 @media (max-width: 1024px) {
-  .logoContainer {
-    margin-right: 2rem;
-    margin-left: 1rem;
+  .nav {
+    padding: 0.5rem 1rem;
+    display: grid;
+    grid-template-columns: 44px 1fr 44px; /* Left space, center, right button */
+    align-items: center;
   }
-  
+
+  .logoContainer {
+    position: absolute; /* Add this */
+    left: 50%; /* Add this */
+    transform: translateX(-50%); /* Add this */
+    margin: 0; /* Remove existing margins */
+  }
+
+  .logoImg {
+    height: 3rem;
+    max-width: 10rem;
+  }
+
   .navList {
-    gap: var(--spacing-md);
+    display: none;
+  }
+
+  .authButtons {
+    display: none;
+  }
+
+  .mobileMenuBtn {
+    display: block;
+    margin-left: auto; /* Push to right side */
   }
 }
 
