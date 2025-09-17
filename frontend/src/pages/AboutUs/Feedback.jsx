@@ -530,91 +530,84 @@ const Feedback = () => {
 
       {/* Content Section */}
       <div className={styles.content}>
-        {/* Feedback Grid */}
-        {filteredFeedback.length === 0 && !searchTerm && filterCategory === 'all' ? (
-          <div className={styles.noFeedback}>
-            <FileText size={80} />
-            <h3>No feedback found</h3>
-            <p>There is no community feedback to display.</p>
-          </div>
-        ) : (
-          <div className={styles.feedbackGrid}>
-            {/* Submit New Feedback Card - First item */}
-            <div
-              onClick={handleSubmitClick}
-              className={styles.submitCard}
-            >
-              <div className={styles.submitCardContent}>
-                <div className={styles.submitIconContainer}>
-                  <Plus size={48} className={styles.submitIcon} />
-                </div>
-                <h3 className={styles.submitTitle}>Submit New Feedback</h3>
-                <p className={styles.submitDescription}>
-                  Share your thoughts and feedback with the community
-                </p>
+        {/* Always show the feedback grid */}
+        <div className={styles.feedbackGrid}>
+          {/* Submit New Feedback Card - Always first item */}
+          <div
+            onClick={handleSubmitClick}
+            className={styles.submitCard}
+          >
+            <div className={styles.submitCardContent}>
+              <div className={styles.submitIconContainer}>
+                <Plus size={48} className={styles.submitIcon} />
               </div>
+              <h3 className={styles.submitTitle}>Submit New Feedback</h3>
+              <p className={styles.submitDescription}>
+                Share your thoughts and feedback with the community
+              </p>
             </div>
+          </div>
 
-            {filteredFeedback.length === 0 ? (
-              <div className={styles.noFeedback}>
-                <FileText size={80} />
-                <h3>No feedback found</h3>
-                <p>
-                  {searchTerm || filterCategory !== 'all' 
-                    ? 'Try adjusting your search or filter criteria' 
-                    : 'There is no community feedback to display.'}
-                </p>
-              </div>
-            ) : (
-              filteredFeedback.map((feedback) => (
-                <div
-                  key={feedback._id}
-                  onClick={() => handleFeedbackClick(feedback)}
-                  className={styles.feedbackCard}
-                >
-                  {/* Status Badge - Replaced category badge */}
-                  <div className={`${styles.statusBadge} ${styles[getStatusCssClass(feedback.status || 'pending')]}`}>
-                    {getStatusDisplay(feedback.status || 'pending')}
+          {/* Conditionally render either "no feedback" message or the actual feedback cards */}
+          {filteredFeedback.length === 0 ? (
+            <div className={styles.noFeedback}>
+              <FileText size={80} />
+              <h3>No feedback found</h3>
+              <p>
+                {searchTerm || filterCategory !== 'all' 
+                  ? 'Try adjusting your search or filter criteria' 
+                  : 'There is no community feedback to display.'}
+              </p>
+            </div>
+          ) : (
+            filteredFeedback.map((feedback) => (
+              <div
+                key={feedback._id}
+                onClick={() => handleFeedbackClick(feedback)}
+                className={styles.feedbackCard}
+              >
+                {/* Status Badge - Replaced category badge */}
+                <div className={`${styles.statusBadge} ${styles[getStatusCssClass(feedback.status || 'pending')]}`}>
+                  {getStatusDisplay(feedback.status || 'pending')}
+                </div>
+
+                {/* Subject */}
+                <h3 className={styles.feedbackSubject}>{feedback.subject}</h3>
+
+                {/* Feedback Info */}
+                <div className={styles.feedbackInfo}>
+                  <div className={styles.infoItem}>
+                    <User size={16} />
+                    <span>{`${feedback.submittedBy.firstName} ${feedback.submittedBy.lastName}`}</span>
                   </div>
-
-                  {/* Subject */}
-                  <h3 className={styles.feedbackSubject}>{feedback.subject}</h3>
-
-                  {/* Feedback Info */}
-                  <div className={styles.feedbackInfo}>
-                    <div className={styles.infoItem}>
-                      <User size={16} />
-                      <span>{`${feedback.submittedBy.firstName} ${feedback.submittedBy.lastName}`}</span>
-                    </div>
-                    <div className={styles.infoItem}>
-                      <Tag size={16} />
-                      <span>{(feedback.category)}</span>
-                    </div>
-                  </div>
-
-                  {/* Message Preview */}
-                  <div className={styles.messagePreview}>
-                    <strong>Message:</strong>
-                    <p>{feedback.message.substring(0, 100)}...</p>
-                  </div>
-
-                  {/* Card Actions */}
-                  <div className={styles.cardActions}>
-                    <button 
-                      className={styles.viewMoreBtn}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleFeedbackClick(feedback);
-                      }}
-                    >
-                      View Details
-                    </button>
+                  <div className={styles.infoItem}>
+                    <Tag size={16} />
+                    <span>{(feedback.category)}</span>
                   </div>
                 </div>
-              ))
-            )}
-          </div>
-        )}
+
+                {/* Message Preview */}
+                <div className={styles.messagePreview}>
+                  <strong>Message:</strong>
+                  <p>{feedback.message.substring(0, 100)}...</p>
+                </div>
+
+                {/* Card Actions */}
+                <div className={styles.cardActions}>
+                  <button 
+                    className={styles.viewMoreBtn}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleFeedbackClick(feedback);
+                    }}
+                  >
+                    View Details
+                  </button>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
       </div>
 
       {/* Feedback Details Modal */}
