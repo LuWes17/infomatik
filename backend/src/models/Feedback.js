@@ -68,21 +68,25 @@ const feedbackSchema = new mongoose.Schema({
   },
   
   // Admin response system with edit tracking
-  adminResponse: {
+  adminResponses: [{
     message: {
       type: String,
+      required: true,
       maxlength: [1500, 'Admin response cannot exceed 1500 characters']
     },
     respondedBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User'
+      ref: 'User',
+      required: true
     },
-    respondedAt: Date,
+    respondedAt: {
+      type: Date,
+      default: Date.now
+    },
     isPublic: {
       type: Boolean,
       default: true
     },
-    // Edit tracking fields
     isEdited: {
       type: Boolean,
       default: false
@@ -92,7 +96,7 @@ const feedbackSchema = new mongoose.Schema({
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User'
     }
-  },
+  }],
   
   
   // Resolution tracking
@@ -121,9 +125,7 @@ feedbackSchema.index({ subject: 'text', message: 'text' });
 
 // Virtual for response count
 feedbackSchema.virtual('responseCount').get(function() {
-  let count = 0;
-  if (this.adminResponse && this.adminResponse.message) count++;
-  return count;
+  return this.adminResponses ? this.adminResponses.length : 0;
 });
 
 // Virtual for photo count
@@ -133,44 +135,47 @@ feedbackSchema.virtual('photoCount').get(function() {
 
 // Method to add admin response
 feedbackSchema.methods.addResponse = function(message, adminId, isPublic = true) {
-  this.adminResponse = {
+  this.adminResponses.push({
     message,
     respondedBy: adminId,
     respondedAt: new Date(),
     isPublic,
     isEdited: false
-  };
-  this.status = 'in-progress';
+  });
+  
+  // Update status to in-progress when first response is added
+  if (this.status === 'pending') {
+    this.status = 'in-progress';
+  }
+  
   return this.save();
 };
 
 // Method to edit admin response
-feedbackSchema.methods.editResponse = function(message, adminId, isPublic = true) {
-  if (!this.adminResponse || !this.adminResponse.message) {
-    throw new Error('No existing response to edit');
+feedbackSchema.methods.editResponse = function(responseId, message, adminId, isPublic = true) {
+  const response = this.adminResponses.id(responseId);
+  if (!response) {
+    throw new Error('Response not found');
   }
   
-  this.adminResponse.message = message;
-  this.adminResponse.isPublic = isPublic;
-  this.adminResponse.isEdited = true;
-  this.adminResponse.editedAt = new Date();
-  this.adminResponse.editedBy = adminId;
+  response.message = message;
+  response.isPublic = isPublic;
+  response.isEdited = true;
+  response.editedAt = new Date();
+  response.editedBy = adminId;
   
   return this.save();
 };
 
 // Method to delete admin response
-feedbackSchema.methods.deleteResponse = function() {
-  this.adminResponse = {
-    message: null,
-    respondedBy: null,
-    respondedAt: null,
-    isPublic: true,
-    isEdited: false,
-    editedAt: null,
-    editedBy: null
-  };
-  this.status = 'pending';
+feedbackSchema.methods.deleteResponse = function(responseId) {
+  this.adminResponses.pull(responseId);
+  
+  // If no responses left, update status back to pending
+  if (this.adminResponses.length === 0) {
+    this.status = 'pending';
+  }
+  
   return this.save();
 };
 
@@ -190,7 +195,8 @@ feedbackSchema.statics.getPublicFeedback = function(category = null) {
   
   return this.find(query)
     .populate('submittedBy', 'firstName lastName barangay')
-    .populate('adminResponse.respondedBy', 'firstName lastName role')
+    .populate('adminResponses.respondedBy', 'firstName lastName role')
+    .populate('adminResponses.editedBy', 'firstName lastName')
     .sort({ createdAt: -1 });
 };
 

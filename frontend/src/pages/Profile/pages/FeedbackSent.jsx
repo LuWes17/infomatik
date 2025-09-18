@@ -233,28 +233,56 @@ const FeedbackSent = () => {
                   <div className={styles.messageText}>
                     {selectedFeedback.message}
                   </div>
+                      {selectedFeedback.photos && selectedFeedback.photos.length > 0 && (
+                                        <div className={styles.section}>
+                                          <h4>Attached Photos</h4>
+                                          <div className={styles.photoGrid}>
+                                            {selectedFeedback.photos.map((photo, index) => (
+                                              <div 
+                                                key={index} 
+                                                className={styles.photoThumbnail}
+                                                onClick={() => handlePhotoClick(index)}
+                                              >
+                                                <img 
+                                                  src={photo.filePath} 
+                                                  alt={photo.fileName}
+                                                  className={styles.thumbnailImage}
+                                                />
+                                              </div>
+                                            ))}
+                                          </div>
+                                        </div>
+                                      )}
                 </div>
               
                 {/* Admin Response in Thread */}
-                {selectedFeedback.adminResponse && selectedFeedback.adminResponse.message && (
-                  <div className={`${styles.threadMessage} ${styles.adminThreadMessage}`}>
-                    <div className={styles.senderInfo}>
-                      <div className={`${styles.threadAvatar} ${styles.adminAvatar}`}>
-                        <User size={14} />
+                {selectedFeedback.adminResponses && selectedFeedback.adminResponses.length > 0 && 
+                  selectedFeedback.adminResponses
+                    .sort((a, b) => new Date(a.respondedAt) - new Date(b.respondedAt))
+                    .map((response, index) => (
+                      <div key={response._id} className={`${styles.threadMessage} ${styles.adminThreadMessage}`}>
+                        <div className={styles.senderInfo}>
+                          <div className={`${styles.threadAvatar} ${styles.adminAvatar}`}>
+                            <User size={14} />
+                          </div>
+                          <span className={`${styles.senderName} ${styles.adminSenderName}`}>
+                            Admin - Response #{index + 1}
+                          </span>
+                          <span className={styles.messageDate}>
+                            {response.respondedAt && formatDateTime(response.respondedAt)}
+                          </span>
+                        </div>
+                        <div className={styles.messageText}>
+                          {response.message}
+                        </div>
                       </div>
-                      <span className={`${styles.senderName} ${styles.adminSenderName}`}>
-                        System Admin
-                      </span>
-                      <span className={styles.messageDate}>
-                        {selectedFeedback.adminResponse.respondedAt && formatDateTime(selectedFeedback.adminResponse.respondedAt)}
-                      </span>
-                      {selectedFeedback.adminResponse.isEdited && (
-                        <span className={styles.editedBadge}>Edited</span>
-                      )}
-                    </div>
-                    <div className={styles.messageText}>
-                      {selectedFeedback.adminResponse.message}
-                    </div>
+                    ))
+                  }
+
+                {/* No admin response message */}
+                {(!selectedFeedback.adminResponses || selectedFeedback.adminResponses.length === 0) && (
+                  <div className={styles.noResponseMessage}>
+                    <p>No admin responses yet.</p>
                   </div>
                 )}
               </div>

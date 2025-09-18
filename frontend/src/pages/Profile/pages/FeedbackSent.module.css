@@ -249,6 +249,56 @@
   hyphens: auto;
 }
 
+.responseMetadata {
+  display: flex;
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-sm);
+  padding-top: var(--spacing-sm);
+  border-top: 1px solid var(--blue-200);
+  font-size: var(--font-size-xs);
+  flex-wrap: wrap;
+}
+
+.visibilityBadge {
+  background: var(--success-100);
+  color: var(--success-700);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--border-radius-sm);
+  font-weight: 500;
+}
+
+.respondedBy {
+  color: var(--gray-600);
+  font-style: italic;
+
+  /* No response message */
+.noResponseMessage {
+  background: var(--gray-50);
+  border: 1px dashed var(--gray-300);
+  border-radius: var(--border-radius-md);
+  padding: var(--spacing-lg);
+  text-align: center;
+  margin-top: var(--spacing-md);
+}
+
+.noResponseMessage p {
+  margin: 0;
+  color: var(--gray-500);
+  font-style: italic;
+  font-size: var(--font-size-sm);
+}
+}
+
+.editedBadge {
+  background: var(--warning-100);
+  color: var(--warning-700);
+  padding: 2px var(--spacing-xs);
+  border-radius: var(--border-radius-sm);
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  margin-left: auto;
+}
+
 /* Card Footer */
 .cardFooter {
   display: flex;
@@ -554,6 +604,57 @@
   hyphens: auto;
 }
 
+.section {
+  margin-bottom: 1rem;
+  margin-top: 1rem;
+}
+
+.section h4 {
+  color: var(--gray-900);
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.section .description {
+  color: var(--gray-700);
+  line-height: 1.7;
+  white-space: pre-wrap;
+  font-size: 0.9rem;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+/* Photos section in modal */
+.photoGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.photoThumbnail {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.photoThumbnail:hover {
+  cursor: zoom-in;
+}
+
+.thumbnailImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+
+
 
 /* Resolution Section */
 .resolutionSection {
@@ -700,6 +801,21 @@
     flex-direction: column;
     align-items: flex-start;
     gap: var(--spacing-lg);
+  }
+
+   .responseMetadata {
+    flex-direction: column;
+    gap: var(--spacing-xs);
+  }
+  
+  .senderInfo {
+    flex-wrap: wrap;
+  }
+  
+  .messageDate {
+    margin-left: 0;
+    width: 100%;
+    margin-top: var(--spacing-xs);
   }
 }
 

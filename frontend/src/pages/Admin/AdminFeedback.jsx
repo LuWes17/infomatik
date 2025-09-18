@@ -21,6 +21,8 @@ const AdminFeedback = () => {
   // Form states for admin response
   const [responseMessage, setResponseMessage] = useState('');
   const [responsePublic, setResponsePublic] = useState(true);
+  const [editingResponseId, setEditingResponseId] = useState(null); // NEW: Track which response is being edited
+  const [showingResponseForm, setShowingResponseForm] = useState(false);
   const [newStatus, setNewStatus] = useState('');
   const [resolutionNotes, setResolutionNotes] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -94,11 +96,12 @@ const AdminFeedback = () => {
 
   const handleCardClick = (feedback) => {
     setSelectedFeedback(feedback);
-    setResponseMessage(feedback.adminResponse?.message || '');
-    setResponsePublic(feedback.adminResponse?.isPublic || true);
+    setResponseMessage('');
+    setResponsePublic(true);
     setNewStatus(feedback.status);
     setResolutionNotes('');
-    setEditingResponse(false);
+    setEditingResponseId(null); // RESET editing state
+    setShowingResponseForm(false); // RESET form state
     setShowModal(true);
   };
 
@@ -127,13 +130,15 @@ const AdminFeedback = () => {
 
       const data = await response.json();
       
-      // Update the selected feedback and feedbacks list
       setSelectedFeedback(data.data);
       setFeedbacks(feedbacks.map(f => 
         f._id === selectedFeedback._id ? data.data : f
       ));
       
-      setEditingResponse(false);
+      // Clear form
+      setResponseMessage('');
+      setResponsePublic(true);
+      setShowingResponseForm(false);
       toast.success('Response added successfully');
       fetchStatistics();
     } catch (error) {
@@ -144,7 +149,7 @@ const AdminFeedback = () => {
     }
   };
 
-  const handleEditResponse = async () => {
+  const handleEditResponse = async (responseId) => {
     if (!responseMessage.trim()) {
       toast.error('Please enter a response message');
       return;
@@ -153,7 +158,7 @@ const AdminFeedback = () => {
     try {
       setIsSubmitting(true);
       const token = localStorage.getItem('token');
-      const response = await fetch(`${API_BASE}/feedback/${selectedFeedback._id}/response`, {
+      const response = await fetch(`${API_BASE}/feedback/${selectedFeedback._id}/responses/${responseId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -169,13 +174,14 @@ const AdminFeedback = () => {
 
       const data = await response.json();
       
-      // Update the selected feedback and feedbacks list
       setSelectedFeedback(data.data);
       setFeedbacks(feedbacks.map(f => 
         f._id === selectedFeedback._id ? data.data : f
       ));
       
-      setEditingResponse(false);
+      setEditingResponseId(null);
+      setResponseMessage('');
+      setResponsePublic(true);
       toast.success('Response updated successfully');
       fetchStatistics();
     } catch (error) {
@@ -186,15 +192,13 @@ const AdminFeedback = () => {
     }
   };
 
-  const handleDeleteResponse = async () => {
-    if (!window.confirm('Are you sure you want to delete this response?')) {
-      return;
-    }
+  const handleDeleteResponse = async (responseId) => {
+    if (!window.confirm('Are you sure you want to delete this response?')) return;
 
     try {
       setIsSubmitting(true);
       const token = localStorage.getItem('token');
-      const response = await fetch(`${API_BASE}/feedback/${selectedFeedback._id}/response`, {
+      const response = await fetch(`${API_BASE}/feedback/${selectedFeedback._id}/responses/${responseId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -205,15 +209,11 @@ const AdminFeedback = () => {
 
       const data = await response.json();
       
-      // Update the selected feedback and feedbacks list
       setSelectedFeedback(data.data);
       setFeedbacks(feedbacks.map(f => 
         f._id === selectedFeedback._id ? data.data : f
       ));
       
-      setResponseMessage('');
-      setResponsePublic(true);
-      setEditingResponse(false);
       toast.success('Response deleted successfully');
       fetchStatistics();
     } catch (error) {
@@ -263,6 +263,20 @@ const AdminFeedback = () => {
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const startEditingResponse = (response) => {
+    setEditingResponseId(response._id);
+    setResponseMessage(response.message);
+    setResponsePublic(response.isPublic);
+    setShowingResponseForm(false);
+  };
+
+  const cancelEditing = () => {
+    setEditingResponseId(null);
+    setResponseMessage('');
+    setResponsePublic(true);
+    setShowingResponseForm(false);
   };
 
   const getStatusBadgeClass = (status) => {
@@ -492,82 +506,159 @@ const AdminFeedback = () => {
               {/* Admin Response Section */}
               <div className={styles.responseSection}>
                 <div className={styles.responseSectionHeader}>
-                  <h3>Admin Response</h3>
-                  {selectedFeedback.adminResponse?.message && !editingResponse && (
-                    <div className={styles.responseActions}>
-                      <button 
-                        onClick={() => setEditingResponse(true)}
-                        className={styles.editButton}
-                        disabled={isSubmitting}
-                      >
-                        Edit
-                      </button>
-                      <button 
-                        onClick={handleDeleteResponse}
-                        className={styles.deleteButton}
-                        disabled={isSubmitting}
-                      >
-                        Delete
-                      </button>
-                    </div>
+                  <h3>Admin Responses</h3>
+                  {!showingResponseForm && !editingResponseId && (
+                    <button 
+                      onClick={() => setShowingResponseForm(true)}
+                      className={styles.addResponseButton}
+                      disabled={isSubmitting}
+                    >
+                      Add Response
+                    </button>
                   )}
                 </div>
 
-                {/* Existing Response Display */}
-                {selectedFeedback.adminResponse?.message && !editingResponse && (
-                  <div className={styles.existingResponse}>
-                    <p>{selectedFeedback.adminResponse.message}</p>
-                    <div className={styles.responseInfo}>
-                      <span>By: {selectedFeedback.adminResponse.respondedBy?.firstName} {selectedFeedback.adminResponse.respondedBy?.lastName}</span>
-                      <span>{formatDate(selectedFeedback.adminResponse.respondedAt)}</span>
-                      <span>{selectedFeedback.adminResponse.isPublic ? 'Public' : 'Private'}</span>
-                      {selectedFeedback.adminResponse.isEdited && (
-                        <span className={styles.editedIndicator}>Edited</span>
-                      )}
+                {/* Existing Responses Display */}
+                {selectedFeedback.adminResponses && selectedFeedback.adminResponses.length > 0 && (
+                  <div className={styles.responsesList}>
+                    {selectedFeedback.adminResponses
+                      .sort((a, b) => new Date(a.respondedAt) - new Date(b.respondedAt))
+                      .map((response, index) => (
+                        <div key={response._id} className={styles.responseItem}>
+                          {editingResponseId === response._id ? (
+                            // Edit Response Form
+                            <div className={styles.responseForm}>
+                              <div className={styles.formGroup}>
+                                <label>Response Message:</label>
+                                <textarea
+                                  value={responseMessage}
+                                  onChange={(e) => setResponseMessage(e.target.value)}
+                                  placeholder="Enter your response..."
+                                  className={styles.responseTextarea}
+                                  disabled={isSubmitting}
+                                />
+                              </div>
+                              <div className={styles.visibilityGroup}>
+                                <label className={styles.checkbox}>
+                                  <input
+                                    type="checkbox"
+                                    checked={responsePublic}
+                                    onChange={(e) => setResponsePublic(e.target.checked)}
+                                    disabled={isSubmitting}
+                                  />
+                                  <span>Make response public</span>
+                                </label>
+                              </div>
+                              <div className={styles.formActions}>
+                                <button 
+                                  onClick={() => handleEditResponse(response._id)}
+                                  className={styles.submitButton}
+                                  disabled={isSubmitting || !responseMessage.trim()}
+                                >
+                                  {isSubmitting ? 'Updating...' : 'Update Response'}
+                                </button>
+                                <button 
+                                  onClick={cancelEditing}
+                                  className={styles.cancelButton}
+                                  disabled={isSubmitting}
+                                >
+                                  Cancel
+                                </button>
+                              </div>
+                            </div>
+                          ) : (
+                            // Display Response
+                            <div className={styles.responseContent}>
+                              <div className={styles.responseHeader}>
+                                <span className={styles.responseNumber}>Response #{index + 1}</span>
+                                <div className={styles.responseActions}>
+                                  <button 
+                                    onClick={() => startEditingResponse(response)}
+                                    className={styles.editButton}
+                                    disabled={isSubmitting}
+                                  >
+                                    Edit
+                                  </button>
+                                  <button 
+                                    onClick={() => handleDeleteResponse(response._id)}
+                                    className={styles.deleteButton}
+                                    disabled={isSubmitting}
+                                  >
+                                    Delete
+                                  </button>
+                                </div>
+                              </div>
+                              <div className={styles.responseMessage}>
+                                <p>{response.message}</p>
+                              </div>
+                              <div className={styles.responseInfo}>
+                                <span>By: {response.respondedBy?.firstName} {response.respondedBy?.lastName}</span>
+                                <span>{formatDate(response.respondedAt)}</span>
+                                <span>
+                                  {response.isPublic ? 'Public' : 'Private'}
+                                </span>
+                                {response.isEdited && (
+                                  <span className={styles.editedIndicator}>
+                                    (Edited on {formatDate(response.editedAt)})
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                  </div>
+                )}
+
+                {/* Add New Response Form */}
+                {showingResponseForm && !editingResponseId && (
+                  <div className={styles.responseForm}>
+                    <h4>Add New Response</h4>
+                    <div className={styles.formGroup}>
+                      <label>Response Message:</label>
+                      <textarea
+                        value={responseMessage}
+                        onChange={(e) => setResponseMessage(e.target.value)}
+                        placeholder="Enter your response..."
+                        className={styles.responseTextarea}
+                        disabled={isSubmitting}
+                      />
+                    </div>
+                    <div className={styles.visibilityGroup}>
+                      <label className={styles.checkbox}>
+                        <input
+                          type="checkbox"
+                          checked={responsePublic}
+                          onChange={(e) => setResponsePublic(e.target.checked)}
+                          disabled={isSubmitting}
+                        />
+                        <span>Make response public</span>
+                      </label>
+                    </div>
+                    <div className={styles.formActions}>
+                      <button 
+                        onClick={handleAddResponse}
+                        className={styles.submitButton}
+                        disabled={isSubmitting || !responseMessage.trim()}
+                      >
+                        {isSubmitting ? 'Adding...' : 'Add Response'}
+                      </button>
+                      <button 
+                        onClick={() => setShowingResponseForm(false)}
+                        className={styles.cancelButton}
+                        disabled={isSubmitting}
+                      >
+                        Cancel
+                      </button>
                     </div>
                   </div>
                 )}
 
-                {/* Response Form */}
-                {(!selectedFeedback.adminResponse?.message || editingResponse) && (
-                  <div className={styles.responseForm}>
-                    <textarea
-                      value={responseMessage}
-                      onChange={(e) => setResponseMessage(e.target.value)}
-                      placeholder="Enter your response..."
-                      className={styles.responseTextarea}
-                      maxLength={1500}
-                    />
-                    <div className={styles.responseOptions}>
-                      <div className={styles.characterCount}>
-                        {responseMessage.length}/1500
-                      </div>
-                    </div>
-                    <div className={styles.responseFormActions}>
-                      <button
-                        onClick={editingResponse ? handleEditResponse : handleAddResponse}
-                        disabled={isSubmitting || !responseMessage.trim()}
-                        className={styles.submitButton}
-                      >
-                        {isSubmitting 
-                          ? (editingResponse ? 'Updating...' : 'Adding...') 
-                          : (editingResponse ? 'Update Response' : 'Add Response')
-                        }
-                      </button>
-                      {editingResponse && (
-                        <button
-                          onClick={() => {
-                            setEditingResponse(false);
-                            setResponseMessage(selectedFeedback.adminResponse?.message || '');
-                            setResponsePublic(selectedFeedback.adminResponse?.isPublic || true);
-                          }}
-                          className={styles.cancelButton}
-                          disabled={isSubmitting}
-                        >
-                          Cancel
-                        </button>
-                      )}
-                    </div>
+                {/* No responses message */}
+                {(!selectedFeedback.adminResponses || selectedFeedback.adminResponses.length === 0) && 
+                !showingResponseForm && !editingResponseId && (
+                  <div className={styles.noResponsesMessage}>
+                    <p>No responses yet. Click "Add Response" to respond to this feedback.</p>
                   </div>
                 )}
               </div>

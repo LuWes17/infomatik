@@ -13,7 +13,8 @@ exports.getPublicFeedback = asyncHandler(async (req, res) => {
   
   const feedback = await Feedback.find(filter)
     .populate('submittedBy', 'firstName lastName')
-    .populate('adminResponse.respondedBy', 'firstName lastName')
+    .populate('adminResponses.respondedBy', 'firstName lastName')
+    .populate('adminResponses.editedBy', 'firstName lastName')
     .sort({ createdAt: -1 })
     .limit(limit * 1)
     .skip(skip);
@@ -89,7 +90,8 @@ exports.createFeedback = asyncHandler(async (req, res) => {
 // Get my feedback (User)
 exports.getMyFeedback = asyncHandler(async (req, res) => {
   const feedback = await Feedback.find({ submittedBy: req.user.id })
-    .populate('adminResponse.respondedBy', 'firstName lastName')
+    .populate('adminResponses.respondedBy', 'firstName lastName')
+    .populate('adminResponses.editedBy', 'firstName lastName')
     .sort({ createdAt: -1 });
     
   res.status(200).json({
@@ -111,7 +113,8 @@ exports.getAllFeedback = asyncHandler(async (req, res) => {
   
   const feedback = await Feedback.find(filter)
     .populate('submittedBy', 'firstName lastName contactNumber barangay')
-    .populate('adminResponse.respondedBy', 'firstName lastName')
+    .populate('adminResponses.respondedBy', 'firstName lastName')
+    .populate('adminResponses.editedBy', 'firstName lastName')
     .sort({ createdAt: -1 })
     .limit(limit * 1)
     .skip(skip);
@@ -133,7 +136,8 @@ exports.getAllFeedback = asyncHandler(async (req, res) => {
 exports.getFeedbackById = asyncHandler(async (req, res) => {
   const feedback = await Feedback.findById(req.params.id)
     .populate('submittedBy', 'firstName lastName contactNumber barangay')
-    .populate('adminResponse.respondedBy', 'firstName lastName');
+    .populate('adminResponses.respondedBy', 'firstName lastName')
+    .populate('adminResponses.editedBy', 'firstName lastName');
     
   if (!feedback) {
     return res.status(404).json({
@@ -165,7 +169,8 @@ exports.addAdminResponse = asyncHandler(async (req, res) => {
   
   // Populate the response data before sending back
   await feedback.populate('submittedBy', 'firstName lastName contactNumber barangay');
-  await feedback.populate('adminResponse.respondedBy', 'firstName lastName');
+  await feedback.populate('adminResponses.respondedBy', 'firstName lastName');
+  await feedback.populate('adminResponses.editedBy', 'firstName lastName');
   
   res.status(200).json({
     success: true,
@@ -177,6 +182,7 @@ exports.addAdminResponse = asyncHandler(async (req, res) => {
 // Edit admin response (Admin)
 exports.editAdminResponse = asyncHandler(async (req, res) => {
   const { message, isPublic } = req.body;
+  const { responseId } = req.params; // NEW: Get response ID from URL params
   
   const feedback = await Feedback.findById(req.params.id);
   
@@ -188,11 +194,12 @@ exports.editAdminResponse = asyncHandler(async (req, res) => {
   }
   
   try {
-    await feedback.editResponse(message, req.user.id, isPublic);
+    await feedback.editResponse(responseId, message, req.user.id, isPublic);
     
     // Populate the response data before sending back
     await feedback.populate('submittedBy', 'firstName lastName contactNumber barangay');
-    await feedback.populate('adminResponse.respondedBy', 'firstName lastName');
+    await feedback.populate('adminResponses.respondedBy', 'firstName lastName');
+    await feedback.populate('adminResponses.editedBy', 'firstName lastName');
     
     res.status(200).json({
       success: true,
@@ -209,6 +216,8 @@ exports.editAdminResponse = asyncHandler(async (req, res) => {
 
 // Delete admin response (Admin)
 exports.deleteAdminResponse = asyncHandler(async (req, res) => {
+  const { responseId } = req.params; // NEW: Get response ID from URL params
+  
   const feedback = await Feedback.findById(req.params.id);
   
   if (!feedback) {
@@ -218,16 +227,25 @@ exports.deleteAdminResponse = asyncHandler(async (req, res) => {
     });
   }
   
-  await feedback.deleteResponse();
-  
-  // Populate the response data before sending back
-  await feedback.populate('submittedBy', 'firstName lastName contactNumber barangay');
-  
-  res.status(200).json({
-    success: true,
-    message: 'Response deleted successfully',
-    data: feedback
-  });
+  try {
+    await feedback.deleteResponse(responseId);
+    
+    // Populate the response data before sending back
+    await feedback.populate('submittedBy', 'firstName lastName contactNumber barangay');
+    await feedback.populate('adminResponses.respondedBy', 'firstName lastName');
+    await feedback.populate('adminResponses.editedBy', 'firstName lastName');
+    
+    res.status(200).json({
+      success: true,
+      message: 'Response deleted successfully',
+      data: feedback
+    });
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      message: error.message
+    });
+  }
 });
 
 // Update feedback status (Admin)

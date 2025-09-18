@@ -634,6 +634,7 @@
 /* Section */
 .section {
   margin-bottom: 1rem;
+  margin-top: 1rem;
 }
 
 .section h4 {
@@ -651,24 +652,159 @@
   overflow-wrap: break-word;
 }
 
-/* Admin Response Box */
-.adminResponseBox {
-  background: #f8fafc;
-  border-left: 4px solid var(--primary-color);
-  padding: 1rem;
-  border-radius: 8px;
-  margin-top: 0.5rem;
+/* Feedback Thread Container */
+.threadContainer {
+  margin-top: 1rem;
+  background: var(--white);
+  border-radius: var(--border-radius-lg);
 }
 
-.responseMetadata {
-  margin-top: 0.75rem;
+.threadHeader {
+  color: var(--gray-800);
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  margin: 0 0 var(--spacing-lg) 0;
+}
+
+.threadMessage {
+  background: var(--white);
+  border-radius: var(--border-radius-md);
+  padding: var(--spacing-lg);
+  margin-bottom: var(--spacing-md);
+  border: 1px solid var(--gray-200);
+  box-shadow: var(--shadow-sm);
+}
+
+.threadMessage:last-child {
+  margin-bottom: 0;
+}
+
+.adminThreadMessage {
+  border-left: 3px solid var(--primary-color);
+  background: var(--blue-50);
+  border-color: var(--blue-200);
+}
+
+.senderInfo {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-sm);
+  flex-wrap: wrap;
+}
+
+.threadAvatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--primary-color);
+  color: var(--white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.adminAvatar {
+  background: var(--success-color);
+}
+
+.senderName {
+  font-weight: 600;
+  color: var(--gray-800);
+  font-size: var(--font-size-sm);
+}
+
+.adminSenderName {
+  color: var(--primary-color);
+}
+
+.messageDate {
   color: var(--gray-500);
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
+  margin-left: auto;
+}
+
+.editedBadge {
+  background: var(--warning-100);
+  color: var(--warning-700);
+  padding: 2px var(--spacing-xs);
+  border-radius: var(--border-radius-sm);
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  margin-left: auto;
+}
+
+.messageText {
+  color: var(--gray-700);
+  line-height: 1.6;
+  margin: 0;
+  white-space: pre-wrap;
+  font-size: var(--font-size-sm);
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
+}
+
+/* No response message */
+.noResponseMessage {
+  background: var(--gray-50);
+  border: 1px dashed var(--gray-300);
+  border-radius: var(--border-radius-md);
+  padding: var(--spacing-lg);
+  text-align: center;
+  margin-top: var(--spacing-md);
+}
+
+.noResponseMessage p {
+  margin: 0;
+  color: var(--gray-500);
+  font-style: italic;
+  font-size: var(--font-size-sm);
+}
+
+
+
+.respondedBy {
+  font-weight: 500;
+}
+
+.responseDate {
+  color: var(--gray-500);
 }
 
 .editedIndicator {
   font-style: italic;
-  color: var(--gray-400);
+  color: var(--warning-color);
+}
+
+/* No response message styling */
+.noResponseMessage {
+  background: #f8fafc;
+  border: 1px dashed #d1d5db;
+  border-radius: 12px;
+  padding: 2rem;
+  text-align: center;
+  margin-top: 0.75rem;
+}
+
+.noResponseMessage p {
+  margin: 0;
+  color: var(--gray-500);
+  font-style: italic;
+  font-size: 0.9rem;
+}
+
+
+/* Admin Response Box */
+.adminResponseItem .adminResponseBox {
+  background: white;
+  border-left: none;
+  padding: 1rem;
+  border-radius: 0;
+  margin-top: 0;
 }
 
 /* Modal Metadata */
@@ -1568,6 +1704,25 @@
     width: 100%;
     padding: 1rem 1.5rem;
   }
+
+  .responseHeader {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+  
+  .responseMetadata {
+    justify-content: space-between;
+    width: 100%;
+  }
+  
+  .adminResponseItem .adminResponseBox {
+    padding: 0.875rem;
+  }
+  
+  .noResponseMessage {
+    padding: 1.5rem 1rem;
+  }
 }
 
 @media (max-width: 480px) {
@@ -1749,5 +1904,15 @@
   .authPrompt p {
     font-size: 0.9rem;
     margin-bottom: 1.5rem;
+  }
+
+  .responseMetadata {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.25rem;
+  }
+  
+  .responseMetadata span {
+    text-align: left;
   }
 }

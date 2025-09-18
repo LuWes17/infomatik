@@ -151,6 +151,268 @@
   box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
 }
 
+/* Response section header */
+.responseSectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-lg);
+  padding-bottom: var(--spacing-sm);
+  border-bottom: 2px solid var(--gray-200);
+}
+
+/* Add response button */
+.addResponseButton {
+  background: var(--primary-color);
+  color: var(--white);
+  border: none;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--border-radius-sm);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.addResponseButton:hover:not(:disabled) {
+  background: var(--primary-dark);
+}
+
+.addResponseButton:disabled {
+  background: var(--gray-400);
+  cursor: not-allowed;
+}
+
+/* Responses list */
+.responsesList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+  margin-bottom: var(--spacing-lg);
+}
+
+/* Individual response item */
+.responseItem {
+  border: 1px solid var(--gray-200);
+  border-radius: var(--border-radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+/* Response content */
+.responseContent {
+  padding: var(--spacing-lg);
+}
+
+.responseHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-md);
+  padding-bottom: var(--spacing-sm);
+  border-bottom: 1px solid var(--gray-200);
+}
+
+.responseNumber {
+  font-weight: 600;
+  color: var(--primary-color);
+  font-size: var(--font-size-sm);
+}
+
+.responseActions {
+  display: flex;
+  gap: var(--spacing-sm);
+}
+
+.responseMessage {
+  margin-bottom: var(--spacing-md);
+}
+
+.responseMessage p {
+  color: var(--gray-700);
+  line-height: 1.6;
+  margin: 0;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.responseInfo {
+  display: flex;
+  gap: var(--spacing-md);
+  flex-wrap: wrap;
+  font-size: var(--font-size-xs);
+  color: var(--gray-600);
+}
+
+.responseInfo span {
+  display: flex;
+  align-items: center;
+}
+
+.editedIndicator {
+  font-style: italic;
+  color: var(--warning-color) !important;
+}
+
+/* Response form */
+.responseForm {
+  background: var(--gray-50);
+  padding: var(--spacing-lg);
+  border-top: 1px solid var(--gray-200);
+}
+
+.responseForm h4 {
+  margin: 0 0 var(--spacing-md) 0;
+  color: var(--gray-800);
+  font-size: var(--font-size-lg);
+}
+
+.formGroup {
+  margin-bottom: var(--spacing-md);
+}
+
+.formGroup label {
+  display: block;
+  margin-bottom: var(--spacing-xs);
+  font-weight: 500;
+  color: var(--gray-700);
+  font-size: var(--font-size-sm);
+}
+
+.responseTextarea {
+  width: 100%;
+  min-height: 120px;
+  padding: var(--spacing-md);
+  border: 1px solid var(--gray-300);
+  border-radius: var(--border-radius-sm);
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  line-height: 1.5;
+  resize: vertical;
+  transition: border-color 0.2s ease;
+}
+
+.responseTextarea:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px var(--primary-color-alpha);
+}
+
+.responseTextarea:disabled {
+  background: var(--gray-100);
+  cursor: not-allowed;
+}
+
+.visibilityGroup {
+  margin-bottom: var(--spacing-lg);
+}
+
+.checkbox {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+  color: var(--gray-700);
+}
+
+.checkbox input {
+  margin-right: var(--spacing-sm);
+  cursor: pointer;
+}
+
+.formActions {
+  display: flex;
+  gap: var(--spacing-md);
+  justify-content: flex-end;
+}
+
+.submitButton {
+  background: var(--success-color);
+  color: var(--white);
+  border: none;
+  padding: var(--spacing-sm) var(--spacing-lg);
+  border-radius: var(--border-radius-sm);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.submitButton:hover:not(:disabled) {
+  background: var(--success-dark);
+}
+
+.submitButton:disabled {
+  background: var(--gray-400);
+  cursor: not-allowed;
+}
+
+.cancelButton {
+  background: var(--gray-500);
+  color: var(--white);
+  border: none;
+  padding: var(--spacing-sm) var(--spacing-lg);
+  border-radius: var(--border-radius-sm);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.cancelButton:hover:not(:disabled) {
+  background: var(--gray-600);
+}
+
+.cancelButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.editButton {
+  background: var(--warning-color);
+  color: var(--white);
+  border: none;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--border-radius-sm);
+  font-size: var(--font-size-xs);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.editButton:hover:not(:disabled) {
+  background: var(--warning-dark);
+}
+
+.deleteButton {
+  background: red;
+  color: var(--white);
+  border: none;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--border-radius-sm);
+  font-size: var(--font-size-xs);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+
+.deleteButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* No responses message */
+.noResponsesMessage {
+  text-align: center;
+  padding: var(--spacing-xl);
+  color: var(--gray-500);
+  font-style: italic;
+}
+
+.noResponsesMessage p {
+  margin: 0;
+  font-size: var(--font-size-sm);
+}
+
 /* Feedback Grid */
 .feedbackGrid {
   display: grid;
@@ -424,121 +686,6 @@
   background: white;
 }
 
-.responseSectionHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: var(--spacing-lg, 1.5rem) var(--spacing-xl, 2rem);
-  background: var(--primary-color, #007bff);
-  color: white;
-}
-
-.responseSectionHeader h3 {
-  margin: 0;
-  font-size: var(--font-size-lg, 1.125rem);
-  font-weight: 600;
-}
-
-.responseActions {
-  display: flex;
-  gap: var(--spacing-md, 1rem);
-}
-
-.editButton, .deleteButton {
-  padding: 0.5rem 1rem;
-  border: none;
-  border-radius: var(--border-radius-md, 8px);
-  font-size: var(--font-size-sm, 0.875rem);
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.editButton {
-  background: rgba(255, 255, 255, 0.2);
-  color: white;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-}
-
-.editButton:hover {
-  background: rgba(255, 255, 255, 0.3);
-}
-
-.deleteButton {
-  background: rgba(220, 53, 69, 0.8);
-  color: white;
-  border: 1px solid rgba(220, 53, 69, 0.9);
-}
-
-.deleteButton:hover {
-  background: rgba(220, 53, 69, 1);
-}
-
-.editButton:disabled, .deleteButton:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.existingResponse {
-  padding: var(--spacing-xl, 2rem);
-  border-bottom: 1px solid var(--gray-200, #e9ecef);
-}
-
-.existingResponse p {
-  background: var(--gray-50, #f8f9fa);
-  padding: var(--spacing-lg, 1.5rem);
-  border-radius: var(--border-radius-md, 8px);
-  border-left: 4px solid var(--primary-color, #007bff);
-  line-height: 1.6;
-  color: var(--gray-700, #495057);
-  margin: 0 0 var(--spacing-lg, 1.5rem) 0;
-}
-
-.responseInfo {
-  display: flex;
-  gap: var(--spacing-lg, 1.5rem);
-  flex-wrap: wrap;
-  color: var(--gray-600, #6c757d);
-  font-size: var(--font-size-sm, 0.875rem);
-}
-
-.responseInfo span {
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-}
-
-.editedIndicator {
-  color: var(--primary-color, #007bff) !important;
-  font-weight: 600;
-}
-
-/* Response Form */
-.responseForm {
-  padding: var(--spacing-xl, 2rem);
-  background: var(--gray-50, #f8f9fa);
-}
-
-.responseTextarea {
-  width: 100%;
-  min-height: 120px;
-  padding: var(--spacing-lg, 1.5rem);
-  border: 1px solid var(--gray-300, #dee2e6);
-  border-radius: var(--border-radius-md, 8px);
-  font-size: var(--font-size-base, 1rem);
-  line-height: 1.5;
-  resize: vertical;
-  font-family: inherit;
-  transition: all 0.2s ease;
-}
-
-.responseTextarea:focus {
-  outline: none;
-  border-color: var(--primary-color, #007bff);
-  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
-}
 
 .responseOptions {
   display: flex;
@@ -573,38 +720,6 @@
   gap: var(--spacing-md, 1rem);
 }
 
-.submitButton, .cancelButton, .updateButton {
-  padding: var(--spacing-md, 1rem) var(--spacing-xl, 2rem);
-  border: none;
-  border-radius: var(--border-radius-md, 8px);
-  font-size: var(--font-size-base, 1rem);
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.submitButton, .updateButton {
-  background: var(--primary-color, #007bff);
-  color: white;
-}
-
-.submitButton:hover, .updateButton:hover {
-  background: var(--primary-dark, #0056b3);
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-md, 0 4px 6px -1px rgba(0, 0, 0, 0.1));
-}
-
-.cancelButton {
-  background: var(--gray-500, #6c757d);
-  color: white;
-}
-
-.cancelButton:hover {
-  background: var(--gray-600, #5a6268);
-  transform: translateY(-1px);
-}
 
 .submitButton:disabled, .cancelButton:disabled, .updateButton:disabled {
   opacity: 0.6;
@@ -723,16 +838,6 @@
     flex: none;
   }
 
-  .responseSectionHeader {
-    flex-direction: column;
-    gap: var(--spacing-md, 1rem);
-    align-items: flex-start;
-  }
-
-  .responseActions {
-    width: 100%;
-    justify-content: flex-end;
-  }
 
   .detailGrid {
     grid-template-columns: 1fr;
@@ -742,10 +847,7 @@
     flex-direction: column;
   }
 
-  .responseInfo {
-    flex-direction: column;
-    gap: var(--spacing-sm, 0.5rem);
-  }
+
 }
 
 @media (max-width: 480px) {
@@ -762,10 +864,6 @@
   }
 
   .feedbackSection {
-    padding: var(--spacing-lg, 1.5rem);
-  }
-
-  .responseForm {
     padding: var(--spacing-lg, 1.5rem);
   }
 
