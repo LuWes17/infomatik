@@ -1,11 +1,14 @@
-/* AdminLayout.module.css - Modular CSS matching project color scheme */
+/* AdminLayout.module.css - Desktop Only Version with Project Color Scheme */
 
-/* CSS Variables for consistency with other pages */
+/* CSS Variables matching project color scheme */
 :root {
+  /* Primary Colors */
   --primary-color: #1c62bb;
   --primary-dark: #1d4ed8;
   --primary-light: #3b82f6;
   --secondary-color: #2c3e50;
+  
+  /* Gray Scale */
   --gray-50: #f9fafb;
   --gray-100: #f3f4f6;
   --gray-200: #e5e7eb;
@@ -17,28 +20,42 @@
   --gray-800: #1f2937;
   --gray-900: #111827;
   --white: #ffffff;
-  --error-500: #ef4444;
-  --error-600: #dc2626;
-  --error-700: #b91c1c;
-  --success-500: #10b981;
-  --success-600: #059669;
-  --success-700: #047857;
+  
+  /* Status Colors */
+  --success-color: #10b981;
+  --success-dark: #059669;
+  --warning-color: #f59e0b;
+  --warning-dark: #d97706;
+  --error-color: #ef4444;
+  --error-dark: #dc2626;
+  
+  /* Layout Variables */
+  --sidebar-width: 280px;
+  --sidebar-collapsed-width: 72px;
+  --transition-duration: 0.3s;
+  
+  /* Spacing */
   --spacing-xs: 0.25rem;
   --spacing-sm: 0.5rem;
   --spacing-md: 0.75rem;
   --spacing-lg: 1rem;
   --spacing-xl: 1.5rem;
   --spacing-2xl: 2rem;
+  
+  /* Typography */
   --font-size-xs: 0.75rem;
   --font-size-sm: 0.875rem;
   --font-size-base: 1rem;
   --font-size-lg: 1.125rem;
   --font-size-xl: 1.25rem;
-  --font-size-2xl: 1.5rem;
+  
+  /* Border Radius */
   --border-radius-sm: 0.25rem;
   --border-radius-md: 0.5rem;
   --border-radius-lg: 0.75rem;
   --border-radius-xl: 1rem;
+  
+  /* Shadows */
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
@@ -52,280 +69,325 @@
   background-color: var(--gray-50);
 }
 
-/* Mobile Header */
-.mobileHeader {
-  display: none;
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 60px;
-  background: var(--primary-color);
-  color: var(--white);
-  padding: 0 var(--spacing-lg);
-  align-items: center;
-  justify-content: space-between;
-  z-index: 100;
-  box-shadow: var(--shadow-lg);
-}
-
-.sidebarToggle {
-  background: none;
-  border: none;
-  color: var(--white);
-  cursor: pointer;
-  padding: var(--spacing-sm);
-  border-radius: var(--border-radius-md);
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.sidebarToggle:hover {
-  background: rgba(255, 255, 255, 0.1);
-}
-
-.adminTitle {
-  font-size: var(--font-size-lg);
-  font-weight: 600;
-  margin: 0;
-}
-
 /* Sidebar */
 .sidebar {
   position: fixed;
   left: 0;
   top: 0;
   bottom: 0;
-  width: 280px;
-  background: linear-gradient(180deg, var(--primary-color) 0%, var(--primary-dark) 100%);
-  color: var(--white);
+  width: var(--sidebar-width);
+  background: var(--white);
+  border-right: 1px solid var(--gray-200);
   display: flex;
   flex-direction: column;
-  box-shadow: var(--shadow-xl);
-  z-index: 101;
-  transition: transform 0.3s ease;
+  box-shadow: var(--shadow-lg);
+  z-index: 100;
+  transition: width var(--transition-duration) ease;
 }
 
-.sidebarHeader {
-  padding: var(--spacing-xl);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.sidebarTitle {
-  margin: 0;
-  font-size: var(--font-size-xl);
-  font-weight: 700;
-}
-
-.sidebarClose {
-  display: none;
-  background: none;
-  border: none;
-  color: var(--white);
-  cursor: pointer;
-  padding: var(--spacing-sm);
-  border-radius: var(--border-radius-md);
-  transition: all 0.2s ease;
-}
-
-.sidebarClose:hover {
-  background: rgba(255, 255, 255, 0.1);
+.sidebar.collapsed {
+  width: var(--sidebar-collapsed-width);
 }
 
 /* Admin Info Section */
 .adminInfo {
-  padding: var(--spacing-lg) var(--spacing-xl);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding: var(--spacing-xl);
+  border-bottom: 1px solid var(--gray-200);
+  transition: padding var(--transition-duration) ease;
 }
 
-.welcomeText {
+.collapsed .adminInfo {
+  padding: var(--spacing-lg) var(--spacing-md);
+  display: flex;
+  justify-content: center;
+}
+
+/* Admin Profile Section */
+.adminProfile {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  transition: all var(--transition-duration) ease;
+}
+
+.collapsed .adminProfile {
+  gap: 0;
+  justify-content: center;
+}
+
+.adminAvatar {
+  width: 48px;
+  height: 48px;
+  background: var(--primary-color);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: white;
+  border: none;
+  outline: none;
+}
+
+.adminAvatar:hover {
+  transform: scale(1.05);
+  box-shadow: var(--shadow-md);
+}
+
+/* User icon inside avatar */
+.userIcon {
+  color: var(--white);
+}
+
+.avatarText {
+  color: var(--white);
+  font-weight: 600;
+  font-size: var(--font-size-base);
+}
+
+.adminDetails {
+  min-width: 0;
+  opacity: 1;
+  transition: opacity var(--transition-duration) ease;
+}
+
+.collapsed .adminDetails {
+  opacity: 0;
+  width: 0;
+  overflow: hidden;
+}
+
+.adminName {
+  margin: 0 0 var(--spacing-xs) 0;
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  color: var(--gray-900);
+  white-space: nowrap;
+}
+
+.adminRole {
   margin: 0;
   font-size: var(--font-size-sm);
-  opacity: 0.9;
-  font-weight: 500;
+  color: var(--gray-500);
+  white-space: nowrap;
 }
 
 /* Sidebar Navigation */
 .sidebarNav {
   flex: 1;
   overflow-y: auto;
-  padding: var(--spacing-lg) 0;
+  padding: var(--spacing-xl) var(--spacing-md);
+  transition: padding var(--transition-duration) ease;
+}
+
+.collapsed .sidebarNav {
+  padding: var(--spacing-xl) var(--spacing-xs);
 }
 
 .sidebarMenu {
   list-style: none;
   margin: 0;
   padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
 }
 
 .sidebarLink {
   display: flex;
   align-items: center;
-  padding: var(--spacing-md) var(--spacing-xl);
-  color: rgba(255, 255, 255, 0.85);
+  padding: var(--spacing-md) var(--spacing-lg);
+  color: var(--gray-700);
   text-decoration: none;
-  transition: all 0.3s ease;
-  border-left: 3px solid transparent;
+  transition: all 0.2s ease;
+  border-radius: var(--border-radius-lg);
   gap: var(--spacing-md);
   font-weight: 500;
+  font-size: var(--font-size-sm);
+  position: relative;
+  min-height: 48px;
 }
 
 .sidebarLink:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: var(--white);
-  border-left-color: rgba(255, 255, 255, 0.5);
-  transform: translateX(4px);
+  background: var(--gray-100);
+  color: var(--gray-900);
 }
 
 .sidebarLink.active {
-  background: rgba(255, 255, 255, 0.15);
+  background: var(--primary-color);
   color: var(--white);
-  border-left-color: var(--white);
-  font-weight: 600;
+}
+
+.collapsed .sidebarLink {
+  justify-content: center;
+  padding: var(--spacing-md);
 }
 
 .sidebarIcon {
   flex-shrink: 0;
+  color: inherit;
 }
 
 .sidebarLabel {
   font-size: var(--font-size-sm);
+  opacity: 1;
+  transition: opacity var(--transition-duration) ease;
+  white-space: nowrap;
+}
+
+.collapsed .sidebarLabel {
+  opacity: 0;
+  width: 0;
+  overflow: hidden;
+}
+
+/* Tooltip for collapsed state */
+.collapsed .sidebarLink::after {
+  content: attr(title);
+  position: absolute;
+  left: calc(100% + var(--spacing-md));
+  top: 50%;
+  transform: translateY(-50%);
+  background: var(--gray-900);
+  color: var(--white);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--border-radius-md);
+  font-size: var(--font-size-xs);
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  z-index: 1000;
+  box-shadow: var(--shadow-md);
+}
+
+.collapsed .sidebarLink:hover::after {
+  opacity: 1;
+}
+
+/* Tooltip for collapsed admin avatar */
+.collapsed .adminAvatar::after {
+  content: attr(title);
+  position: absolute;
+  left: calc(100% + var(--spacing-md));
+  top: 50%;
+  transform: translateY(-50%);
+  background: var(--gray-900);
+  color: var(--white);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--border-radius-md);
+  font-size: var(--font-size-xs);
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  z-index: 1000;
+  box-shadow: var(--shadow-md);
+}
+
+.collapsed .adminAvatar:hover::after {
+  opacity: 1;
 }
 
 /* Sidebar Footer */
 .sidebarFooter {
   padding: var(--spacing-lg);
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 1px solid var(--gray-200);
+  transition: padding var(--transition-duration) ease;
+}
+
+.collapsed .sidebarFooter {
+  padding: var(--spacing-lg) var(--spacing-md);
+  display: flex;
+  justify-content: center;
 }
 
 .logoutBtn {
   width: 100%;
   padding: var(--spacing-md) var(--spacing-lg);
-  background: var(--error-500);
+  background: var(--error-color);
   color: var(--white);
   border: none;
   border-radius: var(--border-radius-lg);
   font-size: var(--font-size-sm);
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: var(--spacing-sm);
-  box-shadow: var(--shadow-sm);
+  min-height: 48px;
 }
 
 .logoutBtn:hover {
-  background: var(--error-600);
+  background: var(--error-dark);
   transform: translateY(-1px);
   box-shadow: var(--shadow-md);
 }
 
-.logoutBtn:active {
-  transform: translateY(0);
+.logoutBtn:focus {
+  outline: 2px solid var(--error-color);
+  outline-offset: 2px;
+}
+
+.collapsed .logoutBtn {
+  justify-content: center;
+  padding: var(--spacing-md);
+  width: 48px;
+  height: 48px;
+}
+
+.collapsed .logoutBtn span {
+  display: none;
+}
+
+/* Tooltip for collapsed logout button */
+.collapsed .logoutBtn::after {
+  content: attr(title);
+  position: absolute;
+  left: calc(100% + var(--spacing-md));
+  top: 50%;
+  transform: translateY(-50%);
+  background: var(--gray-900);
+  color: var(--white);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--border-radius-md);
+  font-size: var(--font-size-xs);
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  z-index: 1000;
+  box-shadow: var(--shadow-md);
+  position: absolute;
+}
+
+.collapsed .logoutBtn:hover::after {
+  opacity: 1;
 }
 
 /* Main Content */
 .adminMain {
-  margin-left: 280px;
+  margin-left: var(--sidebar-width);
   flex: 1;
   padding: var(--spacing-2xl);
   min-height: 100vh;
   background: var(--gray-50);
+  transition: margin-left var(--transition-duration) ease;
 }
 
-/* Sidebar Overlay for Mobile */
-.sidebarOverlay {
-  display: none;
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  z-index: 100;
-  backdrop-filter: blur(2px);
+.adminMain.mainCollapsed {
+  margin-left: var(--sidebar-collapsed-width);
 }
 
-/* Mobile Styles */
-@media (max-width: 768px) {
-  .mobileHeader {
-    display: flex;
-  }
-
-  .sidebar {
-    transform: translateX(-100%);
-  }
-
-  .sidebar.sidebarOpen {
-    transform: translateX(0);
-  }
-
-  .sidebarClose {
-    display: block;
-  }
-
-  .adminMain {
-    margin-left: 0;
-    padding-top: calc(60px + var(--spacing-2xl));
-  }
-
-  .sidebarOverlay {
-    display: block;
-  }
-}
-
-/* Responsive adjustments for smaller screens */
-@media (max-width: 480px) {
-  .sidebar {
-    width: 260px;
-  }
-
-  .adminMain {
-    padding: calc(60px + var(--spacing-lg)) var(--spacing-lg) var(--spacing-lg) var(--spacing-lg);
-  }
-
-  .sidebarHeader {
-    padding: var(--spacing-lg);
-  }
-
-  .sidebarTitle {
-    font-size: var(--font-size-lg);
-  }
-
-  .adminInfo {
-    padding: var(--spacing-md) var(--spacing-lg);
-  }
-
-  .sidebarLink {
-    padding: var(--spacing-md) var(--spacing-lg);
-    gap: var(--spacing-sm);
-  }
-
-  .sidebarFooter {
-    padding: var(--spacing-md);
-  }
-}
-
-/* Focus states for accessibility */
-.sidebarToggle:focus,
-.sidebarClose:focus,
-.sidebarLink:focus,
-.logoutBtn:focus {
-  outline: 2px solid rgba(255, 255, 255, 0.5);
-  outline-offset: 2px;
-}
-
-/* Smooth scrolling for sidebar navigation */
+/* Custom scrollbar for sidebar navigation */
 .sidebarNav {
   scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+  scrollbar-color: var(--gray-300) transparent;
 }
 
 .sidebarNav::-webkit-scrollbar {
@@ -337,10 +399,38 @@
 }
 
 .sidebarNav::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.3);
+  background: var(--gray-300);
   border-radius: 3px;
 }
 
 .sidebarNav::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.5);
+  background: var(--gray-400);
+}
+
+/* Smooth animations */
+* {
+  box-sizing: border-box;
+}
+
+/* Improved hover states */
+.sidebarLink,
+.adminAvatar,
+.logoutBtn {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Ensure proper spacing and typography consistency */
+.adminLayout * {
+  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .sidebar {
+    border-right: 2px solid var(--gray-900);
+  }
+  
+  .sidebarLink.active {
+    border: 2px solid var(--white);
+  }
 }

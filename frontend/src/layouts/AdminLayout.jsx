@@ -2,8 +2,7 @@ import React, { useState } from 'react';
 import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { 
-  Menu, 
-  X, 
+  User,
   Home, 
   Megaphone, 
   Trophy, 
@@ -17,8 +16,8 @@ import {
 import styles from './AdminLayout.module.css';
 
 const AdminLayout = () => {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const { logout, user } = useAuth();
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const { logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -31,8 +30,8 @@ const AdminLayout = () => {
     }
   };
 
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
+  const toggleCollapse = () => {
+    setIsCollapsed(!isCollapsed);
   };
 
   const menuItems = [
@@ -48,42 +47,44 @@ const AdminLayout = () => {
 
   return (
     <div className={styles.adminLayout}>
-      {/* Mobile Header */}
-      <div className={styles.mobileHeader}>
-        <button className={styles.sidebarToggle} onClick={toggleSidebar}>
-          <Menu size={20} />
-        </button>
-        <h1 className={styles.adminTitle}>System Administrator</h1>
-      </div>
-
       {/* Sidebar */}
-      <aside className={`${styles.sidebar} ${isSidebarOpen ? styles.sidebarOpen : ''}`}>
-        <div className={styles.sidebarHeader}>
-          <h2 className={styles.sidebarTitle}>Admin Panel</h2>
-          <button className={styles.sidebarClose} onClick={toggleSidebar}>
-            <X size={20} />
-          </button>
-        </div>
-
+      <aside className={`${styles.sidebar} ${isCollapsed ? styles.collapsed : ''}`}>
+        {/* Admin Info Section - Always visible, clickable avatar to toggle */}
         <div className={styles.adminInfo}>
-          <p className={styles.welcomeText}>Welcome, Admin!</p>
+          <div className={styles.adminProfile}>
+          <button 
+            className={styles.adminAvatar} 
+            onClick={toggleCollapse}
+            title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          >
+            <User size={24} className={styles.userIcon} />
+          </button>
+            {!isCollapsed && (
+              <div className={styles.adminDetails}>
+                <p className={styles.adminName}>System Admin</p>
+              </div>
+            )}
+          </div>
         </div>
 
+        {/* Navigation Menu */}
         <nav className={styles.sidebarNav}>
           <ul className={styles.sidebarMenu}>
             {menuItems.map((item) => {
               const IconComponent = item.icon;
+              const isActive = location.pathname === item.path;
+              
               return (
                 <li key={item.path}>
                   <Link
                     to={item.path}
-                    className={`${styles.sidebarLink} ${
-                      location.pathname === item.path ? styles.active : ''
-                    }`}
-                    onClick={() => setIsSidebarOpen(false)}
+                    className={`${styles.sidebarLink} ${isActive ? styles.active : ''}`}
+                    title={isCollapsed ? item.label : ''}
                   >
-                    <IconComponent size={18} className={styles.sidebarIcon} />
-                    <span className={styles.sidebarLabel}>{item.label}</span>
+                    <IconComponent size={20} className={styles.sidebarIcon} />
+                    {!isCollapsed && (
+                      <span className={styles.sidebarLabel}>{item.label}</span>
+                    )}
                   </Link>
                 </li>
               );
@@ -91,21 +92,21 @@ const AdminLayout = () => {
           </ul>
         </nav>
 
-        <div className={styles.sidebarFooter}>
-          <button className={styles.logoutBtn} onClick={handleLogout}>
-            <LogOut size={18} />
-            <span>Logout</span>
-          </button>
-        </div>
+        {/* Sidebar Footer */}
+<div className={styles.sidebarFooter}>
+  <button 
+    className={styles.logoutBtn} 
+    onClick={handleLogout}
+    title={isCollapsed ? 'Logout' : ''}
+  >
+    <LogOut size={isCollapsed ? 24 : 18} />
+    {!isCollapsed && <span>Logout</span>}
+  </button>
+</div>
       </aside>
 
-      {/* Overlay for mobile */}
-      {isSidebarOpen && (
-        <div className={styles.sidebarOverlay} onClick={() => setIsSidebarOpen(false)} />
-      )}
-
       {/* Main Content Area */}
-      <main className={styles.adminMain}>
+      <main className={`${styles.adminMain} ${isCollapsed ? styles.mainCollapsed : ''}`}>
         <Outlet />
       </main>
     </div>
