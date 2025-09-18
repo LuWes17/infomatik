@@ -1019,6 +1019,10 @@ const Feedback = () => {
                         </div>
                       )}
                     </div>
+
+                    <small className={styles.fileHint}>
+                     Accepted format: JPG and PNG only.
+                    </small>
                   </div>
                 </div>
 

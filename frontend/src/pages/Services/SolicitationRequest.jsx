@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useLocation } from 'react-router-dom';
 import { 
   Mail,
   Filter, 
@@ -41,6 +42,7 @@ const SolicitationRequests = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
+  const location = useLocation();
 
   // Custom dropdown states
   const [barangayDropdownOpen, setBarangayDropdownOpen] = useState(false);
@@ -83,6 +85,14 @@ const SolicitationRequests = () => {
 
   const organizationTypes = ['NGA', 'NGO', 'CSO', 'LGU', 'Barangay', 'SK', 'Others'];
   const requestTypes = ['Medical', 'Financial', 'Construction Materials', 'Educational Supplies', 'Others'];
+
+  useEffect(() => {
+  // Check if we should auto-open the form when redirected from another page
+  if (location.state?.openForm && isAuthenticated && !authLoading) {
+    setShowRequestForm(true);
+    document.body.style.overflow = "hidden";
+  }
+  }, [location.state, isAuthenticated, authLoading]);
 
   // Function to get display name for request type badges
   const getRequestTypeBadgeName = (requestType) => {

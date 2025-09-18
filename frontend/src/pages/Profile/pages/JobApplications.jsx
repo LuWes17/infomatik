@@ -1,5 +1,6 @@
 // frontend/src/pages/Profile/pages/JobApplications.jsx
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { 
   FileText, 
   Calendar, 
@@ -77,23 +78,6 @@ const JobApplications = () => {
     }
   };
 
-  useEffect(() => {
-    if (showDetails) {
-      // Prevent scrolling when modal is open
-      document.body.style.overflow = 'hidden';
-      document.body.style.paddingRight = '17px'; // Prevent layout shift from scrollbar
-    } else {
-      // Restore scrolling when modal is closed
-      document.body.style.overflow = 'unset';
-      document.body.style.paddingRight = '0px';
-    }
-
-    // Cleanup function to restore scrolling when component unmounts
-    return () => {
-      document.body.style.overflow = 'unset';
-      document.body.style.paddingRight = '0px';
-    };
-  }, [showDetails]);
 
   // Handle card click to show details
   const handleCardClick = async (application) => {
@@ -117,26 +101,27 @@ const JobApplications = () => {
   const closeDetails = () => {
     setShowDetails(false);
     setSelectedApplication(null);
-
-    document.body.style.overflow = 'unset';
-    document.body.style.paddingRight = '0px';
   };
 
-  // Handle CV view - opens CV in new tab
-  const handleViewCV = (cvUrl, applicantName) => {
-    if (!cvUrl) {
-      alert('CV file not available');
-      return;
+
+   // Handle modal open/close and body scroll lock
+  useEffect(() => {
+    if (showDetails) {
+      // Prevent body scroll when modal is open
+      document.body.classList.add(styles.bodyScrollLocked);
+      document.body.style.overflow = 'hidden';
+    } else {
+      // Re-enable body scroll when modal is closed
+      document.body.classList.remove(styles.bodyScrollLocked);
+      document.body.style.overflow = 'unset';
     }
-    
-    try {
-      // Open CV in new tab
-      window.open(cvUrl, '_blank');
-    } catch (error) {
-      console.error('Error opening CV:', error);
-      alert('Unable to open CV file');
-    }
-  };
+
+    // Cleanup on unmount
+    return () => {
+      document.body.classList.remove(styles.bodyScrollLocked);
+      document.body.style.overflow = 'unset';
+    };
+  }, [showDetails]);
 
   // Get status icon and color
   const getStatusDisplay = (status) => {
@@ -195,10 +180,6 @@ const JobApplications = () => {
   if (loading) {
     return (
       <div className={styles.container}>
-        <div className={styles.header}>
-          <h2>My Job Applications</h2>
-          <p className={styles.subtitle}>Track your application status</p>
-        </div>
         <div className={styles.loadingContainer}>
           <div className={styles.spinner}></div>
           <p>Loading your applications...</p>
@@ -210,10 +191,6 @@ const JobApplications = () => {
   if (error) {
     return (
       <div className={styles.container}>
-        <div className={styles.header}>
-          <h2>My Job Applications</h2>
-          <p className={styles.subtitle}>Track your application status</p>
-        </div>
         <div className={styles.errorContainer}>
           <p className={styles.errorMessage}>{error}</p>
           <button onClick={fetchApplications} className={styles.retryButton}>
@@ -224,87 +201,13 @@ const JobApplications = () => {
     );
   }
 
-  return (
-    <div className={styles.container}>
-      {applications.length === 0 ? (
-        <div className={styles.emptyState}>
-          <FileText size={64} className={styles.emptyIcon} />
-          <h3>No Applications Yet</h3>
-          <p>You haven't applied for any jobs yet. Browse our job openings to get started!</p>
-          <a href="/services/job-openings" className={styles.browseButton}>
-            Browse Jobs
-          </a>
-        </div>
-      ) : (
-        <div className={styles.applicationsGrid}>
-          {applications.map((application) => {
-            const statusDisplay = getStatusDisplay(application.status);
-            
-            return (
-              <div 
-                key={application._id} 
-                className={styles.applicationCard}
-                onClick={() => handleCardClick(application)}
-              >
-                <div className={styles.cardHeader}>
-                  <div className={styles.cardTitle}>
-                    <h3>{application.jobPosting?.title || 'Job Position'}</h3>
-                  </div>
-                  <div className={`${styles.statusBadge} ${statusDisplay.className}`}>
-                    {statusDisplay.icon}
-                    <span>{statusDisplay.text}</span>
-                  </div>
-                </div>
+    const Modal = () => {
+    if (!showDetails || !selectedApplication) return null;
 
-                <div className={styles.cardBody}>
-                  <div className={styles.cardMeta}>
-                    {application.jobPosting?.location && (
-                      <div className={styles.metaItem}>
-                        <MapPin size={16} />
-                        <span>{application.jobPosting.location}</span>
-                      </div>
-                    )}
-                    {application.jobPosting?.employmentType && (
-                      <div className={styles.metaItem}>
-                        <BriefcaseBusiness size={16} />
-                        <span className={styles.employmentType}>
-                          {application.jobPosting.employmentType}
-                        </span>
-                      </div>
-                    )}
-                    <div className={styles.metaItem}>
-                      <Calendar size={16} />
-                      <span>{formatDate(application.jobPosting.applicationDeadline)}</span>
-                    </div>
-                  </div>
+    const job = selectedApplication.jobDetails || selectedApplication.jobId;
 
-                  {application.jobPosting?.requirements && (
-                    <div className={styles.requirements}>
-                      <strong>Requirements:</strong>
-                      <p>
-                        {application.jobPosting.requirements.length > 100 
-                          ? `${application.jobPosting.requirements.substring(0, 100)}...`
-                          : application.jobPosting.requirements
-                        }
-                      </p>
-                    </div>
-                  )}
-                </div>
-
-                <div className={styles.cardFooter}>
-                  <button className={styles.viewButton}>
-                    View Details
-                  </button>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
-
-      {/* Application Details Modal */}
-      {showDetails && selectedApplication && (
-        <div className={styles.modalOverlay} onClick={closeDetails}>
+    return createPortal(
+      <div className={styles.modalOverlay} onClick={closeDetails}>
           <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
             <div className={styles.modalHeader}>
               <h2>{selectedApplication.jobPosting?.title || 'Job Application'}</h2>
@@ -454,8 +357,91 @@ const JobApplications = () => {
               </div>
             </div>
           </div>
+        </div>,
+      document.body // Render modal as direct child of body
+    );
+  };
+
+  return (
+    <div className={styles.container}>
+      {applications.length === 0 ? (
+        <div className={styles.emptyState}>
+          <FileText size={64} className={styles.emptyIcon} />
+          <h3>No Applications Yet</h3>
+          <p>You haven't applied for any jobs yet. Browse our job openings to get started!</p>
+          <a href="/services/job-openings" className={styles.browseButton}>
+            Browse Jobs
+          </a>
+        </div>
+      ) : (
+        <div className={styles.applicationsGrid}>
+          {applications.map((application) => {
+            const statusDisplay = getStatusDisplay(application.status);
+            
+            return (
+              <div 
+                key={application._id} 
+                className={styles.applicationCard}
+                onClick={() => handleCardClick(application)}
+              >
+                <div className={styles.cardHeader}>
+                  <div className={styles.cardTitle}>
+                    <h3>{application.jobPosting?.title || 'Job Position'}</h3>
+                  </div>
+                  <div className={`${styles.statusBadge} ${statusDisplay.className}`}>
+                    {statusDisplay.icon}
+                    <span>{statusDisplay.text}</span>
+                  </div>
+                </div>
+
+                <div className={styles.cardBody}>
+                  <div className={styles.cardMeta}>
+                    {application.jobPosting?.location && (
+                      <div className={styles.metaItem}>
+                        <MapPin size={16} />
+                        <span>{application.jobPosting.location}</span>
+                      </div>
+                    )}
+                    {application.jobPosting?.employmentType && (
+                      <div className={styles.metaItem}>
+                        <BriefcaseBusiness size={16} />
+                        <span className={styles.employmentType}>
+                          {application.jobPosting.employmentType}
+                        </span>
+                      </div>
+                    )}
+                    <div className={styles.metaItem}>
+                      <Calendar size={16} />
+                      <span>{formatDate(application.jobPosting.applicationDeadline)}</span>
+                    </div>
+                  </div>
+
+                  {application.jobPosting?.requirements && (
+                    <div className={styles.requirements}>
+                      <strong>Requirements:</strong>
+                      <p>
+                        {application.jobPosting.requirements.length > 100 
+                          ? `${application.jobPosting.requirements.substring(0, 100)}...`
+                          : application.jobPosting.requirements
+                        }
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                <div className={styles.cardFooter}>
+                  <button className={styles.viewButton}>
+                    View Details
+                  </button>
+                </div>
+              </div>
+            );
+          })}
         </div>
       )}
+
+      {/* Application Details Modal */}
+      <Modal />
     </div>
   );
 };
