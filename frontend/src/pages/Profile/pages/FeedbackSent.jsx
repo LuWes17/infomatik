@@ -61,11 +61,23 @@ const FeedbackSent = () => {
     }
   };
 
+  
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'long',
       day: 'numeric'
+    });
+  };
+
+  const formatDateTime = (dateString) => {
+    return new Date(dateString).toLocaleString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
     });
   };
 
@@ -169,7 +181,7 @@ const FeedbackSent = () => {
                 <p className={styles.feedbackDate}>
                   Submitted on {formatDate(selectedFeedback.createdAt)}
                 </p>
-                <div className={`${styles.statusBadge} ${styles.large} ${getStatusDisplay(selectedFeedback.status).className}`}>
+                <div className={`${styles.statusBadge} ${getStatusDisplay(selectedFeedback.status).className}`}>
                   {getStatusDisplay(selectedFeedback.status).icon}
                   <span>{getStatusDisplay(selectedFeedback.status).text}</span>
                 </div>
@@ -190,39 +202,54 @@ const FeedbackSent = () => {
               </div>
 
               {/* Message Content Section */}
-              <div className={styles.detailsSection}>
-                <h3>Feedback Message</h3>
-                <div className={styles.feedbackContent}>
-                  <div className={styles.messageContentSection}>
-                    <p>{selectedFeedback.message}</p>
+              <div className={styles.threadContainer}>
+                <div className={styles.threadHeader}>
+                  Feedback Thread:
+                </div>
+                
+                <div className={styles.threadMessage}>
+                  <div className={styles.senderInfo}>
+                    <div className={styles.threadAvatar}>
+                      <User size={14} />
+                    </div>
+                    <span className={styles.senderName}>
+                      {selectedFeedback.user?.firstName && selectedFeedback.user?.lastName 
+                        ? `${selectedFeedback.user.firstName} ${selectedFeedback.user.lastName}`
+                        : 'You'
+                      }
+                    </span>
+                    <span className={styles.messageDate}>
+                      {formatDateTime(selectedFeedback.createdAt)}
+                    </span>
+                  </div>
+                  <div className={styles.messageText}>
+                    {selectedFeedback.message}
                   </div>
                 </div>
-              </div>
-
-              {/* Admin Response Section */}
-              {selectedFeedback.adminResponse && selectedFeedback.adminResponse.message && (
-                <div className={styles.adminSection}>
-                  <h3>Administrative Response</h3>
-                  <div className={styles.adminResponse}>
-                    <div className={styles.responseHeader}>
-                      <div className={styles.responseInfo}>
-                        <span className={styles.responseLabel}>Response from Admin</span>
-                        {selectedFeedback.adminResponse.respondedAt && (
-                          <span className={styles.responseDate}>
-                            {formatDate(selectedFeedback.adminResponse.respondedAt)}
-                          </span>
-                        )}
+              
+                {/* Admin Response in Thread */}
+                {selectedFeedback.adminResponse && selectedFeedback.adminResponse.message && (
+                  <div className={`${styles.threadMessage} ${styles.adminThreadMessage}`}>
+                    <div className={styles.senderInfo}>
+                      <div className={`${styles.threadAvatar} ${styles.adminAvatar}`}>
+                        <User size={14} />
                       </div>
+                      <span className={`${styles.senderName} ${styles.adminSenderName}`}>
+                        System Admin
+                      </span>
+                      <span className={styles.messageDate}>
+                        {selectedFeedback.adminResponse.respondedAt && formatDateTime(selectedFeedback.adminResponse.respondedAt)}
+                      </span>
                       {selectedFeedback.adminResponse.isEdited && (
                         <span className={styles.editedBadge}>Edited</span>
                       )}
                     </div>
-                    <div className={styles.responseMessage}>
-                      <p>{selectedFeedback.adminResponse.message}</p>
+                    <div className={styles.messageText}>
+                      {selectedFeedback.adminResponse.message}
                     </div>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
 
               {/* Resolution Section */}
               {selectedFeedback.status === 'resolved' && selectedFeedback.resolutionNotes && (
