@@ -93,16 +93,16 @@ const AdminLayout = () => {
         </nav>
 
         {/* Sidebar Footer */}
-<div className={styles.sidebarFooter}>
-  <button 
-    className={styles.logoutBtn} 
-    onClick={handleLogout}
-    title={isCollapsed ? 'Logout' : ''}
-  >
-    <LogOut size={isCollapsed ? 24 : 18} />
-    {!isCollapsed && <span>Logout</span>}
-  </button>
-</div>
+        <div className={styles.sidebarFooter}>
+          <button 
+            className={styles.logoutBtn} 
+            onClick={handleLogout}
+            title={isCollapsed ? 'Logout' : ''}
+          >
+            <LogOut size={isCollapsed ? 24 : 18} />
+            {!isCollapsed && <span>Logout</span>}
+          </button>
+        </div>
       </aside>
 
       {/* Main Content Area */}

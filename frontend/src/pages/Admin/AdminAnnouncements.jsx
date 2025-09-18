@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Edit3, Trash2, Eye, Calendar, MapPin, Pin, PinOff, Image, X, Megaphone } from 'lucide-react';
+import { Plus, Edit3, Trash2, Eye, Calendar, MapPin, Image, X, Megaphone, Clock } from 'lucide-react';
 import styles from './styles/AdminAnnouncements.module.css';
+
 const API_BASE = import.meta.env.VITE_API_URL; 
 
 const AdminAnnouncements = () => {
@@ -50,17 +51,6 @@ const AdminAnnouncements = () => {
     fetchAnnouncements();
   }, []);
 
-  useEffect(() => {
-    return () => {
-      // Cleanup any remaining preview URLs
-      formData.photos.forEach(photo => {
-        if (photo.preview) {
-          URL.revokeObjectURL(photo.preview);
-        }
-      });
-    };
-  }, []);
-
   // Handle form input changes
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -78,7 +68,6 @@ const AdminAnnouncements = () => {
       return;
     }
     
-    // Create preview URLs for the files
     const newPhotos = files.map(file => ({
       existing: false,
       file: file,
@@ -96,7 +85,6 @@ const AdminAnnouncements = () => {
   const removePhoto = (index) => {
     const photoToRemove = formData.photos[index];
     
-    // Cleanup the preview URL to prevent memory leaks
     if (!photoToRemove.existing && photoToRemove.preview) {
       URL.revokeObjectURL(photoToRemove.preview);
     }
@@ -109,6 +97,11 @@ const AdminAnnouncements = () => {
 
   // Reset form
   const resetForm = () => {
+    formData.photos.forEach(photo => {
+      if (photo.preview) {
+        URL.revokeObjectURL(photo.preview);
+      }
+    });
     setFormData({
       title: '',
       details: '',
@@ -121,10 +114,6 @@ const AdminAnnouncements = () => {
 
   // Handle create announcement
   const handleCreateAnnouncement = async (e) => {
-    if (!window.confirm('Are you sure in creating this announcement?')) {
-      return;
-    }
-
     e.preventDefault();
     
     if (!formData.title || !formData.details || !formData.category) {
@@ -168,13 +157,6 @@ const AdminAnnouncements = () => {
         throw new Error('Failed to create announcement');
       }
 
-      // Cleanup preview URLs
-      formData.photos.forEach(photo => {
-        if (photo.preview) {
-          URL.revokeObjectURL(photo.preview);
-        }
-      });
-
       await fetchAnnouncements();
       setShowCreateModal(false);
       resetForm();
@@ -186,9 +168,6 @@ const AdminAnnouncements = () => {
 
   // Handle update announcement
   const handleUpdateAnnouncement = async (e) => {
-    if (!window.confirm('Are you sure you with your chnages to this announcement?')) {
-      return;
-    }
     e.preventDefault();
     
     try {
@@ -206,7 +185,6 @@ const AdminAnnouncements = () => {
         submitData.append('eventLocation', formData.eventLocation);
       }
       
-      // Prepare data for backend to handle B2 deletions
       const remainingExistingPhotos = formData.photos
         .filter(photo => photo.existing)
         .map(photo => ({
@@ -215,10 +193,8 @@ const AdminAnnouncements = () => {
           filePath: photo.filePath
         }));
       
-      // Send remaining existing photos as JSON string
       submitData.append('remainingExistingPhotos', JSON.stringify(remainingExistingPhotos));
       
-      // Only append new photos (File objects)
       formData.photos.forEach((photo) => {
         if (!photo.existing && photo.file) {
           submitData.append('images', photo.file);
@@ -236,13 +212,6 @@ const AdminAnnouncements = () => {
       if (!response.ok) {
         throw new Error('Failed to update announcement');
       }
-
-      // Cleanup preview URLs for new photos
-      formData.photos.forEach(photo => {
-        if (!photo.existing && photo.preview) {
-          URL.revokeObjectURL(photo.preview);
-        }
-      });
 
       await fetchAnnouncements();
       setShowViewModal(false);
@@ -290,13 +259,12 @@ const AdminAnnouncements = () => {
 
   // Open edit mode
   const openEditMode = () => {
-    // Convert existing photos to preview format for consistent handling
     const existingPhotos = selectedAnnouncement.photos?.map(photo => ({
       existing: true,
       fileId: photo.fileId,
       fileName: photo.fileName,
       filePath: photo.filePath,
-      preview: photo.filePath, // Use B2 URL as preview
+      preview: photo.filePath,
       name: photo.fileName
     })) || [];
     
@@ -323,23 +291,32 @@ const AdminAnnouncements = () => {
   if (loading) {
     return (
       <div className={styles.loadingContainer}>
-        <div className={styles.spinner}></div>
+        <div className={styles.loadingSpinner}></div>
         <p>Loading announcements...</p>
       </div>
     );
   }
 
   return (
-    <div className={styles.adminAnnouncements}>
-      <div className={styles.header}>
-        <h1>Manage Announcements</h1>
-        <button 
-          className={styles.createButton}
-          onClick={() => setShowCreateModal(true)}
-        >
-          <Plus size={20} />
-          Create Announcement
-        </button>
+    <div className={styles.announcementsPage}>
+      {/* Page Header */}
+      <div className={styles.pageHeader}>
+        <div className={styles.headerContent}>
+          <div className={styles.headerTitle}>
+            <Megaphone className={styles.headerIcon} />
+            <div>
+              <h1>Community Announcements</h1>
+              <p>Stay updated with the latest news and events from our community</p>
+            </div>
+          </div>
+          <button 
+            className={styles.createBtn}
+            onClick={() => setShowCreateModal(true)}
+          >
+            <Plus size={20} />
+            Create New
+          </button>
+        </div>
       </div>
 
       {error && (
@@ -348,93 +325,130 @@ const AdminAnnouncements = () => {
         </div>
       )}
 
-      <div className={styles.announcementGrid}>
+      {/* Announcements Grid */}
+      <div className={styles.announcementsGrid}>
         {announcements.map((announcement) => (
-          <div  key={announcement._id} className={styles.announcementCard}>
-            <div className={styles.cardHeader}>
-              <div className={styles.categoryBadge}>
-                <span className={`${styles.category} ${styles[announcement.category.toLowerCase()]}`}>
-                    {announcement.category}
-                </span>
-              </div>
-            </div> 
-            
-          {/* Card Image - Updated with placeholder */}
-                <div className={styles.cardImage}>
-                  {announcement.photos && announcement.photos.length > 0 ? (
-                    <>
-                      <img 
-                        src={announcement.photos[0].filePath.startsWith('http') ? 
-                             announcement.photos[0].filePath : 
-                             `${API_BASE.replace('/api', '')}/${announcement.photos[0].filePath}`} 
-                        alt={announcement.title}
-                        loading="lazy"
-                      />
-                      {announcement.photos.length > 1 && (
-                        <div className={styles.imageCount}>
-                          +{announcement.photos.length - 1} more
-                        </div>
-                      )}
-                    </>
-                  ) : (
-                    <div className={styles.placeholderImage}>
-                      <Megaphone size={40} />
+          <div key={announcement._id} className={styles.announcementCard}>
+            {/* Card Image */}
+            <div className={styles.cardImageContainer}>
+              {announcement.photos && announcement.photos.length > 0 ? (
+                <>
+                  <img 
+                    src={announcement.photos[0].filePath.startsWith('http') ? 
+                         announcement.photos[0].filePath : 
+                         `${API_BASE.replace('/api', '')}/${announcement.photos[0].filePath}`} 
+                    alt={announcement.title}
+                    className={styles.cardImage}
+                  />
+                  {announcement.photos.length > 1 && (
+                    <div className={styles.imageCount}>
+                      <Image size={12} />
+                      {announcement.photos.length}
                     </div>
                   )}
-                </div>          
+                </>
+              ) : (
+                <div className={styles.cardImagePlaceholder}>
+                  <Megaphone size={32} />
+                </div>
+              )}
+              
+              {/* Admin Actions Overlay */}
+              <div className={styles.adminActions}>
+                <button
+                  className={styles.adminActionBtn}
+                  onClick={() => openViewModal(announcement)}
+                  title="View Details"
+                >
+                  <Eye size={16} />
+                </button>
+                <button
+                  className={styles.adminActionBtn}
+                  onClick={() => {
+                    setSelectedAnnouncement(announcement);
+                    openEditMode();
+                    setShowViewModal(true);
+                  }}
+                  title="Edit Announcement"
+                >
+                  <Edit3 size={16} />
+                </button>
+                <button
+                  className={`${styles.adminActionBtn} ${styles.deleteBtn}`}
+                  onClick={() => handleDeleteAnnouncement(announcement._id)}
+                  title="Delete Announcement"
+                >
+                  <Trash2 size={16} />
+                </button>
+              </div>
+            </div>
 
-                {/* Card Content */}
-                                <div className={styles.cardContent}>
-                                  <h3 className={styles.cardTitle}>{announcement.title}</h3>
-                                  <p className={styles.cardDescription}>
-                                    {announcement.details.length > 150 
-                                      ? `${announcement.details.substring(0, 150)}...` 
-                                      : announcement.details
-                                    }
-                                  </p>
-                
-                                  {/* Event Details */}
-                                  {announcement.category === 'Event' && announcement.eventDate && (
-                                    <div className={styles.eventInfo}>
-                                      <div className={styles.eventDetail}>
-                                        <Calendar size={16} />
-                                        <span>{formatDate(announcement.eventDate)}</span>
-                                      </div>
-                                      {announcement.eventLocation && (
-                                        <div className={styles.eventDetail}>
-                                          <MapPin size={16} />
-                                          <span>{announcement.eventLocation}</span>
-                                        </div>
-                                      )}
-                                    </div>
-                                  )}
-                
-                                  {/* Card Footer */}
-                                  <div className={styles.cardFooter}>
-                                    <span className={styles.publishDate}>
-                                      {formatDate(announcement.createdAt)}
-                                    </span>
-                                    <button 
-                                      onClick={() => openViewModal(announcement)}
-                                      className={styles.readMoreButton}
-                                    >
-                                      Read More
-                                    </button>
-                                  </div>
-                                </div>
-                              </div>
+            {/* Card Content */}
+            <div className={styles.cardContent}>
+              <div className={styles.cardHeader}>
+                <span className={`${styles.categoryTag} ${styles[announcement.category.toLowerCase()]}`}>
+                  {announcement.category}
+                </span>
+                <span className={styles.publishDate}>
+                  <Clock size={12} />
+                  {formatDate(announcement.createdAt)}
+                </span>
+              </div>
+
+              <h3 className={styles.cardTitle}>{announcement.title}</h3>
+              
+              <p className={styles.cardDescription}>
+                {announcement.details.length > 120 
+                  ? `${announcement.details.substring(0, 120)}...` 
+                  : announcement.details
+                }
+              </p>
+
+              {/* Event Info */}
+              {announcement.category === 'Event' && announcement.eventDate && (
+                <div className={styles.eventInfo}>
+                  <div className={styles.eventDetail}>
+                    <Calendar size={14} />
+                    <span>{formatDate(announcement.eventDate)}</span>
+                  </div>
+                  {announcement.eventLocation && (
+                    <div className={styles.eventDetail}>
+                      <MapPin size={14} />
+                      <span>{announcement.eventLocation}</span>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              <button 
+                className={styles.readMoreBtn}
+                onClick={() => openViewModal(announcement)}
+              >
+                Read More
+              </button>
+            </div>
+          </div>
         ))}
       </div>
 
       {announcements.length === 0 && !loading && (
         <div className={styles.emptyState}>
-          <p>No announcements found. Create your first announcement!</p>
+          <Megaphone size={64} />
+          <h3>No announcements yet</h3>
+          <p>Create your first announcement to get started!</p>
+          <button 
+            className={styles.createBtn}
+            onClick={() => setShowCreateModal(true)}
+          >
+            <Plus size={20} />
+            Create Announcement
+          </button>
         </div>
       )}
 
-      {/* Create Announcement Modal */}
+      {/* Create Modal */}
       {showCreateModal && (
-        <div className={styles.modal} onClick={(e) => e.target === e.currentTarget && setShowCreateModal(false)}>
+        <div className={styles.modalOverlay} onClick={(e) => e.target === e.currentTarget && setShowCreateModal(false)}>
           <div className={styles.modalContent}>
             <div className={styles.modalHeader}>
               <h2>Create New Announcement</h2>
@@ -446,139 +460,155 @@ const AdminAnnouncements = () => {
               </button>
             </div>
             
-            <form onSubmit={handleCreateAnnouncement} className={styles.form}>
-              <div className={styles.formGroup}>
-                <label htmlFor="title">Title *</label>
-                <input
-                  type="text"
-                  id="title"
-                  name="title"
-                  value={formData.title}
-                  onChange={handleInputChange}
-                  required
-                  maxLength={150}
-                  className={styles.input}
-                />
-              </div>
-
-              <div className={styles.formGroup}>
-                <label htmlFor="category">Category *</label>
-                <select
-                  id="category"
-                  name="category"
-                  value={formData.category}
-                  onChange={handleInputChange}
-                  required
-                  className={styles.select}
-                >
-                  <option value="">Select Category</option>
-                  <option value="Update">Update</option>
-                  <option value="Event">Event</option>
-                </select>
-              </div>
-
-              <div className={styles.formGroup}>
-                <label htmlFor="details">Details *</label>
-                <textarea
-                  id="details"
-                  name="details"
-                  value={formData.details}
-                  onChange={handleInputChange}
-                  required
-                  maxLength={3000}
-                  rows={6}
-                  className={styles.textarea}
-                />
-              </div>
-
-              {formData.category === 'Event' && (
-                <>
+            <div className={styles.modalBody}>
+              <div className={styles.applicationForm}>
+                <div className={styles.formGrid}>
                   <div className={styles.formGroup}>
-                    <label htmlFor="eventDate">Event Date *</label>
-                    <input
-                      type="date"
-                      id="eventDate"
-                      name="eventDate"
-                      value={formData.eventDate}
-                      onChange={handleInputChange}
-                      required={formData.category === 'Event'}
-                      className={styles.input}
-                    />
-                  </div>
-
-                  <div className={styles.formGroup}>
-                    <label htmlFor="eventLocation">Event Location</label>
+                    <label htmlFor="title">Announcement Title *</label>
                     <input
                       type="text"
-                      id="eventLocation"
-                      name="eventLocation"
-                      value={formData.eventLocation}
+                      id="title"
+                      name="title"
+                      value={formData.title}
                       onChange={handleInputChange}
-                      maxLength={200}
-                      className={styles.input}
+                      required
+                      maxLength={150}
+                      className={styles.formInput}
+                      placeholder="Enter announcement title"
                     />
                   </div>
-                </>
-              )}
 
-              <div className={styles.formGroup}>
-                <label htmlFor="photos">Photos (Max 4)</label>
-                <input
-                  type="file"
-                  id="photos"
-                  multiple
-                  accept="image/*"
-                  onChange={handleFileUpload}
-                  className={styles.fileInput}
-                />
-                
-                {formData.photos.length > 0 && (
-                  <div className={styles.photoPreview}>
-                    <div className={styles.photoPreviewGrid}>
-                      {formData.photos.map((photo, index) => (
-                        <div key={index} className={styles.photoPreviewItem}>
-                          <div className={styles.photoPreviewImage}>
-                            <img 
-                              src={photo.preview} 
-                              alt={`Preview ${index + 1}`}
-                              className={styles.previewImg}
-                            />
-                            <button 
-                              type="button"
-                              onClick={() => removePhoto(index)}
-                              className={styles.removePhotoBtn}
-                            >
-                              <X size={16} />
-                            </button>
-                          </div>
-                          <span className={styles.photoName}>{photo.name}</span>
-                        </div>
-                      ))}
-                    </div>
+                  <div className={styles.formGroup}>
+                    <label htmlFor="category">Category *</label>
+                    <select
+                      id="category"
+                      name="category"
+                      value={formData.category}
+                      onChange={handleInputChange}
+                      required
+                      className={styles.formSelect}
+                    >
+                      <option value="">Select Category</option>
+                      <option value="Update">Update</option>
+                      <option value="Event">Event</option>
+                    </select>
                   </div>
-                )}
-              </div>
 
-              <div className={styles.formActions}>
-                <button 
-                  type="button" 
-                  onClick={() => setShowCreateModal(false)}
-                  className={styles.cancelButton}
-                >
-                  Cancel
-                </button>
-                <button type="submit" className={styles.submitButton}>
-                  Create Announcement
-                </button>
+                  <div className={styles.formGroup}>
+                    <label htmlFor="details">Announcement Details *</label>
+                    <textarea
+                      id="details"
+                      name="details"
+                      value={formData.details}
+                      onChange={handleInputChange}
+                      required
+                      maxLength={3000}
+                      rows={6}
+                      className={styles.formTextarea}
+                      placeholder="Enter the full details of your announcement"
+                    />
+                  </div>
+
+                  {formData.category === 'Event' && (
+                    <>
+                      <div className={styles.formGroup}>
+                        <label htmlFor="eventDate">Event Date *</label>
+                        <input
+                          type="date"
+                          id="eventDate"
+                          name="eventDate"
+                          value={formData.eventDate}
+                          onChange={handleInputChange}
+                          required={formData.category === 'Event'}
+                          className={styles.formInput}
+                        />
+                      </div>
+
+                      <div className={styles.formGroup}>
+                        <label htmlFor="eventLocation">Event Location</label>
+                        <input
+                          type="text"
+                          id="eventLocation"
+                          name="eventLocation"
+                          value={formData.eventLocation}
+                          onChange={handleInputChange}
+                          maxLength={200}
+                          className={styles.formInput}
+                          placeholder="Enter event location"
+                        />
+                      </div>
+                    </>
+                  )}
+
+                  <div className={styles.formGroup}>
+                    <label htmlFor="photos">Photos (Max 4)</label>
+                    <div className={styles.fileUpload}>
+                      <input
+                        type="file"
+                        id="photos"
+                        multiple
+                        accept="image/*"
+                        onChange={handleFileUpload}
+                        className={styles.fileInput}
+                      />
+                      <label htmlFor="photos" className={styles.fileLabel}>
+                        <Image size={20} />
+                        <span>Choose photos or drag and drop</span>
+                        <small>PNG, JPG up to 10MB each</small>
+                      </label>
+                    </div>
+                    
+                    {formData.photos.length > 0 && (
+                      <div className={styles.photoPreview}>
+                        <div className={styles.photoGrid}>
+                          {formData.photos.map((photo, index) => (
+                            <div key={index} className={styles.photoItem}>
+                              <img 
+                                src={photo.preview} 
+                                alt={`Preview ${index + 1}`}
+                                className={styles.photoThumbnail}
+                              />
+                              <button 
+                                type="button"
+                                onClick={() => removePhoto(index)}
+                                className={styles.removePhotoBtn}
+                              >
+                                <X size={14} />
+                              </button>
+                              <span className={styles.photoName}>{photo.name}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className={styles.formActions}>
+                  <button 
+                    type="button" 
+                    onClick={() => setShowCreateModal(false)}
+                    className={styles.cancelBtn}
+                  >
+                    Cancel
+                  </button>
+                  <button 
+                    type="button" 
+                    onClick={handleCreateAnnouncement}
+                    className={styles.submitBtn}
+                  >
+                    Create Announcement
+                  </button>
+                </div>
               </div>
-            </form>
+            </div>
           </div>
         </div>
       )}
 
-      {/* View/Edit Announcement Modal */}
+      {/* View/Edit Modal */}
       {showViewModal && selectedAnnouncement && (
-        <div className={styles.modal} onClick={(e) => e.target === e.currentTarget && setShowViewModal(false)}>
+        <div className={styles.modalOverlay} onClick={(e) => e.target === e.currentTarget && setShowViewModal(false)}>
           <div className={styles.modalContent}>
             <div className={styles.modalHeader}>
               <h2>{isEditMode ? 'Edit Announcement' : selectedAnnouncement.title}</h2>
@@ -587,14 +617,14 @@ const AdminAnnouncements = () => {
                   <>
                     <button 
                       onClick={openEditMode}
-                      className={styles.iconButton}
+                      className={styles.iconBtn}
                       title="Edit"
                     >
                       <Edit3 size={18} />
                     </button>
                     <button 
                       onClick={() => handleDeleteAnnouncement(selectedAnnouncement._id)}
-                      className={styles.deleteButton}
+                      className={styles.deleteIconBtn}
                       title="Delete"
                     >
                       <Trash2 size={18} />
@@ -614,200 +644,221 @@ const AdminAnnouncements = () => {
               </div>
             </div>
             
-            {isEditMode ? (
-              <form onSubmit={handleUpdateAnnouncement} className={styles.form}>
-                <div className={styles.formGroup}>
-                  <label htmlFor="editTitle">Title *</label>
-                  <input
-                    type="text"
-                    id="editTitle"
-                    name="title"
-                    value={formData.title}
-                    onChange={handleInputChange}
-                    required
-                    maxLength={150}
-                    className={styles.input}
-                  />
-                </div>
-
-                <div className={styles.formGroup}>
-                  <label htmlFor="editCategory">Category *</label>
-                  <select
-                    id="editCategory"
-                    name="category"
-                    value={formData.category}
-                    onChange={handleInputChange}
-                    required
-                    className={styles.select}
-                  >
-                    <option value="Update">Update</option>
-                    <option value="Event">Event</option>
-                  </select>
-                </div>
-
-                <div className={styles.formGroup}>
-                  <label htmlFor="editDetails">Details *</label>
-                  <textarea
-                    id="editDetails"
-                    name="details"
-                    value={formData.details}
-                    onChange={handleInputChange}
-                    required
-                    maxLength={3000}
-                    rows={6}
-                    className={styles.textarea}
-                  />
-                </div>
-
-                {formData.category === 'Event' && (
-                  <>
+            <div className={styles.modalBody}>
+              {isEditMode ? (
+                <div className={styles.applicationForm}>
+                  <div className={styles.formGrid}>
                     <div className={styles.formGroup}>
-                      <label htmlFor="editEventDate">Event Date *</label>
-                      <input
-                        type="date"
-                        id="editEventDate"
-                        name="eventDate"
-                        value={formData.eventDate}
-                        onChange={handleInputChange}
-                        required={formData.category === 'Event'}
-                        className={styles.input}
-                      />
-                    </div>
-
-                    <div className={styles.formGroup}>
-                      <label htmlFor="editEventLocation">Event Location</label>
+                      <label htmlFor="editTitle">Announcement Title *</label>
                       <input
                         type="text"
-                        id="editEventLocation"
-                        name="eventLocation"
-                        value={formData.eventLocation}
+                        id="editTitle"
+                        name="title"
+                        value={formData.title}
                         onChange={handleInputChange}
-                        maxLength={200}
-                        className={styles.input}
+                        required
+                        maxLength={150}
+                        className={styles.formInput}
                       />
                     </div>
-                  </>
-                )}
 
-                  <div className={styles.formGroup}>
-                    <label>Photos (Max 4 total)</label>
-                      <input
-                        type="file"
-                        multiple
-                        accept="image/*"
-                        onChange={handleFileUpload}
-                        className={styles.fileInput}
+                    <div className={styles.formGroup}>
+                      <label htmlFor="editCategory">Category *</label>
+                      <select
+                        id="editCategory"
+                        name="category"
+                        value={formData.category}
+                        onChange={handleInputChange}
+                        required
+                        className={styles.formSelect}
+                      >
+                        <option value="Update">Update</option>
+                        <option value="Event">Event</option>
+                      </select>
+                    </div>
+
+                    <div className={styles.formGroup}>
+                      <label htmlFor="editDetails">Announcement Details *</label>
+                      <textarea
+                        id="editDetails"
+                        name="details"
+                        value={formData.details}
+                        onChange={handleInputChange}
+                        required
+                        maxLength={3000}
+                        rows={6}
+                        className={styles.formTextarea}
                       />
-                    
-                  {formData.photos.length > 0 && (
-                    <div className={styles.photoPreview}>
-                      <div className={styles.photoPreviewGrid}>
-                        {formData.photos.map((photo, index) => (
-                          <div key={index} className={styles.photoPreviewItem}>
-                            <div className={styles.photoPreviewImage}>
-                              <img 
-                                src={photo.preview} 
-                                alt={`Preview ${index + 1}`}
-                                className={styles.previewImg}
-                              />
-                              <button 
-                                type="button"
-                                onClick={() => removePhoto(index)}
-                                className={styles.removePhotoBtn}
-                              >
-                                <X size={16} />
-                              </button>
-                              {photo.existing && (
-                                <div className={styles.existingPhotoIndicator}>
-                                  Existing
-                                </div>
-                              )}
-                            </div>
-                            <span className={styles.photoName}>{photo.name}</span>
-                          </div>
-                        ))}
+                    </div>
+
+                    {formData.category === 'Event' && (
+                      <>
+                        <div className={styles.formGroup}>
+                          <label htmlFor="editEventDate">Event Date *</label>
+                          <input
+                            type="date"
+                            id="editEventDate"
+                            name="eventDate"
+                            value={formData.eventDate}
+                            onChange={handleInputChange}
+                            required={formData.category === 'Event'}
+                            className={styles.formInput}
+                          />
+                        </div>
+
+                        <div className={styles.formGroup}>
+                          <label htmlFor="editEventLocation">Event Location</label>
+                          <input
+                            type="text"
+                            id="editEventLocation"
+                            name="eventLocation"
+                            value={formData.eventLocation}
+                            onChange={handleInputChange}
+                            maxLength={200}
+                            className={styles.formInput}
+                          />
+                        </div>
+                      </>
+                    )}
+
+                    <div className={styles.formGroup}>
+                      <label>Photos (Max 4 total)</label>
+                      <div className={styles.fileUpload}>
+                        <input
+                          type="file"
+                          id="editPhotos"
+                          multiple
+                          accept="image/*"
+                          onChange={handleFileUpload}
+                          className={styles.fileInput}
+                        />
+                        <label htmlFor="editPhotos" className={styles.fileLabel}>
+                          <Image size={20} />
+                          <span>Add more photos</span>
+                        </label>
                       </div>
-                      {formData.photos.length < 4 && (
-                        <p className={styles.photoHint}>
-                          You can add {4 - formData.photos.length} more photo{4 - formData.photos.length !== 1 ? 's' : ''}.
-                        </p>
+                    
+                      {formData.photos.length > 0 && (
+                        <div className={styles.photoPreview}>
+                          <div className={styles.photoGrid}>
+                            {formData.photos.map((photo, index) => (
+                              <div key={index} className={styles.photoItem}>
+                                <img 
+                                  src={photo.preview} 
+                                  alt={`Preview ${index + 1}`}
+                                  className={styles.photoThumbnail}
+                                />
+                                <button 
+                                  type="button"
+                                  onClick={() => removePhoto(index)}
+                                  className={styles.removePhotoBtn}
+                                >
+                                  <X size={14} />
+                                </button>
+                                {photo.existing && (
+                                  <div className={styles.existingBadge}>
+                                    Existing
+                                  </div>
+                                )}
+                                <span className={styles.photoName}>{photo.name}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
                       )}
                     </div>
-                  )}
-                </div>
+                  </div>
 
-                <div className={styles.formActions}>
-                  <button 
-                    type="button" 
-                    onClick={() => {
-                      setIsEditMode(false);
-                      resetForm();
-                    }}
-                    className={styles.cancelButton}
-                  >
-                    Cancel
-                  </button>
-                  <button type="submit" className={styles.submitButton}>
-                    Update Announcement
-                  </button>
+                  <div className={styles.formActions}>
+                    <button 
+                      type="button" 
+                      onClick={() => {
+                        setIsEditMode(false);
+                        resetForm();
+                      }}
+                      className={styles.cancelBtn}
+                    >
+                      Cancel
+                    </button>
+                    <button 
+                      type="button" 
+                      onClick={handleUpdateAnnouncement}
+                      className={styles.submitBtn}
+                    >
+                      Update Announcement
+                    </button>
+                  </div>
                 </div>
-              </form>
-            ) : (
-              <div className={styles.viewContent}>
+              ) : (
                 <div className={styles.announcementDetails}>
-                  <div className={styles.categoryBadge}>
-                    <span className={`${styles.category} ${styles[selectedAnnouncement.category.toLowerCase()]}`}>
+                  <div className={styles.announcementMeta}>
+                    <span className={`${styles.categoryTag} ${styles[selectedAnnouncement.category.toLowerCase()]}`}>
                       {selectedAnnouncement.category}
+                    </span>
+                    <span className={styles.publishDate}>
+                      <Clock size={14} />
+                      {formatDate(selectedAnnouncement.createdAt)}
                     </span>
                   </div>
                   
-                  <p className={styles.fullDetails}>{selectedAnnouncement.details}</p>
+                  <div className={styles.section}>
+                    <h4>Details</h4>
+                    <p className={styles.description}>{selectedAnnouncement.details}</p>
+                  </div>
                   
                   {selectedAnnouncement.eventDate && (
-                    <div className={styles.eventInfoFull}>
-                      <div className={styles.eventDetail}>
-                        <Calendar size={16} />
-                        <strong>Date:</strong> {formatDate(selectedAnnouncement.eventDate)}
-                      </div>
-                      {selectedAnnouncement.eventLocation && (
+                    <div className={styles.section}>
+                      <h4>Event Information</h4>
+                      <div className={styles.eventInfoFull}>
                         <div className={styles.eventDetail}>
-                          <MapPin size={16} />
-                          <strong>Location:</strong> {selectedAnnouncement.eventLocation}
+                          <Calendar size={16} />
+                          <div>
+                            <strong>Date:</strong> {formatDate(selectedAnnouncement.eventDate)}
+                          </div>
                         </div>
-                      )}
+                        {selectedAnnouncement.eventLocation && (
+                          <div className={styles.eventDetail}>
+                            <MapPin size={16} />
+                            <div>
+                              <strong>Location:</strong> {selectedAnnouncement.eventLocation}
+                            </div>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   )}
                   
                   {selectedAnnouncement.photos?.length > 0 && (
-                    <div className={styles.photosSection}>
+                    <div className={styles.section}>
                       <h4>Photos ({selectedAnnouncement.photos.length})</h4>
-                      <div className={styles.photoGrid}>
+                      <div className={styles.photoGallery}>
                         {selectedAnnouncement.photos.map((photo, index) => (
-                          <div key={index} className={styles.photoContainer}>
+                          <div key={index} className={styles.galleryPhoto}>
                             <img 
                               src={photo.filePath} 
-                              alt={`Announcement photo ${index + 1}`}
-                              className={styles.photo}
+                              alt={`Photo ${index + 1}`}
                             />
                           </div>
                         ))}
                       </div>
                     </div>
                   )}
-                  
-                  <div className={styles.metadata}>
+
+                  <div className={styles.modalMetadata}>
                     <div className={styles.metaItem}>
-                      <strong>Created:</strong> {formatDate(selectedAnnouncement.createdAt)}
+                      <strong>Published</strong>
+                      <span>{formatDate(selectedAnnouncement.createdAt)}</span>
                     </div>
                     {selectedAnnouncement.updatedAt !== selectedAnnouncement.createdAt && (
                       <div className={styles.metaItem}>
-                        <strong>Updated:</strong> {formatDate(selectedAnnouncement.updatedAt)}
+                        <strong>Last Updated</strong>
+                        <span>{formatDate(selectedAnnouncement.updatedAt)}</span>
                       </div>
                     )}
                   </div>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </div>
       )}
