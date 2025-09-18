@@ -14,6 +14,7 @@ const ProfileLayout = ({ children }) => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [isTabletView, setIsTabletView] = useState(false);
   const navRef = useRef(null);
   const contentRef = useRef(null);
 
@@ -28,6 +29,13 @@ const ProfileLayout = ({ children }) => {
 
   const handleChangePassword = () => {
     setShowPasswordModal(true);
+  };
+
+  // Check if current view is tablet
+  const checkTabletView = () => {
+    const width = window.innerWidth;
+    const isTablet = width >= 769 && width <= 1024;
+    setIsTabletView(isTablet);
   };
 
   // Update sliding indicator position
@@ -47,7 +55,7 @@ const ProfileLayout = ({ children }) => {
     }
   };
 
-  // Handle smooth page transitions for desktop
+  // Handle smooth page transitions for desktop and tablet
   useEffect(() => {
     if (window.innerWidth > 768) {
       setIsTransitioning(true);
@@ -73,11 +81,15 @@ const ProfileLayout = ({ children }) => {
     setTimeout(updateActiveIndicator, 100);
   }, [location.pathname]);
 
-  // Update indicator on window resize
+  // Update indicator and tablet view on window resize
   useEffect(() => {
     const handleResize = () => {
       updateActiveIndicator();
+      checkTabletView();
     };
+
+    // Check tablet view on initial load
+    checkTabletView();
 
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
@@ -260,10 +272,6 @@ const ProfileLayout = ({ children }) => {
               <div className={styles.profileAvatar}>
                 <User size={48} />
               </div>
-              {/* Modern Edit Icon - appears on hover (desktop) or always visible (mobile) */}
-              <div className={styles.profileEditIcon} onClick={handleEditProfile}>
-                <Settings size={14} />
-              </div>
             </div>
             <div className={styles.profileInfo}>
               <h2 className={styles.profileName}>
@@ -276,6 +284,24 @@ const ProfileLayout = ({ children }) => {
                 {user?.barangay && `Barangay ${user.barangay.charAt(0).toUpperCase() + user.barangay.slice(1)}`}
               </p>
             </div>
+          </div>
+          
+          {/* Mobile Action Buttons Grid - Visible only on Mobile */}
+          <div className={styles.mobileActionsGrid}>
+            <button 
+              className={styles.mobileActionButton}
+              onClick={handleEditProfile}
+            >
+              <Edit3 size={18} />
+              <span>Edit Profile</span>
+            </button>
+            <button 
+              className={styles.mobileActionButton}
+              onClick={handleChangePassword}
+            >
+              <Lock size={18} />
+              <span>Change Password</span>
+            </button>
           </div>
           
           {/* Desktop Action Buttons - Hidden on Mobile */}
@@ -297,7 +323,7 @@ const ProfileLayout = ({ children }) => {
           </div>
         </div>
 
-        {/* Desktop Logout Button */}
+        {/* Desktop & Tablet Logout Button - Hidden only on Mobile */}
         <button 
           className={styles.logoutButton}
           onClick={handleLogout}
@@ -306,7 +332,7 @@ const ProfileLayout = ({ children }) => {
           Logout
         </button>
       </div>
-
+      
       {/* Right Side - Content Area with Navigation */}
       <div className={styles.profileContent}>
         <nav className={styles.profileNav} ref={navRef}>
@@ -339,31 +365,6 @@ const ProfileLayout = ({ children }) => {
         <div className={styles.profileMain} ref={contentRef}>
           {children}
         </div>
-      </div>
-
-      {/* Mobile Action Menu - Bottom Bar */}
-      <div className={styles.mobileActionMenu}>
-        <button 
-          className={styles.mobileActionBtn}
-          onClick={handleEditProfile}
-        >
-          <Edit3 size={16} />
-          Edit Profile
-        </button>
-        <button 
-          className={styles.mobileActionBtn}
-          onClick={handleChangePassword}
-        >
-          <Lock size={16} />
-          Change Password
-        </button>
-        <button 
-          className={`${styles.mobileActionBtn} ${styles.mobileLogoutBtn}`}
-          onClick={handleLogout}
-        >
-          <LogOut size={16} />
-          Logout
-        </button>
       </div>
 
       {/* Modals */}
