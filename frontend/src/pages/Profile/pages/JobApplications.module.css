@@ -2,7 +2,7 @@
 
 /* CSS Variables for consistent theming */
 :root {
-  --primary-color: #2563eb;
+  --primary-color: #1c62bb;
   --primary-dark: #1d4ed8;
   --primary-light: #3b82f6;
   --gray-50: #f9fafb;
@@ -351,24 +351,26 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
+  z-index: 9999;
   padding: var(--spacing-2xl);
   backdrop-filter: blur(2px);
   -webkit-backdrop-filter: blur(2px);
+  overflow-y: auto;
+  transform: translateZ(0);
 }
 
 .modalContent {
   background: var(--white);
   border-radius: var(--border-radius-xl);
-  box-shadow: var(--shadow-xl);
+  box-shadow: var(--shadow-2xl);
   width: 100%;
   max-width: 800px;
-  max-height: 90vh;
+  max-height: calc(100vh - 4rem);
   display: flex;
   flex-direction: column;
   overflow: hidden;
   position: relative;
-  z-index: 1001;
+  z-index: 10000;
 }
 
 .modalOverlay {
@@ -382,6 +384,15 @@
   align-items: center;
   padding: var(--spacing-2xl) var(--spacing-2xl) var(--spacing-lg);
   border-bottom: 2px solid var(--gray-200);
+  background: var(--white);
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.bodyScrollLocked {
+  overflow: hidden;
+  padding-right: 15px; /* Prevent layout shift from scrollbar removal */
 }
 
 .modalHeader h2 {

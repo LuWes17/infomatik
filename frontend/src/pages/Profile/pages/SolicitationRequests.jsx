@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { 
   Eye, 
   X, 
@@ -95,19 +96,19 @@ const SolicitationRequests = () => {
 
   useEffect(() => {
     if (showDetails) {
-      // Prevent scrolling when modal is open
+      // Prevent body scroll when modal is open
+      document.body.classList.add(styles.bodyScrollLocked);
       document.body.style.overflow = 'hidden';
-      document.body.style.paddingRight = '17px'; // Prevent layout shift from scrollbar
     } else {
-      // Restore scrolling when modal is closed
+      // Re-enable body scroll when modal is closed
+      document.body.classList.remove(styles.bodyScrollLocked);
       document.body.style.overflow = 'unset';
-      document.body.style.paddingRight = '0px';
     }
 
-    // Cleanup function to restore scrolling when component unmounts
+    // Cleanup on unmount
     return () => {
+      document.body.classList.remove(styles.bodyScrollLocked);
       document.body.style.overflow = 'unset';
-      document.body.style.paddingRight = '0px';
     };
   }, [showDetails]);
 
@@ -150,77 +151,11 @@ const SolicitationRequests = () => {
     );
   }
 
-  return (
-    <div className={styles.container}>
+  const Modal = () => {
+    if (!showDetails || !selectedRequest) return null;
 
-      {requests.length === 0 ? (
-        <div className={styles.emptyState}>
-          <FileText size={48} />
-          <h3>No Solicitation Requests</h3>
-          <p>You haven't submitted any solicitation requests yet.</p>
-          <a href="/services/solicitation-requests" className={styles.submitButton}>
-            Submit Request
-          </a>
-        </div>
-      ) : (
-        <div className={styles.requestsGrid}>
-          {requests.map((request) => {
-            const statusDisplay = getStatusDisplay(request.status);
-            
-            return (
-              <div key={request._id} className={styles.requestCard} onClick={() => viewRequest(request)}>
-                <div className={styles.cardHeader}>
-                  <h3 className={styles.organizationName}>
-                    {request.organizationName}
-                  </h3>
-                  <div className={`${styles.statusBadge} ${statusDisplay.className}`}>
-                    {statusDisplay.icon}
-                    <span>{statusDisplay.text}</span>
-                  </div>
-                </div>
-
-                <div className={styles.cardContent}>
-                  <div className={styles.requestInfo}>
-                    <div className={styles.infoRow}>
-                      <User size={16} />
-                      <span>{request.contactPerson}</span>
-                    </div>
-                    <div className={styles.infoRow}>
-                      <Building2 size={16} />
-                      <span>{request.organizationType}</span>
-                    </div>
-                  </div>
-
-                
-                  {request.purpose && (
-                    <div className={styles.purposeSection}>
-                      <strong>Purpose:</strong>
-                      <p className={styles.purposeText}>
-                        {request.purpose.length > 80
-                          ? `${request.purpose.substring(0, 80)}...`
-                          : request.purpose
-                        }
-                      </p>
-                    </div>
-                  )}
-                </div>
-
-                <div className={styles.cardFooter}>
-                  <button 
-                    className={styles.viewButton}
-                  >
-                    View Details
-                  </button>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
-
-      {/* Request Details Modal */}
-      {showDetails && selectedRequest && (
-        <div className={styles.modalOverlay} onClick={closeDetails}>
+    return createPortal(
+      <div className={styles.modalOverlay} onClick={closeDetails}>
           <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
             <div className={styles.modalHeader}>
               <h2>{selectedRequest.organizationName}</h2>
@@ -356,8 +291,82 @@ const SolicitationRequests = () => {
               )}
             </div>
           </div>
+        </div>,
+      document.body // Render modal as direct child of body
+    );
+  };
+
+
+  return (
+    <div className={styles.container}>
+
+      {requests.length === 0 ? (
+        <div className={styles.emptyState}>
+          <FileText size={48} />
+          <h3>No Solicitation Requests</h3>
+          <p>You haven't submitted any solicitation requests yet.</p>
+          <a href="/services/solicitation-requests" className={styles.submitButton}>
+            Submit Request
+          </a>
+        </div>
+      ) : (
+        <div className={styles.requestsGrid}>
+          {requests.map((request) => {
+            const statusDisplay = getStatusDisplay(request.status);
+            
+            return (
+              <div key={request._id} className={styles.requestCard} onClick={() => viewRequest(request)}>
+                <div className={styles.cardHeader}>
+                  <h3 className={styles.organizationName}>
+                    {request.organizationName}
+                  </h3>
+                  <div className={`${styles.statusBadge} ${statusDisplay.className}`}>
+                    {statusDisplay.icon}
+                    <span>{statusDisplay.text}</span>
+                  </div>
+                </div>
+
+                <div className={styles.cardContent}>
+                  <div className={styles.requestInfo}>
+                    <div className={styles.infoRow}>
+                      <User size={16} />
+                      <span>{request.contactPerson}</span>
+                    </div>
+                    <div className={styles.infoRow}>
+                      <Building2 size={16} />
+                      <span>{request.organizationType}</span>
+                    </div>
+                  </div>
+
+                
+                  {request.purpose && (
+                    <div className={styles.purposeSection}>
+                      <strong>Purpose:</strong>
+                      <p className={styles.purposeText}>
+                        {request.purpose.length > 80
+                          ? `${request.purpose.substring(0, 80)}...`
+                          : request.purpose
+                        }
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                <div className={styles.cardFooter}>
+                  <button 
+                    className={styles.viewButton}
+                  >
+                    View Details
+                  </button>
+                </div>
+              </div>
+            );
+          })}
         </div>
       )}
+
+      {/* Request Details Modal */}
+      <Modal />
     </div>
   );
 };

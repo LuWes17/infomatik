@@ -295,12 +295,14 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
+  z-index: 9999; 
   padding: var(--spacing-2xl);
   backdrop-filter: blur(2px);
   -webkit-backdrop-filter: blur(2px);
   touch-action: none;
   -webkit-overflow-scrolling: touch;
+  overflow-y: auto;
+  transform: translateZ(0);
 }
 
 .modalContent {
@@ -309,12 +311,12 @@
   box-shadow: var(--shadow-xl);
   width: 100%;
   max-width: 900px;
-  max-height: 90vh;
+  max-height: calc(100vh - 4rem);
   display: flex;
   flex-direction: column;
   overflow: hidden;
   position: relative;
-  z-index: 1001;
+  z-index: 10000;
 }
 
 .modalHeader {
@@ -324,6 +326,11 @@
   padding: var(--spacing-2xl) var(--spacing-2xl) var(--spacing-lg);
   border-bottom: 2px solid var(--gray-200);
   min-width: 0;
+}
+
+.bodyScrollLocked {
+  overflow: hidden;
+  padding-right: 15px; /* Prevent layout shift from scrollbar removal */
 }
 
 .modalHeader h2 {

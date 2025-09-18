@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { 
   Eye, 
   X, 
@@ -103,16 +104,19 @@ const FeedbackSent = () => {
 
   useEffect(() => {
     if (showDetails) {
+      // Prevent body scroll when modal is open
+      document.body.classList.add(styles.bodyScrollLocked);
       document.body.style.overflow = 'hidden';
-      document.body.style.paddingRight = '17px';
     } else {
+      // Re-enable body scroll when modal is closed
+      document.body.classList.remove(styles.bodyScrollLocked);
       document.body.style.overflow = 'unset';
-      document.body.style.paddingRight = '0px';
     }
 
+    // Cleanup on unmount
     return () => {
+      document.body.classList.remove(styles.bodyScrollLocked);
       document.body.style.overflow = 'unset';
-      document.body.style.paddingRight = '0px';
     };
   }, [showDetails]);
 
@@ -139,70 +143,11 @@ const FeedbackSent = () => {
     );
   }
 
-  return (
-    <div className={styles.container}>
+  const Modal = () => {
+    if (!showDetails || !selectedFeedback) return null;
 
-      {feedbacks.length === 0 ? (
-        <div className={styles.emptyState}>
-          <MessageCircle size={48} />
-          <h3>No Feedbacks Submitted</h3>
-          <p>You haven't submitted any feedbacks yet.</p>
-          <a href="/about/feedback" className={styles.submitButton}>
-            Submit Feedback
-          </a>
-        </div>
-      ) : (
-        <div className={styles.feedbacksGrid}>
-          {feedbacks.map((feedback) => {
-            const statusDisplay = getStatusDisplay(feedback.status);
-            
-            return (
-              <div key={feedback._id} className={styles.feedbackCard} onClick={() => viewFeedback(feedback)}>
-                <div className={styles.cardHeader}>
-                  <h3 className={styles.feedbackSubject}>
-                    {feedback.subject}
-                  </h3>
-                  <div className={`${styles.statusBadge} ${statusDisplay.className}`}>
-                    {statusDisplay.icon}
-                    <span>{statusDisplay.text}</span>
-                  </div>
-                </div>
-
-                <div className={styles.cardContent}>
-                  <div className={styles.feedbackInfo}>
-                    <div className={styles.infoRow}>
-                      <Tag size={16} />
-                      <span>{feedback.category}</span>
-                    </div>
-                  </div>
-
-                  {feedback.message && (
-                    <div className={styles.messageSection}>
-                      <strong>Message:</strong>
-                      <p className={styles.messageText}>
-                        {feedback.message.length > 120
-                          ? `${feedback.message.substring(0, 120)}...`
-                          : feedback.message
-                        }
-                      </p>
-                    </div>
-                  )}
-                </div>
-
-                <div className={styles.cardFooter}>
-                  <button className={styles.viewButton}>
-                    View Details
-                  </button>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
-
-      {/* Feedback Details Modal */}
-      {showDetails && selectedFeedback && (
-        <div className={styles.modalOverlay} onClick={closeDetails}>
+    return createPortal(
+      <div className={styles.modalOverlay} onClick={closeDetails}>
           <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
             <div className={styles.modalHeader}>
               <h2>{selectedFeedback.subject}</h2>
@@ -288,8 +233,74 @@ const FeedbackSent = () => {
               )}
             </div>
           </div>
+        </div>,
+      document.body // Render modal as direct child of body
+    );
+  };
+
+  return (
+    <div className={styles.container}>
+
+      {feedbacks.length === 0 ? (
+        <div className={styles.emptyState}>
+          <MessageCircle size={48} />
+          <h3>No Feedbacks Submitted</h3>
+          <p>You haven't submitted any feedbacks yet.</p>
+          <a href="/about/feedback" className={styles.submitButton}>
+            Submit Feedback
+          </a>
+        </div>
+      ) : (
+        <div className={styles.feedbacksGrid}>
+          {feedbacks.map((feedback) => {
+            const statusDisplay = getStatusDisplay(feedback.status);
+            
+            return (
+              <div key={feedback._id} className={styles.feedbackCard} onClick={() => viewFeedback(feedback)}>
+                <div className={styles.cardHeader}>
+                  <h3 className={styles.feedbackSubject}>
+                    {feedback.subject}
+                  </h3>
+                  <div className={`${styles.statusBadge} ${statusDisplay.className}`}>
+                    {statusDisplay.icon}
+                    <span>{statusDisplay.text}</span>
+                  </div>
+                </div>
+
+                <div className={styles.cardContent}>
+                  <div className={styles.feedbackInfo}>
+                    <div className={styles.infoRow}>
+                      <Tag size={16} />
+                      <span>{feedback.category}</span>
+                    </div>
+                  </div>
+
+                  {feedback.message && (
+                    <div className={styles.messageSection}>
+                      <strong>Message:</strong>
+                      <p className={styles.messageText}>
+                        {feedback.message.length > 120
+                          ? `${feedback.message.substring(0, 120)}...`
+                          : feedback.message
+                        }
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                <div className={styles.cardFooter}>
+                  <button className={styles.viewButton}>
+                    View Details
+                  </button>
+                </div>
+              </div>
+            );
+          })}
         </div>
       )}
+
+      {/* Feedback Details Modal */}
+      < Modal />
     </div>
   );
 };
