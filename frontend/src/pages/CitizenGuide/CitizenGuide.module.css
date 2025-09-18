@@ -152,8 +152,7 @@
 
 .guideCard:hover {
   transform: translateY(-4px);
-  box-shadow: 0 8px 25px rgba(28, 98, 187, 0.15);
-  border-color: var(--primary-color);
+  box-shadow: 0 5px 10px #9AAACF;
 }
 
 /* Card Header */
