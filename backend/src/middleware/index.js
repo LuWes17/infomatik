@@ -19,12 +19,12 @@ const setupMiddleware = (app) => {
   // CORS configuration - UPDATED
   app.use(cors({
     origin: process.env.NODE_ENV === 'production' 
-      ? ['https://infomatik.onrender.com/'] 
-      : ['http://localhost:3000', 'http://localhost:3001'], // Add multiple ports if needed
+      ? [process.env.FRONTEND_URL || 'https://infomatik.onrender.com'] 
+      : ['http://localhost:3000', 'http://localhost:3001'],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
-    exposedHeaders: ['Content-Disposition'] // For file downloads
+    exposedHeaders: ['Content-Disposition']
   }));
   
   app.use('/uploads', (req, res, next) => {
