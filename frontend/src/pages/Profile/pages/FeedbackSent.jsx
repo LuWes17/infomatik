@@ -107,18 +107,15 @@ const FeedbackSent = () => {
     };
   };
 
-  const getCategoryIcon = (category) => {
-    const categoryIcons = {
-      'General Feedback': <MessageCircle size={16} />,
-      'Service Complaint': <AlertCircle size={16} />,
-      'Service Commendation': <ThumbsUp size={16} />,
-      'Suggestion': <MessageSquare size={16} />,
-      'Inquiry': <FileText size={16} />,
-      'Report Issue': <AlertCircle size={16} />,
-      'Other': <Tag size={16} />
-    };
-
-    return categoryIcons[category] || <Tag size={16} />;
+  // Function to check if status should be displayed for a category
+  const shouldDisplayStatus = (category) => {
+    const noStatusCategories = [
+      'General Feedback',
+      'Service Commendation', 
+      'Suggestion',
+      'Other'
+    ];
+    return !noStatusCategories.includes(category);
   };
 
   useEffect(() => {
@@ -176,16 +173,27 @@ const FeedbackSent = () => {
             </div>
 
             <div className={styles.modalBody}>
-              {/* Status Section */}
-              <div className={styles.statusSection}>
-                <p className={styles.feedbackDate}>
-                  Submitted on {formatDate(selectedFeedback.createdAt)}
-                </p>
-                <div className={`${styles.statusBadge} ${getStatusDisplay(selectedFeedback.status).className}`}>
-                  {getStatusDisplay(selectedFeedback.status).icon}
-                  <span>{getStatusDisplay(selectedFeedback.status).text}</span>
+              {/* Status Section - Only show for certain categories */}
+              {shouldDisplayStatus(selectedFeedback.category) && (
+                <div className={styles.statusSection}>
+                  <p className={styles.feedbackDate}>
+                    Submitted on {formatDate(selectedFeedback.createdAt)}
+                  </p>
+                  <div className={`${styles.statusBadge} ${styles.large} ${getStatusDisplay(selectedFeedback.status).className}`}>
+                    {getStatusDisplay(selectedFeedback.status).icon}
+                    <span>{getStatusDisplay(selectedFeedback.status).text}</span>
+                  </div>
                 </div>
-              </div>
+              )}
+
+              {/* Show just the date for categories without status */}
+              {!shouldDisplayStatus(selectedFeedback.category) && (
+                <div className={styles.statusSection}>
+                  <p className={styles.feedbackDate}>
+                    Submitted on {formatDate(selectedFeedback.createdAt)}
+                  </p>
+                </div>
+              )}
 
               {/* Feedback Details Section */}
               <div className={styles.detailsSection}>
@@ -292,13 +300,15 @@ const FeedbackSent = () => {
             return (
               <div key={feedback._id} className={styles.feedbackCard} onClick={() => viewFeedback(feedback)}>
                 <div className={styles.cardHeader}>
-                  <h3 className={styles.feedbackSubject}>
+                  <h3 className={`${styles.feedbackSubject} ${!shouldDisplayStatus(feedback.category) ? styles.noStatus : ''}`}>
                     {feedback.subject}
                   </h3>
-                  <div className={`${styles.statusBadge} ${statusDisplay.className}`}>
-                    {statusDisplay.icon}
-                    <span>{statusDisplay.text}</span>
-                  </div>
+                  {shouldDisplayStatus(feedback.category) && (
+                    <div className={`${styles.statusBadge} ${statusDisplay.className}`}>
+                      {statusDisplay.icon}
+                      <span>{statusDisplay.text}</span>
+                    </div>
+                  )}
                 </div>
 
                 <div className={styles.cardContent}>

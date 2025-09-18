@@ -128,6 +128,15 @@
   flex: 1;
 }
 
+/* No status styling */
+.feedbackSubject.noStatus {
+  flex: none;
+  width: 100%;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: unset;
+}
+
 /* Status Badges */
 .statusBadge {
   display: flex;

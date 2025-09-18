@@ -255,6 +255,10 @@
   color: #334155;
 }
 
+.feedbackSubject.noStatus {
+  padding-right: 1rem;
+}
+
 .noFeedback p {
   margin: 0;
   font-size: 1rem;

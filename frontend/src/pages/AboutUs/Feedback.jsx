@@ -88,6 +88,16 @@ const Feedback = () => {
     return statusMap[status] || status;
   };
 
+  const shouldDisplayStatus = (category) => {
+    const noStatusCategories = [
+      'General Feedback',
+      'Service Commendation', 
+      'Suggestion',
+      'Other'
+    ];
+    return !noStatusCategories.includes(category);
+  };
+
   // Function to get CSS class name for status badges
   const getStatusCssClass = (status) => {
     return status.toLowerCase().replace(/\s+/g, '-').replace(/_/g, '-');
@@ -689,13 +699,17 @@ const Feedback = () => {
                 onClick={() => handleFeedbackClick(feedback)}
                 className={styles.feedbackCard}
               >
-                {/* Status Badge - Replaced category badge */}
-                <div className={`${styles.statusBadge} ${styles[getStatusCssClass(feedback.status || 'pending')]}`}>
-                  {getStatusDisplay(feedback.status || 'pending')}
-                </div>
+                {/* Status Badge - Only show for certain categories */}
+                {shouldDisplayStatus(feedback.category) && (
+                  <div className={`${styles.statusBadge} ${styles[getStatusCssClass(feedback.status || 'pending')]}`}>
+                    {getStatusDisplay(feedback.status || 'pending')}
+                  </div>
+                )}
 
                 {/* Subject */}
-                <h3 className={styles.feedbackSubject}>{feedback.subject}</h3>
+                <h3 className={`${styles.feedbackSubject} ${!shouldDisplayStatus(feedback.category) ? styles.noStatus : ''}`}>
+                  {feedback.subject}
+                </h3>
 
                 {/* Feedback Info */}
                 <div className={styles.feedbackInfo}>
@@ -740,10 +754,12 @@ const Feedback = () => {
             <div className={styles.modalHeader}>
               <div className={styles.modalTitle}>
                 <h2>{selectedFeedback.subject}</h2>
-                {/* Status Badge - Replaced category badge */}
-                <span className={`${styles.statusBadge} ${styles[getStatusCssClass(selectedFeedback.status || 'pending')]}`}>
-                  {getStatusDisplay(selectedFeedback.status || 'pending')}
-                </span>
+                {/* Status Badge - Only show for certain categories */}
+                {shouldDisplayStatus(selectedFeedback.category) && (
+                  <span className={`${styles.statusBadge} ${styles[getStatusCssClass(selectedFeedback.status || 'pending')]}`}>
+                    {getStatusDisplay(selectedFeedback.status || 'pending')}
+                  </span>
+                )}
               </div>
               <button onClick={closeAllModals} className={styles.closeButton}>
                 ×
