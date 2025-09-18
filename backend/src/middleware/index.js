@@ -19,7 +19,7 @@ const setupMiddleware = (app) => {
   // CORS configuration - UPDATED
   app.use(cors({
     origin: process.env.NODE_ENV === 'production' 
-      ? ['https://your-domain.com'] 
+      ? ['https://infomatik.onrender.com/'] 
       : ['http://localhost:3000', 'http://localhost:3001'], // Add multiple ports if needed
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -30,7 +30,7 @@ const setupMiddleware = (app) => {
   app.use('/uploads', (req, res, next) => {
       res.header('Cross-Origin-Resource-Policy', 'cross-origin');
       res.header('Access-Control-Allow-Origin', process.env.NODE_ENV === 'production' 
-        ? 'https://your-domain.com' 
+        ? 'https://infomatik.onrender.com/' 
         : 'http://localhost:3000');
       next();
     });  
