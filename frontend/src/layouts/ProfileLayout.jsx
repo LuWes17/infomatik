@@ -31,6 +31,84 @@ const ProfileLayout = ({ children }) => {
     setShowPasswordModal(true);
   };
 
+  // Freeze background when modals are open
+  useEffect(() => {
+    const isModalOpen = showEditModal || showPasswordModal;
+    
+    if (isModalOpen) {
+      // Store the current scroll position
+      const scrollY = window.scrollY;
+      
+      // Add class to body to prevent scrolling
+      document.body.classList.add('modal-open');
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.width = '100%';
+    } else {
+      // Remove the scroll lock and restore position
+      const scrollY = document.body.style.top;
+      document.body.classList.remove('modal-open');
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.width = '';
+      
+      if (scrollY) {
+        window.scrollTo(0, parseInt(scrollY || '0') * -1);
+      }
+    }
+
+    // Cleanup function to ensure body class is removed if component unmounts
+    return () => {
+      document.body.classList.remove('modal-open');
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.width = '';
+    };
+  }, [showEditModal, showPasswordModal]);
+
+  const handleCloseEditModal = () => {
+    setShowEditModal(false);
+  };
+
+  const handleClosePasswordModal = () => {
+    setShowPasswordModal(false);
+  };
+
+  // Freeze background when modals are open
+  useEffect(() => {
+    const isModalOpen = showEditModal || showPasswordModal;
+    
+    if (isModalOpen) {
+      // Store the current scroll position
+      const scrollY = window.scrollY;
+      
+      // Add class to body to prevent scrolling
+      document.body.classList.add('modal-open');
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.width = '100%';
+    } else {
+      // Remove the scroll lock and restore position
+      const scrollY = document.body.style.top;
+      document.body.classList.remove('modal-open');
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.width = '';
+      
+      if (scrollY) {
+        window.scrollTo(0, parseInt(scrollY || '0') * -1);
+      }
+    }
+
+    // Cleanup function to ensure body class is removed if component unmounts
+    return () => {
+      document.body.classList.remove('modal-open');
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.width = '';
+    };
+  }, [showEditModal, showPasswordModal]);
+
   // Check if current view is tablet
   const checkTabletView = () => {
     const width = window.innerWidth;

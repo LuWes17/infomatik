@@ -5,6 +5,7 @@
   gap: 2rem;
   padding: 2rem;
   background-color: var(--gray-50);
+  position: relative;
 }
 
 /* Left Sidebar - Profile Card */
@@ -257,6 +258,36 @@
   border: 1px solid var(--gray-200);
   border-top: none;
   transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* Modal background freeze styles */
+/* Add this as a global style (outside of module scope) or in your global CSS file */
+:global(body.modal-open) {
+  overflow: hidden !important;
+  position: fixed !important;
+  width: 100% !important;
+}
+
+/* Optional: Add overlay effect for better visual separation when modals are open */
+.profileContainer::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(2px);
+  z-index: 998;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+/* Show overlay when modal is open */
+:global(body.modal-open) .profileContainer::before {
+  opacity: 1;
+  visibility: visible;
 }
 
 /* Tablet/iPad View - Same as Mobile Layout */
