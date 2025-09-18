@@ -1,0 +1,9 @@
+[build]
+builder = "nixpacks"
+
+[deploy]
+startCommand = "cd backend && npm start"
+workingDirectory = "backend"
+
+[environments.production]
+root = "backend"
