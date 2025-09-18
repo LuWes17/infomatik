@@ -142,7 +142,7 @@ const CalendarEvents = () => {
             <div className={styles.headerText}>
               <h2 className={styles.title}>Calendar of Events</h2>
               <p className={styles.subtitle}>
-                Manatiling updated sa mga paparating na kaganapan at aktibidad ng komunidad
+                Stay updated on upcoming community events and activities.
               </p>
             </div>
           </div>

@@ -5,11 +5,9 @@ import {
   Plus, 
   Search, 
   User, 
-  Calendar,
   FileText, 
   Tag,
   ChevronDown,
-  Clock,
   Camera,
   X
 } from 'lucide-react';
