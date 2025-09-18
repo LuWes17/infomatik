@@ -48,7 +48,7 @@ const feedbackSchema = new mongoose.Schema({
     type: String,
     required: true,
     enum: [
-      'General Feedback', 'Service Complaint', 'Service Commendation', 
+      'General Feedback', 'Service Commendation', 
       'Suggestion', 'Inquiry', 'Report Issue', 'Other'
     ]
   },
@@ -94,22 +94,6 @@ const feedbackSchema = new mongoose.Schema({
     }
   },
   
-  // Analytics and engagement
-  views: {
-    type: Number,
-    default: 0
-  },
-  
-  likes: {
-    type: Number,
-    default: 0
-  },
-  
-  // User engagement tracking
-  likedBy: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
-  }],
   
   // Resolution tracking
   resolvedAt: Date,

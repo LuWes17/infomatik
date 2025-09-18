@@ -70,7 +70,6 @@ const Feedback = () => {
   // Categories constant
   const categories = [
     'General Feedback',
-    'Service Complaint', 
     'Service Commendation',
     'Suggestion',
     'Inquiry',
@@ -78,19 +77,6 @@ const Feedback = () => {
     'Other'
   ];
 
-  // Function to get short category label for display
-  const getShortCategoryLabel = (category) => {
-    const shortLabels = {
-      'General Feedback': 'General',
-      'Service Complaint': 'Complaint',
-      'Service Commendation': 'Commendation',
-      'Suggestion': 'Suggestion',
-      'Inquiry': 'Inquiry',
-      'Report Issue': 'Report Issue',
-      'Other': 'Other'
-    };
-    return shortLabels[category] || category;
-  };
 
   // Function to get status display text
   const getStatusDisplay = (status) => {
