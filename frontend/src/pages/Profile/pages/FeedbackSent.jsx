@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { createPortal } from 'react-dom';
 import { 
   Eye, 
@@ -26,6 +27,12 @@ const FeedbackSent = () => {
   const [loading, setLoading] = useState(true);
   const [selectedFeedback, setSelectedFeedback] = useState(null);
   const [showDetails, setShowDetails] = useState(false);
+  const navigate = useNavigate();
+
+  const handleSendFeedbackClick = () => {
+    // Redirect to feedback page and trigger form modal
+    navigate('/about/feedback', { state: { openForm: true } });
+  };
 
   useEffect(() => {
     fetchMyFeedbacks();
@@ -246,9 +253,9 @@ const FeedbackSent = () => {
           <MessageCircle size={48} />
           <h3>No Feedbacks Submitted</h3>
           <p>You haven't submitted any feedbacks yet.</p>
-          <a href="/about/feedback" className={styles.submitButton}>
+          <button onClick={handleSendFeedbackClick} className={styles.submitButton}>
             Submit Feedback
-          </a>
+          </button>
         </div>
       ) : (
         <div className={styles.feedbacksGrid}>

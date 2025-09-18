@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { createPortal } from 'react-dom';
 import { 
   Eye, 
@@ -27,6 +28,12 @@ const SolicitationRequests = () => {
   const [loading, setLoading] = useState(true);
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [showDetails, setShowDetails] = useState(false);
+  const navigate = useNavigate();
+
+   const handleSendRequestClick = () => {
+    // Redirect to feedback page and trigger form modal
+    navigate('/services/solicitation-requests', { state: { openForm: true } });
+  };
 
   useEffect(() => {
     fetchMyRequests();
@@ -305,9 +312,9 @@ const SolicitationRequests = () => {
           <FileText size={48} />
           <h3>No Solicitation Requests</h3>
           <p>You haven't submitted any solicitation requests yet.</p>
-          <a href="/services/solicitation-requests" className={styles.submitButton}>
+          <button onClick={handleSendRequestClick} className={styles.submitButton}>
             Submit Request
-          </a>
+          </button>
         </div>
       ) : (
         <div className={styles.requestsGrid}>

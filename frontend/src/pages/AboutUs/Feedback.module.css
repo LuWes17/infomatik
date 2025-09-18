@@ -1091,6 +1091,13 @@
   color: white;
 }
 
+.fileHint {
+  color: var(--gray-500);
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+  display: block;
+}
+
 
 /* Gallery Modal Styles */
 .galleryModal {
