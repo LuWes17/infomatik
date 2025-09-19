@@ -25,6 +25,7 @@ const Accomplishments = () => {
 
   // Project types for filtering
   const projectTypes = ['All', 'Infrastructure', 'Social Program', 'Health Initiative', 'Education', 'Environment', 'Economic Development', 'Other'];
+  const categories = ['All', 'Infrastructure', 'Social Program', 'Health Initiative', 'Education', 'Environment', 'Economic Development', 'Other'];
 
   // Fetch accomplishments from backend
   const fetchAccomplishments = async () => {
