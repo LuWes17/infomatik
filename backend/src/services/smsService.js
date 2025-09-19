@@ -229,7 +229,7 @@ formatPhoneNumber(number) {
    * @returns {Promise<Object>} - SMS result
    */
   async sendWelcomeSMS(user) {
-      const message = `Welcome to Infomatik, ${user.firstName}! \n \n Your account has been created successfully. \n \n You now have full access to our comprehensive services including viewing office announcements, accomplishments, and reviewing local policies. \n\n Additionally, you can apply for job openings, submit solicitation requests, and provide valuable feedback to help improve our community services.`;     
+      const message = `Welcome to Infomatik, ${user.firstName}! \n \nYour account has been created successfully. \n \nYou now have full access to our comprehensive services including viewing office announcements, accomplishments, and reviewing local policies. \n\nAdditionally, you can apply for job openings, submit solicitation requests, and provide valuable feedback to help improve our community services.`;     
       console.log(message);
     return await this.sendSMS(user.contactNumber, message);
   }
@@ -245,10 +245,10 @@ formatPhoneNumber(number) {
     let message;
     
     if (status === 'accepted') {
-      message = `🎉 Congratulations ${user.firstName}! Your application for "${jobTitle}" has been ACCEPTED. \n\n Please visit our office at the Legislative Building, Bangkilingan in front of Ziga Memorial Hospital within 3 business days with a valid ID and documents to further discuss your application.`;
+      message = `🎉 Congratulations ${user.firstName}! Your application for "${jobTitle}" has been ACCEPTED. \n\nPlease visit our office at the Legislative Building, Bangkilingan in front of Ziga Memorial Hospital within 3 business days with a valid ID and documents to further discuss your application.`;
       console.log(message);
     } else if (status === 'rejected') {
-      message = `Hello ${user.firstName}, thank you for your interest in the "${jobTitle}" position. Unfortunately, your application was not selected this time. \n\n Please consider applying for other opportunities in the future. Keep checking our website ${this.websiteUrl} for new openings.`;
+      message = `Hello ${user.firstName}, thank you for your interest in the "${jobTitle}" position. Unfortunately, your application was not selected this time. \n\nPlease consider applying for other opportunities in the future. Keep checking our website ${this.websiteUrl} for new openings.`;
       console.log(message);
     } else {
       // Fallback for other statuses
@@ -313,11 +313,11 @@ async sendNewJobOpeningNotificationSMS(users, jobTitle) {
     let message;
     
     if (status === 'APPROVED') {
-      message = `Hello ${user.firstName}, GOOD NEWS! Your solicitation request has been APPROVED. \n\n Please visit our office at the Legislative Building, Bangkilingan in front of Ziga Memorial Hospital to discuss the details and next steps for your approved request.`;
+      message = `Hello ${user.firstName}, GOOD NEWS! Your solicitation request has been APPROVED. \n\nPlease visit our office at the Legislative Building, Bangkilingan in front of Ziga Memorial Hospital to discuss the details and next steps for your approved request.`;
       console.log(message);
     } else if (status === 'REJECTED') {
       console.log(message);
-      message = `Hello ${user.firstName}, we regret to inform you that your solicitation request has been REJECTED. \n\n You may visit our office at the Legislative Building, Bangkilingan in front of Ziga Memorial Hospital for more information about the decision.`;
+      message = `Hello ${user.firstName}, we regret to inform you that your solicitation request has been REJECTED. \n\nYou may visit our office at the Legislative Building, Bangkilingan in front of Ziga Memorial Hospital for more information about the decision.`;
     } else {
       // Fallback for any other status
       message = `Hello ${user.firstName}, your solicitation request has been ${status.toLowerCase()}. Please visit our office at the Legislative Building, Bangkilingan in front of Ziga Memorial Hospital for more details.`;
@@ -351,7 +351,7 @@ async sendNewJobOpeningNotificationSMS(users, jobTitle) {
     monthText = 'soon';
   }
   
-  const message = `RICE DISTRIBUTION ANNOUNCEMENT: Free rice distribution for ${capitalizedBarangays.join(', ')} residents ${monthText}. \n\n Please check our website ${this.websiteUrl} for more specific details (location, date, etc.) about the distribution.`;
+  const message = `RICE DISTRIBUTION ANNOUNCEMENT: Free rice distribution for ${capitalizedBarangays.join(', ')} residents ${monthText}. \n\nPlease check our website ${this.websiteUrl} for more specific details (location, date, etc.) about the distribution.`;
   
     console.log(message);
     const phoneNumbers = users.map(user => user.contactNumber);
@@ -378,7 +378,7 @@ async sendNewJobOpeningNotificationSMS(users, jobTitle) {
    * @returns {Promise<Object>} - SMS result
    */
   async sendJobClosureNotificationSMS(user, jobTitle) {
-    const message = `Hello ${user.firstName}, the job opening "${jobTitle}" that you applied for has been closed. \n\n Please check other available opportunities on our website ${this.websiteUrl}.`;
+    const message = `Hello ${user.firstName}, the job opening "${jobTitle}" that you applied for has been closed. \n\nPlease check other available opportunities on our website ${this.websiteUrl}.`;
     console.log(message);
     return await this.sendSMS(user.contactNumber, message);
   }
