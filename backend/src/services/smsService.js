@@ -6,6 +6,7 @@ class SMSService {
     this.apiUrl = 'https://api.semaphore.co';
     this.apiKey = process.env.SEMAPHORE_API_KEY;
     this.senderName = process.env.SMS_SENDER_NAME || 'Infomatik';
+    this.websiteUrl = process.env.WEBSITE_URL || 'https://infomatik.onrender.com'
     
     if (!this.apiKey) {
       console.warn('SEMAPHORE_API_KEY not found in environment variables');
@@ -244,10 +245,10 @@ formatPhoneNumber(number) {
     let message;
     
     if (status === 'accepted') {
-      message = `🎉 Congratulations ${user.firstName}! Your application for "${jobTitle}" has been ACCEPTED. \n\n Please visit our office at the Legislative Building, Bangkilingan in front of Ziga Memorial Hospital within 3 business days with a valid ID and required documents to further discuss your application.`;
+      message = `🎉 Congratulations ${user.firstName}! Your application for "${jobTitle}" has been ACCEPTED. \n\n Please visit our office at the Legislative Building, Bangkilingan in front of Ziga Memorial Hospital within 3 business days with a valid ID and documents to further discuss your application.`;
       console.log(message);
     } else if (status === 'rejected') {
-      message = `Hello ${user.firstName}, thank you for your interest in the "${jobTitle}" position. Unfortunately, your application was not selected this time. Please consider applying for other opportunities in the future. Keep checking our website for new openings.`;
+      message = `Hello ${user.firstName}, thank you for your interest in the "${jobTitle}" position. Unfortunately, your application was not selected this time. \n\n Please consider applying for other opportunities in the future. Keep checking our website ${this.websiteUrl} for new openings.`;
       console.log(message);
     } else {
       // Fallback for other statuses
@@ -265,7 +266,7 @@ formatPhoneNumber(number) {
  * @returns {Promise<Object>} - Bulk SMS result
  */
 async sendJobReopeningNotificationSMS(users, jobTitle) {
-  const message = `JOB REOPENED: ${jobTitle} is now open for applications again! Apply now through our website.`;
+  const message = `JOB REOPENED: ${jobTitle} is now open for applications again! Apply now through our website ${this.websiteUrl}.`;
   
   console.log(message);
   const phoneNumbers = users
@@ -287,7 +288,7 @@ async sendJobReopeningNotificationSMS(users, jobTitle) {
  * @returns {Promise<Object>} - Bulk SMS result
  */
 async sendNewJobOpeningNotificationSMS(users, jobTitle) {
-  const message = `NEW JOB OPENING: ${jobTitle} is now available! Apply now through our website.`;
+  const message = `NEW JOB OPENING: ${jobTitle} is now available! Apply now through our website ${this.websiteUrl}.`;
   
   console.log(message);
   const phoneNumbers = users
@@ -350,7 +351,7 @@ async sendNewJobOpeningNotificationSMS(users, jobTitle) {
     monthText = 'soon';
   }
   
-  const message = `RICE DISTRIBUTION ANNOUNCEMENT: Free rice distribution for ${capitalizedBarangays.join(', ')} residents ${monthText}. \n\n Please check our website for more specific details (location, date, etc.) about the distribution.`;
+  const message = `RICE DISTRIBUTION ANNOUNCEMENT: Free rice distribution for ${capitalizedBarangays.join(', ')} residents ${monthText}. \n\n Please check our website ${this.websiteUrl} for more specific details (location, date, etc.) about the distribution.`;
   
     console.log(message);
     const phoneNumbers = users.map(user => user.contactNumber);
@@ -377,7 +378,7 @@ async sendNewJobOpeningNotificationSMS(users, jobTitle) {
    * @returns {Promise<Object>} - SMS result
    */
   async sendJobClosureNotificationSMS(user, jobTitle) {
-    const message = `Hello ${user.firstName}, the job opening "${jobTitle}" that you applied for has been closed. Please check other available opportunities on our website.`;
+    const message = `Hello ${user.firstName}, the job opening "${jobTitle}" that you applied for has been closed. \n\n Please check other available opportunities on our website ${this.websiteUrl}.`;
     console.log(message);
     return await this.sendSMS(user.contactNumber, message);
   }
