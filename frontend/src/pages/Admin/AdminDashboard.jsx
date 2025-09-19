@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import styles from './styles/AdminDashboard.module.css';
 
+const API_BASE = import.meta.env.VITE_API_URL; 
+
 const AdminDashboard = () => {
   const [dashboardData, setDashboardData] = useState({
     statistics: {
@@ -25,7 +27,7 @@ const AdminDashboard = () => {
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/dashboard/statistics', {
+      const response = await fetch(`${API_BASE}/dashboard/statistics`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`,
