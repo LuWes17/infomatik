@@ -836,6 +836,12 @@
 }
 
 @media (max-width: 768px) {
+  .headerText {
+  flex-direction: column; /* Stack vertically instead of horizontally */
+  text-align: center; /* Center align the content */
+  gap: 1rem; 
+  }
+  
   .headerContent h1 {
     font-size: 1.75rem;
   }

@@ -319,9 +319,9 @@
   }
   
   .headerText {
-    justify-content: center;
-    text-align: center;
-    gap: 1.5rem;
+    flex-direction: column; /* Stack vertically instead of horizontally */
+    text-align: center; /* Center align the content */
+    gap: 1.5rem; 
   }
   
   .icon {
