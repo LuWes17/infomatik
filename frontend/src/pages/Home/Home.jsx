@@ -5,6 +5,7 @@ import konsiroy2 from '../../assets/home slides/konsi-roy-2.jpg';
 import withkonsi from '../../assets/home slides/withkonsi.jpg';
 import konsiCommunity from '../../assets/home slides/konsi-community.jpg';
 import konsiCommunity2 from '../../assets/home slides/konsi-community-2.jpg';
+import konsipic from '../../assets/home slides/konspic.jpeg';
 import { CircleChevronRight, CircleChevronLeft, CalendarDays, BellRing, BriefcaseBusiness, Mail, ScrollText } from "lucide-react";
 import FeedbackSection from './FeedbackSection'; 
 import LatestUpdates from './LatestUpdates';
@@ -13,7 +14,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import CalendarEvents from './CalendarEvents';
 
 const Home = () => {
-  const slides = [konsiroy, withkonsi, konsiCommunity, konsiroy2, konsiCommunity2];
+  const slides = [konsipic, withkonsi, konsiCommunity, konsiroy, konsiCommunity2];
   const [currentIndex, setCurrentIndex] = useState(0);
   const [nextIndex, setNextIndex] = useState(0);
   const [isAutoPlay, setIsAutoPlay] = useState(true);

@@ -187,7 +187,8 @@ exports.updateSolicitationStatus = asyncHandler(async (req, res) => {
     try {
       await smsService.sendSolicitationStatusSMS(
         solicitation.submittedBy, 
-        status === 'approved' ? 'APPROVED' : 'REJECTED'
+        status === 'approved' ? 'APPROVED' : 'REJECTED',
+        solicitation
       );
       
       console.log(`SMS notification sent to ${solicitation.submittedBy.contactNumber} for solicitation ${status}`);

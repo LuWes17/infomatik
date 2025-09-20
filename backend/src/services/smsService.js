@@ -303,29 +303,31 @@ async sendNewJobOpeningNotificationSMS(users, jobTitle) {
   return await this.sendBulkSMS(phoneNumbers, message);
 }
 
-  /**
-   * Send solicitation request status SMS with different messages for approved/rejected
-   * @param {Object} user - User object
-   * @param {string} status - Request status ('APPROVED' or 'REJECTED')
-   * @returns {Promise<Object>} - SMS result
-   */
-  async sendSolicitationStatusSMS(user, status) {
-    let message;
-    
-    if (status === 'APPROVED') {
-      message = `Hello ${user.firstName}, GOOD NEWS! Your solicitation request has been APPROVED. \n\nPlease visit our office at the Legislative Building, Bangkilingan in front of Ziga Memorial Hospital to discuss the details and next steps for your approved request.`;
-      console.log(message);
-    } else if (status === 'REJECTED') {
-      console.log(message);
-      message = `Hello ${user.firstName}, we regret to inform you that your solicitation request has been REJECTED. \n\nYou may visit our office at the Legislative Building, Bangkilingan in front of Ziga Memorial Hospital for more information about the decision.`;
-    } else {
-      // Fallback for any other status
-      message = `Hello ${user.firstName}, your solicitation request has been ${status.toLowerCase()}. Please visit our office at the Legislative Building, Bangkilingan in front of Ziga Memorial Hospital for more details.`;
-      console.log(message);
-    }
-    
-    return await this.sendSMS(user.contactNumber, message);
+/**
+ * Send solicitation request status SMS with different messages for approved/rejected
+ * @param {Object} user - User object
+ * @param {string} status - Request status ('APPROVED' or 'REJECTED')
+ * @param {Object} solicitation - Solicitation request object (optional, for organization name)
+ * @returns {Promise<Object>} - SMS result
+ */
+async sendSolicitationStatusSMS(user, status, solicitation) {
+  let message;
+  
+  if (status === 'APPROVED') {
+    message = `Good News!\n\nWe are pleased to inform you that your solicitation request for "${solicitation?.organizationName || 'your organization'}" has been APPROVED.\n\nTo proceed with the next steps, we kindly request that you visit our office during office hours 8AM to 5PM on weekdays (excluding holidays).\n\nPlease see the details below for your reference:\n\nOffice Location: Legislative Building, Bangkilingan in front of Ziga Memorial Hospital\nContact Person: Mark Jayson Bebito\nContact Number: 09924454630\n\nThank you for your patience and cooperation.`;
+    console.log(message);
+  } else if (status === 'REJECTED') {
+    message = `Hello ${user.firstName}, We regret to inform you that your solicitation request has been REJECTED after careful review.\n\nYou may visit our office during office hours 8AM to 5PM on weekdays (excluding holidays) for more information about the decision and guidance on resubmission.\n\nOffice Location: Legislative Building, Bangkilingan in front of Ziga Memorial Hospital\n\nThank you for your understanding.`;
+    console.log(message);
+  } else {
+    // Fallback for any other status
+    message = `Hello ${user.firstName}, your solicitation request has been ${status.toLowerCase()}. Please visit our office at the Legislative Building, Bangkilingan in front of Ziga Memorial Hospital for more details.`;
+    console.log(message);
   }
+  
+  return await this.sendSMS(user.contactNumber, message);
+}
+
   /**
    * Send rice distribution SMS to barangay residents
    * @param {Array} users - Users in selected barangays
