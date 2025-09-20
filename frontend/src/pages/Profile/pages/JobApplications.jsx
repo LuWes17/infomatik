@@ -138,6 +138,12 @@ const JobApplications = () => {
           className: styles.statusRejected,
           text: 'Rejected'
         };
+      case 'for-interview':
+      return {
+        icon: <Calendar size={20} />,
+        className: styles.statusForInterview,
+        text: 'For Interview'
+      };
       case 'pending':
       default:
         return {

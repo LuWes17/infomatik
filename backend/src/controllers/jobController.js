@@ -391,7 +391,7 @@ exports.updateApplicationStatus = asyncHandler(async (req, res) => {
   await application.save();
   
   // Send SMS notification
-  if (status === 'accepted' || status === 'rejected') {
+  if (['for-interview', 'accepted', 'rejected'].includes(status)) {
     await smsService.sendJobApplicationSMS(
       application.applicant,
       application.jobPosting.title,
@@ -414,7 +414,9 @@ exports.getJobStatistics = asyncHandler(async (req, res) => {
   const openPostings = await JobPosting.countDocuments({ status: 'open' });
   const totalApplications = await JobApplication.countDocuments();
   const pendingApplications = await JobApplication.countDocuments({ status: 'pending' });
+  const forInterviewApplications = await JobApplication.countDocuments({ status: 'for-interview' });
   const acceptedApplications = await JobApplication.countDocuments({ status: 'accepted' });
+  const rejectedApplications = await JobApplication.countDocuments({ status: 'rejected' });
   
   res.status(200).json({
     success: true,
@@ -423,7 +425,9 @@ exports.getJobStatistics = asyncHandler(async (req, res) => {
       openPostings,
       totalApplications,
       pendingApplications,
-      acceptedApplications
+      forInterviewApplications,
+      acceptedApplications,
+      rejectedApplications
     }
   });
 });

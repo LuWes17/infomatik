@@ -235,20 +235,23 @@ formatPhoneNumber(number) {
   }
 
   /**
-   * Send job application status SMS with different messages for accepted/rejected
+   * Send job application status SMS with support for interview statuses
    * @param {Object} user - User object
    * @param {string} jobTitle - Job title
-   * @param {string} status - Application status (accepted/rejected)
+   * @param {string} status - Application status
    * @returns {Promise<Object>} - SMS result
    */
   async sendJobApplicationSMS(user, jobTitle, status) {
     let message;
     
-    if (status === 'accepted') {
-      message = `🎉 Congratulations ${user.firstName}! Your application for "${jobTitle}" has been ACCEPTED. \n\nPlease visit our office at the Legislative Building, Bangkilingan in front of Ziga Memorial Hospital within 3 business days with a valid ID and documents to further discuss your application.`;
+    if (status === 'for-interview') {
+      message = `🎯 Good news ${user.firstName}! Your application for "${jobTitle}" has been ACCEPTED FOR INTERVIEW.\n\nTo proceed with the interview, we kindly request that you visit our office during office hours 8AM to 12PM on weekdays (excluding holidays).\n\nPlease see the details below for your reference:\n\n Office Location: Legislative Building, Bangkilingan in front of Ziga Memorial Hospital`
+      console.log(message);
+    } else if (status === 'accepted') {
+      message = `🎉 Congrats ${user.firstName}! You have been ACCEPTED for the "${jobTitle}" position after your interview.\n\nWe hope our platform helped you during your application journey. You can send us your feedback directly through our website to help us improve further!`
       console.log(message);
     } else if (status === 'rejected') {
-      message = `Hello ${user.firstName}, thank you for your interest in the "${jobTitle}" position. Unfortunately, your application was not selected this time. \n\nPlease consider applying for other opportunities in the future. Keep checking our website ${this.websiteUrl} for new openings.`;
+      message = `Hello ${user.firstName}, thank you for your interest in the "${jobTitle}" position. Unfortunately, your application was not accepted this time. Please consider applying for other opportunities in the future. Keep checking our website ${this.websiteUrl} for new openings.`;
       console.log(message);
     } else {
       // Fallback for other statuses

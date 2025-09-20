@@ -15,7 +15,6 @@ import {
   CheckCircle,
   XCircle,
   Clock,
-  Send
 } from 'lucide-react';
 import './styles/AdminJobOpenings.css';
 
@@ -208,6 +207,62 @@ const AdminJobOpenings = () => {
     }
   };
 
+    // Accept for interview
+  const acceptForInterview = async (applicationId, applicant) => {
+    if (!window.confirm(`Select ${applicant.fullName} for interview?`)) return;
+    
+    try {
+      const response = await fetch(`${API_BASE}/jobs/applications/${applicationId}/status`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({
+          status: 'for-interview',
+          adminNotes: 'Selected for interview'
+        })
+      });
+      
+      const data = await response.json();
+      if (data.success) {
+        fetchApplications(selectedJob._id);
+        alert('Applicant selected for interview and SMS notification sent.');
+      }
+    } catch (error) {
+      console.error('Error selecting for interview:', error);
+      alert('Error selecting for interview');
+    }
+  };
+
+  // Final accept after interview
+  const finalAccept = async (applicationId, applicant) => {
+    if (!window.confirm(`Accept ${applicant.fullName} for the position?`)) return;
+    
+    try {
+      const response = await fetch(`${API_BASE}/jobs/applications/${applicationId}/status`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({
+          status: 'accepted',
+          adminNotes: 'Application accepted after interview'
+        })
+      });
+      
+      const data = await response.json();
+      if (data.success) {
+        fetchApplications(selectedJob._id);
+        alert('Application accepted and SMS notification sent.');
+      }
+    } catch (error) {
+      console.error('Error accepting application:', error);
+      alert('Error accepting application');
+    }
+  };
+
   // Reject application
   const rejectApplication = async (applicationId, applicant) => {
     if (!window.confirm(`Reject application from ${applicant.fullName}?`)) return;
@@ -281,6 +336,8 @@ const AdminJobOpenings = () => {
     switch(status) {
       case 'pending':
         return 'status-pending';
+      case 'for-interview':
+        return 'status-for-interview';
       case 'accepted':
         return 'status-accepted';
       case 'rejected':
@@ -630,44 +687,76 @@ const AdminJobOpenings = () => {
                                 )}
                               </td>
                               <td className="table-cell">
-                                {application.status === 'pending' ? (
-                                  <div className="application-actions">
-                                    <button
-                                      onClick={() => acceptApplication(application._id, application)}
-                                      className="action-btn action-btn-accept"
-                                      title="Accept and notify via SMS"
-                                    >
-                                      <CheckCircle size={16} />
-                                      Accept
-                                    </button>
-                                    <button
-                                      onClick={() => rejectApplication(application._id, application)}
-                                      className="action-btn action-btn-reject"
-                                      title="Reject application"
-                                    >
-                                      <XCircle size={16} />
-                                      Reject
-                                    </button>
-                                  </div>
-                                ) : (
-                                  <div className="status-display">
-                                    {application.status === 'accepted' && (
-                                      <>
-                                        <CheckCircle size={18} className="status-icon-accepted" />
-                                        <span className="status-text">Accepted</span>
-                                        {application.smsNotificationSent && (
-                                          <Send size={14} className="sms-sent-icon" title="SMS sent" />
-                                        )}
-                                      </>
-                                    )}
-                                    {application.status === 'rejected' && (
-                                      <>
-                                        <XCircle size={18} className="status-icon-rejected" />
-                                        <span className="status-text">Rejected</span>
-                                      </>
-                                    )}
-                                  </div>
-                                )}
+                                {application.status === 'pending' && (
+                                <div className="application-actions">
+                                  <button
+                                    onClick={() => acceptForInterview(application._id, application)}
+                                    className="action-btn action-btn-interview"
+                                    title="Select for interview and notify via SMS"
+                                  >
+                                    <Calendar size={16} />
+                                    For Interview
+                                  </button>
+                                  <button
+                                    onClick={() => rejectApplication(application._id, application)}
+                                    className="action-btn action-btn-reject"
+                                    title="Reject application"
+                                  >
+                                    <XCircle size={16} />
+                                    Reject
+                                  </button>
+                                </div>
+                              )}
+
+                              {application.status === 'for-interview' && (
+                                <div className="application-actions">
+                                  <button
+                                    onClick={() => finalAccept(application._id, application)}
+                                    className="action-btn action-btn-accept"
+                                    title="Accept and notify via SMS"
+                                  >
+                                    <CheckCircle size={16} />
+                                    Accept
+                                  </button>
+                                  <button
+                                    onClick={() => rejectApplication(application._id, application)}
+                                    className="action-btn action-btn-reject"
+                                    title="Reject application"
+                                  >
+                                    <XCircle size={16} />
+                                    Reject
+                                  </button>
+                                </div>
+                              )}
+
+                              {['accepted', 'rejected'].includes(application.status) && (
+                                <div className="status-display">
+                                  {application.status === 'accepted' && (
+                                    <>
+                                      <CheckCircle size={18} className="status-icon-accepted" />
+                                      <span className="status-text">Accepted</span>
+                                      {application.smsNotificationSent && (
+                                        <Send size={14} className="sms-sent-icon" title="SMS sent" />
+                                      )}
+                                    </>
+                                  )}
+                                  {application.status === 'for-interview' && (
+                                    <>
+                                      <Calendar size={18} className="status-icon-interview" />
+                                      <span className="status-text">For Interview</span>
+                                      {application.smsNotificationSent && (
+                                        <Send size={14} className="sms-sent-icon" title="SMS sent" />
+                                      )}
+                                    </>
+                                  )}
+                                  {application.status === 'rejected' && (
+                                    <>
+                                      <XCircle size={18} className="status-icon-rejected" />
+                                      <span className="status-text">Rejected</span>
+                                    </>
+                                  )}
+                                </div>
+                              )}
                               </td>
                             </tr>
                           ))}

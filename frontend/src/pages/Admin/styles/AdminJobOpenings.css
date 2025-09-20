@@ -501,6 +501,27 @@
   color: #991b1b;
 }
 
+/* Status Badges - ADD NEW INTERVIEW STATUS */
+.status-for-interview {
+  background-color: #dbeafe;
+  color: #1e40af;
+}
+
+/* Action Buttons - ADD INTERVIEW BUTTON STYLES */
+.action-btn-interview {
+  background-color: #3b82f6;
+  color: white;
+}
+
+.action-btn-interview:hover {
+  background-color: #2563eb;
+}
+
+/* Status Icons - ADD INTERVIEW STATUS ICON */
+.status-icon-interview {
+  color: #3b82f6;
+}
+
 /* CV Actions */
 .cv-actions {
   display: flex;
