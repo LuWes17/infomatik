@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import styles from './styles/AdminDashboard.module.css';
+import UserListModal from './UserListModal';
 
 const API_BASE = import.meta.env.VITE_API_URL; 
 
@@ -19,6 +20,7 @@ const AdminDashboard = () => {
   });
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('applications');
+  const [showUserModal, setShowUserModal] = useState(false);
 
   useEffect(() => {
     fetchDashboardData();
@@ -89,18 +91,20 @@ const AdminDashboard = () => {
 
       {/* Statistics Cards */}
       <div className={styles.statsGrid}>
-        <div className={styles.statCard}>
-          <div className={styles.statIcon} style={{ backgroundColor: 'var(--primary-light)' }}>
-            <svg width="24" height="24" fill="none" stroke="var(--primary-color)" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
+        <div 
+          className={styles.statCard} 
+          onClick={() => setShowUserModal(true)}
+          style={{ cursor: 'pointer' }}
+        >
+          <div className={styles.statIcon}>
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m3 5.197H9m6 0a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
           <div className={styles.statContent}>
-            <div className={styles.statNumbers}>
-              <span className={styles.mainNumber}>{statistics.users.total}</span>
-              <span className={styles.subNumber}>({statistics.users.active} active)</span>
-            </div>
-            <p className={styles.statLabel}>Total Users</p>
+            <div className={styles.statValue}>{statistics.users.total}</div>
+            <div className={styles.statLabel}>Total Users</div>
+            <div className={styles.statSubtext}>Click to view details</div>
           </div>
         </div>
 
@@ -337,6 +341,11 @@ const AdminDashboard = () => {
           )}
         </div>
       </div>
+
+      <UserListModal 
+        isOpen={showUserModal}
+        onClose={() => setShowUserModal(false)}
+      />
     </div>
   );
 };

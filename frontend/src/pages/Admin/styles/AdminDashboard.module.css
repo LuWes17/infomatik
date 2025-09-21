@@ -574,3 +574,20 @@
     display: none;
   }
 }
+
+.statCard:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg, 0 10px 15px -3px rgba(0, 0, 0, 0.1));
+}
+
+.statCard[style*="cursor: pointer"]:hover {
+  background: var(--gray-50, #f9fafb);
+  border-color: var(--primary-color, #007bff);
+}
+
+.statSubtext {
+  font-size: var(--font-size-xs, 0.75rem);
+  color: var(--gray-500, #6b7280);
+  font-style: italic;
+  margin-top: var(--spacing-xs, 0.25rem);
+}

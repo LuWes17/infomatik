@@ -1,0 +1,407 @@
+/* UserListModal.module.css */
+
+/* Modal Overlay */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: var(--spacing-lg, 1.5rem);
+}
+
+/* Modal Container */
+.modal {
+  background: white;
+  border-radius: var(--border-radius-lg, 12px);
+  box-shadow: var(--shadow-2xl, 0 20px 40px rgba(0, 0, 0, 0.3));
+  width: 100%;
+  max-width: 800px;
+  max-height: 90vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Modal Header */
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-xl, 2rem);
+  border-bottom: 1px solid var(--gray-200, #e9ecef);
+  background: white;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.modalTitle {
+  font-size: var(--font-size-2xl, 2rem);
+  font-weight: 700;
+  color: var(--gray-800, #2c3e50);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm, 0.5rem);
+}
+
+.userIcon {
+  width: 24px;
+  height: 24px;
+  color: var(--primary-color, #007bff);
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  font-size: var(--font-size-2xl, 2rem);
+  color: var(--gray-400, #6c757d);
+  cursor: pointer;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--border-radius-sm, 6px);
+  transition: all 0.2s ease;
+}
+
+.closeButton:hover {
+  background: var(--gray-100, #f8f9fa);
+  color: var(--gray-600, #495057);
+}
+
+/* Search Section */
+.searchSection {
+  padding: var(--spacing-lg, 1.5rem) var(--spacing-xl, 2rem);
+  border-bottom: 1px solid var(--gray-200, #e9ecef);
+  background: var(--gray-50, #f8f9fa);
+}
+
+.searchInput {
+  width: 100%;
+  padding: var(--spacing-md, 1rem);
+  border: 1px solid var(--gray-300, #dee2e6);
+  border-radius: var(--border-radius-md, 8px);
+  font-size: var(--font-size-base, 1rem);
+  transition: all 0.2s ease;
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: var(--primary-color, #007bff);
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
+
+/* Stats Section */
+.statsSection {
+  padding: var(--spacing-lg, 1.5rem) var(--spacing-xl, 2rem);
+  background: white;
+  border-bottom: 1px solid var(--gray-200, #e9ecef);
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: var(--spacing-lg, 1.5rem);
+}
+
+.statItem {
+  text-align: center;
+  padding: var(--spacing-md, 1rem);
+  background: var(--gray-50, #f8f9fa);
+  border-radius: var(--border-radius-md, 8px);
+  border: 1px solid var(--gray-200, #e9ecef);
+}
+
+.statValue {
+  font-size: var(--font-size-2xl, 2rem);
+  font-weight: 700;
+  color: var(--primary-color, #007bff);
+  margin-bottom: var(--spacing-xs, 0.25rem);
+}
+
+.statLabel {
+  font-size: var(--font-size-sm, 0.875rem);
+  color: var(--gray-600, #6c757d);
+  font-weight: 500;
+}
+
+/* Modal Content */
+.modalContent {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--spacing-xl, 2rem);
+}
+
+/* Loading State */
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-3xl, 4rem);
+  color: var(--gray-600, #6c757d);
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--gray-200, #e9ecef);
+  border-top: 3px solid var(--primary-color, #007bff);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: var(--spacing-lg, 1.5rem);
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* User List */
+.userList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md, 1rem);
+}
+
+.userItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-lg, 1.5rem);
+  background: white;
+  border: 1px solid var(--gray-200, #e9ecef);
+  border-radius: var(--border-radius-lg, 12px);
+  transition: all 0.2s ease;
+}
+
+.userItem:hover {
+  background: var(--gray-50, #f8f9fa);
+  border-color: var(--primary-color, #007bff);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md, 0 4px 6px -1px rgba(0, 0, 0, 0.1));
+}
+
+.userInfo {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-lg, 1.5rem);
+  flex: 1;
+}
+
+.userAvatar {
+  width: 50px;
+  height: 50px;
+  background: var(--primary-color, #007bff);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: var(--font-size-lg, 1.125rem);
+  flex-shrink: 0;
+}
+
+.userDetails {
+  flex: 1;
+  min-width: 0;
+}
+
+.userName {
+  font-size: var(--font-size-lg, 1.125rem);
+  font-weight: 600;
+  color: var(--gray-800, #2c3e50);
+  margin: 0 0 var(--spacing-xs, 0.25rem) 0;
+}
+
+.userMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-md, 1rem);
+  align-items: center;
+}
+
+.userBarangay {
+  font-size: var(--font-size-sm, 0.875rem);
+  color: var(--gray-600, #6c757d);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs, 0.25rem);
+}
+
+.userContact {
+  font-size: var(--font-size-sm, 0.875rem);
+  color: var(--gray-600, #6c757d);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs, 0.25rem);
+}
+
+.locationIcon,
+.phoneIcon {
+  width: 14px;
+  height: 14px;
+  color: var(--gray-500, #adb5bd);
+}
+
+/* User Status Badges */
+.userBadges {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs, 0.25rem);
+  align-items: flex-end;
+}
+
+.statusBadge {
+  padding: var(--spacing-xs, 0.25rem) var(--spacing-sm, 0.5rem);
+  border-radius: var(--border-radius-full, 9999px);
+  font-size: var(--font-size-xs, 0.75rem);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+.statusBadge.active {
+  background: var(--success-100, #d1fae5);
+  color: var(--success-800, #166534);
+}
+
+.statusBadge.inactive {
+  background: var(--gray-100, #f3f4f6);
+  color: var(--gray-600, #4b5563);
+}
+
+.roleBadge {
+  padding: var(--spacing-xs, 0.25rem) var(--spacing-sm, 0.5rem);
+  border-radius: var(--border-radius-sm, 6px);
+  font-size: var(--font-size-xs, 0.75rem);
+  font-weight: 500;
+}
+
+.roleBadge.admin {
+  background: var(--primary-100, #dbeafe);
+  color: var(--primary-800, #1e40af);
+}
+
+.roleBadge.citizen {
+  background: var(--gray-100, #f3f4f6);
+  color: var(--gray-700, #374151);
+}
+
+/* Empty State */
+.emptyState {
+  text-align: center;
+  padding: var(--spacing-3xl, 4rem);
+  color: var(--gray-500, #6c757d);
+}
+
+.emptyState h3 {
+  font-size: var(--font-size-xl, 1.25rem);
+  font-weight: 600;
+  margin-bottom: var(--spacing-sm, 0.5rem);
+}
+
+.emptyState p {
+  font-size: var(--font-size-base, 1rem);
+  margin: 0;
+}
+
+/* Pagination */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: var(--spacing-md, 1rem);
+  padding: var(--spacing-xl, 2rem);
+  border-top: 1px solid var(--gray-200, #e9ecef);
+  background: white;
+}
+
+.paginationButton {
+  padding: var(--spacing-sm, 0.5rem) var(--spacing-md, 1rem);
+  border: 1px solid var(--gray-300, #d1d5db);
+  background: white;
+  color: var(--gray-700, #374151);
+  border-radius: var(--border-radius-md, 8px);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: var(--font-size-sm, 0.875rem);
+  font-weight: 500;
+}
+
+.paginationButton:hover:not(:disabled) {
+  background: var(--gray-50, #f9fafb);
+  border-color: var(--gray-400, #9ca3af);
+}
+
+.paginationButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.paginationInfo {
+  font-size: var(--font-size-sm, 0.875rem);
+  color: var(--gray-600, #4b5563);
+  font-weight: 500;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .modalOverlay {
+    padding: var(--spacing-md, 1rem);
+  }
+  
+  .modal {
+    max-width: 100%;
+    max-height: 95vh;
+  }
+  
+  .modalHeader {
+    padding: var(--spacing-lg, 1.5rem);
+  }
+  
+  .modalTitle {
+    font-size: var(--font-size-xl, 1.25rem);
+  }
+  
+  .searchSection,
+  .statsSection,
+  .modalContent {
+    padding: var(--spacing-lg, 1.5rem);
+  }
+  
+  .statsGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-md, 1rem);
+  }
+  
+  .userItem {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-md, 1rem);
+  }
+  
+  .userInfo {
+    width: 100%;
+  }
+  
+  .userBadges {
+    flex-direction: row;
+    align-items: center;
+  }
+  
+  .userMeta {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-xs, 0.25rem);
+  }
+}
