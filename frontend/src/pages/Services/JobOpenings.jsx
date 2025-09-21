@@ -575,8 +575,8 @@ const toggleBarangayDropdown = () => {
         <div className={styles.headerText}>
           <BriefcaseBusiness size={92} className={styles.icon} />
           <div className={styles.headerContent}>
-            <h1>Job Openings</h1>
-            <p>Employment opportunities in our community. We invite you to join us in serving the people.</p>
+            <h1>Job Opportunities</h1>
+            <p>Sharing this job opening to help connect our constituents with employment opportunities</p>
           </div>
         </div>
         
