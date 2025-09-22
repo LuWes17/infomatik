@@ -2,6 +2,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import styles from './styles/UserListModal.module.css';
 
+const API_BASE = import.meta.env.VITE_API_URL; // e.g. http://localhost:4000/api
+
 const UserListModal = ({ isOpen, onClose }) => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -23,7 +25,7 @@ const UserListModal = ({ isOpen, onClose }) => {
     
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('/api/admin/users?limit=1000', {
+      const response = await fetch(`${API_BASE}/admin/users?limit=1000`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
