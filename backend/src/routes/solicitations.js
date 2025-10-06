@@ -9,7 +9,8 @@ const {
   getAllSolicitations,
   getSolicitationById,
   updateSolicitationStatus,
-  getSolicitationStatistics
+  getSolicitationStatistics,
+  uploadProofOfTransaction
 } = require('../controllers/solicitationController');
 
 // Public routes
@@ -24,5 +25,7 @@ router.get('/all', protect, adminOnly, getAllSolicitations);
 router.get('/statistics', protect, adminOnly, getSolicitationStatistics);
 router.get('/:id', protect, adminOnly, getSolicitationById);
 router.put('/:id/status', protect, adminOnly, updateSolicitationStatus);
+
+router.post('/:id/upload-proof', protect, adminOnly, upload().single('proofImage'), uploadProofOfTransaction);
 
 module.exports = router;

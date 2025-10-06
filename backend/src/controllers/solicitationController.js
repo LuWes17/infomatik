@@ -314,3 +314,60 @@ exports.deleteSolicitation = asyncHandler(async (req, res) => {
     });
   }
 });
+
+// Upload proof of transaction (Admin)
+exports.uploadProofOfTransaction = asyncHandler(async (req, res) => {
+  try {
+    const solicitation = await SolicitationRequest.findById(req.params.id);
+    
+    if (!solicitation) {
+      return res.status(404).json({
+        success: false,
+        message: 'Solicitation request not found'
+      });
+    }
+
+    // Check if file was uploaded
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: 'No proof image uploaded'
+      });
+    }
+
+    // Delete old proof image if it exists
+    if (solicitation.proofFileId && solicitation.proofOfTransaction) {
+      try {
+        const fileName = solicitation.proofOfTransaction.split('/').pop();
+        await deleteFromB2(solicitation.proofFileId, fileName);
+      } catch (deleteError) {
+        console.error('Error deleting old proof image:', deleteError);
+      }
+    }
+
+    // Upload new proof image to B2
+    const uploadResult = await uploadToB2(req.file, 'solicitation-proofs');
+    
+    // Update solicitation with proof of transaction
+    solicitation.proofOfTransaction = uploadResult.fileUrl;
+    solicitation.proofFileId = uploadResult.fileId;
+    
+    await solicitation.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Proof of transaction uploaded successfully',
+      data: {
+        proofOfTransaction: solicitation.proofOfTransaction,
+        solicitation
+      }
+    });
+  } catch (error) {
+    console.error('Error uploading proof of transaction:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to upload proof of transaction',
+      error: error.message
+    });
+  }
+});

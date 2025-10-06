@@ -813,6 +813,32 @@ const SolicitationRequests = () => {
                 <p className={styles.description}>{selectedRequest.requestedAssistanceDetails}</p>
               </div>
 
+              {/* NEW: Proof of Transaction Section - Only show if proof exists */}
+              {selectedRequest.proofOfTransaction && (
+                <div className={styles.section}>
+                  <h4>Proof of Transaction</h4>
+                  <div className={styles.proofContainer}>
+                    <div className={styles.proofImageWrapper}>
+                      <img 
+                        src={selectedRequest.proofOfTransaction} 
+                        alt="Proof of transaction" 
+                        className={styles.proofImage}
+                      />
+                    </div>
+                    <a
+                      href={selectedRequest.proofOfTransaction}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={styles.viewFullProofLink}
+                    >
+                      <FileText size={16} />
+                      <span>View Full Size Image</span>
+                    </a>
+                  </div>
+                </div>
+              )}
+              
+
               {/* Modal Metadata */}
               <div className={styles.modalMetadata}>
                 <div className={styles.metaItem}>

@@ -366,6 +366,89 @@
   white-space: pre-wrap;
 }
 
+/* NEW: Proof of Transaction Styles */
+.proofUploadContainer {
+  margin-top: 1rem;
+}
+
+.proofUploadArea {
+  border: 2px dashed #dee2e6;
+  border-radius: 8px;
+  padding: 2rem;
+  text-align: center;
+  background-color: #f8f9fa;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.proofUploadArea:hover {
+  border-color: #1c62bb;
+  background-color: #e7f3ff;
+}
+
+.proofUploadLabel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  color: #6c757d;
+}
+
+.proofUploadLabel i {
+  font-size: 2rem;
+  color: #1c62bb;
+}
+
+.proofUploadLabel span {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #2c3e50;
+}
+
+.proofUploadLabel small {
+  font-size: 0.875rem;
+  color: #6c757d;
+}
+
+.proofPreviewContainer {
+  position: relative;
+  display: inline-block;
+  max-width: 100%;
+}
+
+.proofPreview {
+  max-width: 100%;
+  max-height: 400px;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  display: block;
+}
+
+.removeProofButton {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+  transition: background-color 0.3s ease;
+  font-weight: 500;
+}
+
+.removeProofButton:hover {
+  background-color: #c82333;
+}
+
+/* Full width detail item */
+.detailItem.fullWidth {
+  grid-column: 1 / -1;
+}
+
 /* Documents Section */
 .documentsContainer {
   display: flex;

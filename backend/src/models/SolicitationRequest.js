@@ -95,6 +95,16 @@ const solicitationRequestSchema = new mongoose.Schema({
       default: Date.now
     }
   }],
+
+  proofOfTransaction: {
+    type: String, // URL to the uploaded proof image
+    required: false
+  },
+
+  proofFileId: {
+    type: String, // B2 file ID for deletion
+    required: false
+  }, 
   
   // Request Status
   status: {

@@ -13,6 +13,10 @@ const AdminSolicitationRequests = () => {
   const [statusFilter, setStatusFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
 
+  const [proofImage, setProofImage] = useState(null);
+  const [proofPreview, setProofPreview] = useState(null);
+  const [uploadingProof, setUploadingProof] = useState(false);
+
   const requestTypes = [
     'all',
     'Medical',
@@ -71,6 +75,9 @@ const AdminSolicitationRequests = () => {
       if (data.success) {
         setSelectedRequest(data.data);
         setShowRequestDetails(true);
+        if (data.data.proofOfTransaction) {
+          setProofPreview(data.data.proofOfTransaction);
+        }
       }
     } catch (error) {
       console.error('Error fetching solicitation details:', error);
@@ -172,6 +179,80 @@ const AdminSolicitationRequests = () => {
     }
   };
 
+    // Handle proof image selection
+  const handleProofImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        alert('Please select an image file');
+        return;
+      }
+      
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        alert('Image size must be less than 5MB');
+        return;
+      }
+
+      setProofImage(file);
+      
+      // Create preview
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setProofPreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  // Upload proof of transaction
+  const uploadProof = async () => {
+    if (!proofImage && !selectedRequest.proofOfTransaction) {
+      alert('Please select an image first');
+      return;
+    }
+
+    if (!proofImage) {
+      // If no new image selected but proof exists, just mark as completed
+      markAsCompleted(selectedRequest._id);
+      return;
+    }
+
+    setUploadingProof(true);
+
+    try {
+      const formData = new FormData();
+      formData.append('proofImage', proofImage);
+
+      const response = await fetch(
+        `${API_BASE}/solicitations/${selectedRequest._id}/upload-proof`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          },
+          body: formData
+        }
+      );
+
+      const data = await response.json();
+
+      if (data.success) {
+        alert('Proof uploaded successfully!');
+        // Now mark as completed
+        await markAsCompleted(selectedRequest._id);
+      } else {
+        alert(data.message || 'Failed to upload proof');
+      }
+    } catch (error) {
+      console.error('Error uploading proof:', error);
+      alert('Failed to upload proof of transaction');
+    } finally {
+      setUploadingProof(false);
+    }
+  };
+
   // Mark as completed
   const markAsCompleted = async (requestId) => {
     if (!window.confirm('Mark this solicitation as completed?')) {
@@ -196,12 +277,20 @@ const AdminSolicitationRequests = () => {
       if (data.success) {
         alert('Solicitation marked as completed!');
         setShowRequestDetails(false);
+        setProofImage(null);
+        setProofPreview(null);
         fetchSolicitationRequests();
       }
     } catch (error) {
       console.error('Error marking solicitation as completed:', error);
       alert('Failed to mark solicitation as completed');
     }
+  };
+
+  const closeModal = () => {
+    setShowRequestDetails(false);
+    setProofImage(null);
+    setProofPreview(null);
   };
 
   // Status badge color
@@ -429,6 +518,50 @@ const AdminSolicitationRequests = () => {
                 </div>
               </div>
 
+              {/* NEW: Proof of Transaction Section - Only for approved status */}
+              {selectedRequest.status === 'approved' && (
+                <div className="detailSection">
+                  <h3>Proof of Transaction</h3>
+                  <div className="proofUploadContainer">
+                    {proofPreview ? (
+                      <div className="proofPreviewContainer">
+                        <img 
+                          src={proofPreview} 
+                          alt="Proof of transaction" 
+                          className="proofPreview"
+                        />
+                        {!selectedRequest.proofOfTransaction && (
+                          <button
+                            className="removeProofButton"
+                            onClick={() => {
+                              setProofImage(null);
+                              setProofPreview(null);
+                            }}
+                          >
+                            Remove
+                          </button>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="proofUploadArea">
+                        <input
+                          type="file"
+                          id="proofImage"
+                          accept="image/*"
+                          onChange={handleProofImageChange}
+                          style={{ display: 'none' }}
+                        />
+                        <label htmlFor="proofImage" className="proofUploadLabel">
+                          <i className="icon-upload"></i>
+                          <span>Click to upload proof image</span>
+                          <small>Supports: JPG, PNG, GIF (Max 5MB)</small>
+                        </label>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
               {/* Admin Section */}
               {selectedRequest.status !== 'pending' && (
                 <div className="detailSection">
@@ -501,15 +634,19 @@ const AdminSolicitationRequests = () => {
               {selectedRequest.status === 'approved' && (
                 <button
                   className="completeButton"
-                  onClick={() => markAsCompleted(selectedRequest._id)}
+                  onClick={uploadProof}
+                  disabled={uploadingProof}
                 >
-                  Mark as Completed
+                  {uploadingProof ? 'Uploading...' : 
+                  proofImage || selectedRequest.proofOfTransaction ? 
+                  'Mark as Completed' : 
+                  'Upload Proof & Complete'}
                 </button>
               )}
               
               <button
                 className="cancelButton"
-                onClick={() => setShowRequestDetails(false)}
+                onClick={closeModal}
               >
                 Close
               </button>
