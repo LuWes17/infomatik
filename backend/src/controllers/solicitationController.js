@@ -161,7 +161,7 @@ exports.updateSolicitationStatus = asyncHandler(async (req, res) => {
     const { status, adminNotes, approvedAmount, approvalConditions } = req.body;
     
     const solicitation = await SolicitationRequest.findById(req.params.id)
-      .populate('submittedBy', 'firstName lastName barangay contactNumber'); // ADD .populate() to get user details
+      .populate('submittedBy', 'firstName lastName barangay contactNumber');
     
     if (!solicitation) {
       return res.status(404).json({
@@ -170,39 +170,41 @@ exports.updateSolicitationStatus = asyncHandler(async (req, res) => {
       });
     }
     
+    // Store the status BEFORE updating
+    const newStatus = status; // This ensures we use the exact status from the request
+    
     // Update solicitation
-    solicitation.status = status;
+    solicitation.status = newStatus;
     solicitation.reviewedBy = req.user.id;
     solicitation.reviewedAt = new Date();
     solicitation.adminNotes = adminNotes;
     
-    if (status === 'approved' && approvedAmount) {
+    if (newStatus === 'approved' && approvedAmount) {
       solicitation.approvedAmount = approvedAmount;
       solicitation.approvalConditions = approvalConditions;
     }
     
     await solicitation.save();
     
-    // 🚨 ADD THIS: Send SMS notification to the user who submitted the request
+    // Send SMS notification using the stored newStatus variable
     try {
       await smsService.sendSolicitationStatusSMS(
         solicitation.submittedBy, 
-        status === 'approved' ? 'APPROVED' : 'REJECTED',
+        newStatus === 'approved' ? 'APPROVED' : 'REJECTED', // Use newStatus instead of status
         solicitation
       );
       
-      console.log(`SMS notification sent to ${solicitation.submittedBy.contactNumber} for solicitation ${status}`);
+      console.log(`SMS notification sent to ${solicitation.submittedBy.contactNumber} for solicitation ${newStatus}`);
     } catch (smsError) {
-      console.error(`Failed to send SMS notification for solicitation ${status}:`, smsError);
-      // Don't fail the entire operation if SMS fails
+      console.error(`Failed to send SMS notification for solicitation ${newStatus}:`, smsError);
     }
     
-    // Populate for response (re-populate since we saved)
+    // Populate for response
     await solicitation.populate('reviewedBy', 'firstName lastName');
     
     res.status(200).json({
       success: true,
-      message: `Solicitation ${status} successfully. SMS notification sent to applicant.`,
+      message: `Solicitation ${newStatus} successfully. SMS notification sent to applicant.`,
       data: solicitation
     });
   } catch (error) {
