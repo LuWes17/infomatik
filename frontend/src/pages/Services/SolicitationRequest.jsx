@@ -825,15 +825,6 @@ const SolicitationRequests = () => {
                         className={styles.proofImage}
                       />
                     </div>
-                    <a
-                      href={selectedRequest.proofOfTransaction}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={styles.viewFullProofLink}
-                    >
-                      <FileText size={16} />
-                      <span>View Full Size Image</span>
-                    </a>
                   </div>
                 </div>
               )}
